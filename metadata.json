@@ -1,0 +1,8 @@
+{
+  "name": "PLAYYS NATIVE",
+  "description": "Interactive composable SVG character creator and printable coloring book configurator built with React Native and Expo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
