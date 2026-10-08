@@ -50,28 +50,18 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({
   return (
     <div
       onClick={onStart}
-      className="w-full h-full min-h-screen bg-gradient-to-b from-indigo-950 via-slate-950 to-purple-950 text-white flex flex-col items-center justify-between p-6 sm:p-10 select-none relative overflow-hidden cursor-pointer"
+      className="w-full h-full min-h-screen bg-slate-950 text-white flex flex-col items-center justify-between p-6 sm:p-10 select-none relative overflow-hidden cursor-pointer"
     >
-      {/* Background Animated Ambient Effects */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 left-1/4 w-[500px] h-[500px] bg-pink-500/10 rounded-full blur-3xl animate-pulse duration-1000" />
-        <div className="absolute top-1/2 -right-32 w-[600px] h-[600px] bg-cyan-500/10 rounded-full blur-3xl animate-pulse duration-700" />
-        <div className="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-amber-500/10 rounded-full blur-3xl animate-pulse duration-1000" />
-
-        {/* Ambient floating playful stars & sparks */}
-        <div className="absolute top-16 left-12 text-amber-300 text-6xl animate-bounce duration-1000 opacity-60">
-          ★
-        </div>
-        <div className="absolute top-32 right-20 text-pink-400 text-5xl animate-pulse duration-700 opacity-60">
-          ♥
-        </div>
-        <div className="absolute bottom-28 left-20 text-cyan-300 text-6xl animate-bounce duration-1000 opacity-60">
-          ⚡
-        </div>
-        <div className="absolute bottom-36 right-24 text-amber-400 text-7xl animate-pulse duration-700 opacity-60">
-          ★
-        </div>
-      </div>
+      {/* Background video */}
+      <video
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        src="/assets/Playys.mp4"
+        autoPlay
+        loop
+        muted
+        playsInline
+      />
+      <div className="absolute inset-0 bg-slate-950/30 pointer-events-none" />
 
       {/* Top Header: Brand Logo with Secret Admin Hold */}
       <div className="w-full flex items-center justify-center z-20 shrink-0">
