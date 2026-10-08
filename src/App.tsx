@@ -14,6 +14,7 @@ import { PrintableColoringSheet } from './components/creator/PrintableColoringSh
 import { KioskIdleMovie } from './components/kiosk/KioskIdleMovie';
 import { MagicalColoringMachine } from './components/kiosk/MagicalColoringMachine';
 import { KioskCelebrationScreen } from './components/kiosk/KioskCelebrationScreen';
+import { PrinterDetectDialog } from './components/kiosk/PrinterDetectDialog';
 import { CloudPrinterModal } from './components/expo/CloudPrinterModal';
 import { ExpoProjectExporterModal } from './components/expo/ExpoProjectExporterModal';
 
@@ -26,6 +27,7 @@ export default function App() {
   // Hidden operator / admin modals
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isExporterOpen, setIsExporterOpen] = useState(false);
+  const [isPrinterDetectOpen, setIsPrinterDetectOpen] = useState(false);
 
   // Trigger browser / local print service
   const handlePrint = useCallback(() => {
@@ -50,6 +52,12 @@ export default function App() {
   // Keyboard shortcut: Cmd+D / Ctrl+D triggers admin controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Alt+Shift+P opens DETECT PRINTER (not reserved by the browser or Windows)
+      if (e.altKey && e.shiftKey && e.code === 'KeyP') {
+        e.preventDefault();
+        setIsPrinterDetectOpen((prev) => !prev);
+        return;
+      }
       if ((e.metaKey || e.ctrlKey) && (e.key === 'd' || e.key === 'D')) {
         e.preventDefault();
         setIsAdminModalOpen((prev) => !prev);
@@ -107,6 +115,12 @@ export default function App() {
           </div>
         )}
       </main>
+
+      <PrinterDetectDialog
+        isOpen={isPrinterDetectOpen}
+        onClose={() => setIsPrinterDetectOpen(false)}
+        onTestPrint={handlePrint}
+      />
 
       {/* 3. Hidden Operator / Cloud & USB Printer Modal (Triggered by 5s Logo Hold or Cmd+D) */}
       <CloudPrinterModal
