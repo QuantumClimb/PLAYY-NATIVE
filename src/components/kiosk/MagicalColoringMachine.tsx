@@ -162,18 +162,11 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   return (
     <div
       onClick={resetIdleTimer}
-      className="w-full h-full min-h-screen bg-gradient-to-b from-indigo-950 via-slate-950 to-purple-950 text-white flex flex-col justify-between p-4 sm:p-8 select-none relative overflow-hidden"
+      className="w-full h-full min-h-0 bg-gradient-to-b from-indigo-950 via-slate-950 to-purple-950 text-white flex flex-col justify-between p-4 sm:p-8 select-none relative overflow-hidden"
     >
       {/* 1. Subtle Kiosk Progress Indicator: ● ─ ● ─ ● ─ ● ─ ● */}
       <div className="w-full flex items-center justify-between px-2 shrink-0 z-20">
-        <div className="flex items-center gap-1 font-black text-2xl tracking-tight">
-          <span className="text-pink-400">P</span>
-          <span className="text-cyan-400">L</span>
-          <span className="text-amber-400">A</span>
-          <span className="text-orange-400">Y</span>
-          <span className="text-lime-400">Y</span>
-          <span className="text-purple-400">S</span>
-        </div>
+        <img src="/assets/logo.png" alt="PLAYYS" draggable={false} className="h-14 sm:h-16 w-auto object-contain" />
 
         {/* Minimal Stepper dots */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -204,7 +197,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <button
             type="button"
             onClick={handleStepSurprise}
-            className="flex items-center gap-1.5 bg-indigo-900/80 hover:bg-indigo-800 text-amber-300 border-2 border-amber-300/40 px-3.5 py-1.5 rounded-full text-xs font-black shadow-md cursor-pointer active:scale-95 transition-all"
+            className="btn-3d btn-3d-amber btn-3d-sm flex items-center gap-1.5 px-4 py-2 text-xs font-bold"
           >
             <span>✨</span>
             <span className="hidden sm:inline">SURPRISE ME</span>
@@ -468,7 +461,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                     nativeFeedback.notificationSuccess();
                     onFinishAndPrint();
                   }}
-                  className="w-full py-6 px-8 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-2xl sm:text-3xl rounded-[36px] shadow-[0_15px_45px_rgba(251,191,36,0.5)] border-4 border-yellow-200 flex items-center justify-center gap-3 cursor-pointer active:scale-95 transition-all animate-bounce duration-1000"
+                  className="btn-3d w-full py-6 px-8 font-bold text-2xl sm:text-3xl flex items-center justify-center gap-3"
                 >
                   <span>🖨️</span>
                   <span>PRINT MY PLAYY!</span>
@@ -481,7 +474,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                     nativeFeedback.impactLight();
                     setCurrentStep('head');
                   }}
-                  className="w-full py-4 px-6 bg-slate-900/90 hover:bg-slate-800 text-slate-300 font-extrabold text-lg rounded-[28px] border-2 border-slate-700 cursor-pointer active:scale-95 transition-all"
+                  className="btn-3d btn-3d-blue w-full py-4 px-6 font-bold text-lg"
                 >
                   <span>🔄 CHANGE SOMETHING</span>
                 </button>
@@ -497,7 +490,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <button
             type="button"
             onClick={goBack}
-            className="py-4 px-8 bg-slate-900/90 hover:bg-slate-800 text-slate-300 font-black text-lg rounded-2xl border-2 border-slate-700 cursor-pointer active:scale-95 transition-all"
+            className="btn-3d btn-3d-blue py-4 px-8 font-bold text-lg"
           >
             ← BACK
           </button>
@@ -505,7 +498,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <button
             type="button"
             onClick={goNext}
-            className="py-5 px-10 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xl sm:text-2xl rounded-3xl shadow-[0_10px_35px_rgba(245,158,11,0.4)] border-3 border-amber-300 flex items-center gap-3 cursor-pointer active:scale-95 transition-all"
+            className="btn-3d py-5 px-10 font-bold text-xl sm:text-2xl flex items-center gap-3"
           >
             <span>NEXT</span>
             <span>→</span>

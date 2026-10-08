@@ -60,7 +60,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
   }, [onAllDone]);
 
   return (
-    <div className="w-full h-full min-h-screen bg-gradient-to-b from-indigo-950 via-slate-950 to-purple-950 text-white flex flex-col items-center justify-between p-6 sm:p-10 select-none relative overflow-hidden">
+    <div className="w-full h-full min-h-0 bg-gradient-to-b from-indigo-950 via-slate-950 to-purple-950 text-white flex flex-col items-center justify-between p-6 sm:p-10 select-none relative overflow-hidden">
       {/* Background Star Bursts */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl animate-pulse" />
@@ -109,7 +109,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
         <button
           type="button"
           onClick={onAllDone}
-          className="flex-1 w-full py-5 px-8 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-xl sm:text-2xl rounded-[30px] shadow-[0_10px_35px_rgba(245,158,11,0.4)] border-3 border-amber-300 flex items-center justify-center gap-3 cursor-pointer active:scale-95 transition-all"
+          className="btn-3d flex-1 w-full py-5 px-8 font-bold text-xl sm:text-2xl flex items-center justify-center gap-3"
         >
           <span>⭐ ALL DONE!</span>
         </button>
@@ -118,7 +118,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
         <button
           type="button"
           onClick={onPrintAnother}
-          className="py-5 px-8 bg-slate-900/90 hover:bg-slate-800 text-slate-200 font-black text-lg sm:text-xl rounded-[30px] border-2 border-slate-700 flex items-center justify-center gap-2.5 cursor-pointer active:scale-95 transition-all"
+          className="btn-3d btn-3d-blue py-5 px-8 font-bold text-lg sm:text-xl flex items-center justify-center gap-2.5"
         >
           <span>🖨️ PRINT ANOTHER</span>
         </button>

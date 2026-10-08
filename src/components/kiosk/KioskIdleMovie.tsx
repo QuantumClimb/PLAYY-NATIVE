@@ -70,47 +70,26 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({
           onMouseUp={handleLogoTouchEnd}
           onTouchStart={handleLogoTouchStart}
           onTouchEnd={handleLogoTouchEnd}
-          className="flex items-center gap-1.5 font-black text-5xl sm:text-6xl tracking-tight filter drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)] cursor-pointer select-none"
+          className="cursor-pointer select-none filter drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)]"
         >
-          <span className="text-pink-400">P</span>
-          <span className="text-cyan-400">L</span>
-          <span className="text-amber-400">A</span>
-          <span className="text-orange-400">Y</span>
-          <span className="text-lime-400">Y</span>
-          <span className="text-purple-400">S</span>
-        </div>
-      </div>
-
-      {/* Center Stage: The Live Showcase Movie Loop */}
-      <div className="flex-1 flex flex-col items-center justify-center my-auto z-10 w-full max-w-4xl">
-        <div className="relative w-80 h-96 sm:w-96 sm:h-[460px] bg-white rounded-[44px] p-4 shadow-[0_25px_70px_rgba(0,0,0,0.7)] border-4 border-amber-300/80 flex items-center justify-center transform transition-transform duration-700 hover:scale-105">
-          {/* Animated Ribbon Callout */}
-          <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 via-pink-500 to-indigo-600 text-slate-950 font-black text-sm px-6 py-2 rounded-full shadow-xl uppercase tracking-wider whitespace-nowrap animate-pulse">
-            ★ MAGICAL COLORING MACHINE ★
-          </div>
-
-          {/* Render Active Looping Character */}
-          <PlayyComposition
-            config={activeConfig}
-            mode="color"
-            showBackground={true}
-            showLogoHeader={true}
-            className="w-full h-full object-contain"
+          <img
+            src="/assets/logo.png"
+            alt="PLAYYS"
+            draggable={false}
+            className="h-32 sm:h-44 w-auto object-contain"
           />
         </div>
       </div>
 
+      {/* Spacer keeps the button at the bottom */}
+      <div className="flex-1" />
+
       {/* Bottom Giant Touch Prompt: TAP TO CREATE YOUR PLAYY */}
       <div className="w-full flex flex-col items-center justify-center z-20 shrink-0 pb-4">
-        <div className="w-full max-w-2xl py-6 px-10 bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-slate-950 font-black text-2xl sm:text-4xl rounded-[36px] shadow-[0_15px_45px_rgba(251,191,36,0.5)] border-4 border-yellow-200 flex items-center justify-center gap-4 animate-bounce duration-1000">
-          <span>✨</span>
-          <span>TAP TO CREATE YOUR PLAYY!</span>
-          <span>✨</span>
+        <div className="btn-3d w-full max-w-md py-6 px-10 font-bold text-3xl sm:text-5xl tracking-wide flex items-center justify-center gap-4 animate-bounce duration-1000">
+          <span style={{ fontFamily: "'Fredoka', sans-serif", fontWeight: 700 }}>START</span>
         </div>
-        <p className="text-sm font-bold text-slate-400 mt-4 tracking-wide uppercase">
-          Touch anywhere on screen to play
-        </p>
-      </div>
+              </div>
     </div>
   );
 };

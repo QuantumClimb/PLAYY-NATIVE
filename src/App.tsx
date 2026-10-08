@@ -60,7 +60,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="w-screen h-screen min-h-screen overflow-hidden bg-slate-950 text-white flex flex-col font-sans select-none print:bg-white print:p-0">
+    <div className="w-screen h-screen min-h-screen overflow-hidden bg-slate-950 text-white flex flex-col select-none print:bg-white print:p-0">
       {/* 1. Dedicated Printable Sheet (Hidden on screen, activated during print) */}
       <PrintableColoringSheet config={configuration} />
 
@@ -74,24 +74,37 @@ export default function App() {
           />
         )}
 
-        {/* PHASE 2: ONE SCREEN = ONE DECISION CREATION MACHINE
-            HEAD -> BODY -> POWER -> WORLD -> NAME -> REVIEW */}
-        {phase === 'create' && (
-          <MagicalColoringMachine
-            config={configuration}
-            onChangeConfig={setConfiguration}
-            onFinishAndPrint={handleFinishAndPrint}
-            onAutoReset={handleResetToIdle}
-          />
-        )}
+        {/* Inner pages share the footer; the start page has none */}
+        {phase !== 'idle' && (
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+              {/* PHASE 2: ONE SCREEN = ONE DECISION CREATION MACHINE
+                  HEAD -> BODY -> POWER -> WORLD -> NAME -> REVIEW */}
+              {phase === 'create' && (
+                <MagicalColoringMachine
+                  config={configuration}
+                  onChangeConfig={setConfiguration}
+                  onFinishAndPrint={handleFinishAndPrint}
+                  onAutoReset={handleResetToIdle}
+                />
+              )}
 
-        {/* PHASE 3: CELEBRATION (YOUR PLAYY IS READY! -> AUTO RETURN TO IDLE) */}
-        {phase === 'celebrate' && (
-          <KioskCelebrationScreen
-            config={configuration}
-            onAllDone={handleResetToIdle}
-            onPrintAnother={handlePrint}
-          />
+              {/* PHASE 3: CELEBRATION (YOUR PLAYY IS READY! -> AUTO RETURN TO IDLE) */}
+              {phase === 'celebrate' && (
+                <KioskCelebrationScreen
+                  config={configuration}
+                  onAllDone={handleResetToIdle}
+                  onPrintAnother={handlePrint}
+                />
+              )}
+            </div>
+            <img
+              src="/assets/footer.png"
+              alt=""
+              draggable={false}
+              className="w-full h-auto max-h-24 object-contain shrink-0 bg-slate-950"
+            />
+          </div>
         )}
       </main>
 
