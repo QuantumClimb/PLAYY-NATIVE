@@ -12,17 +12,25 @@ import { SYMBOLS } from '../../lib/playys/symbols';
 import { BACKGROUNDS } from '../../lib/playys/backgrounds';
 import { PlayyComposition } from '../playys/PlayyComposition';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
+import { QUIZ_QUESTIONS } from '../../lib/playys/questions';
+import { calculateArchetype } from '../../lib/playys/archetypes';
+import { BASE_STATS, CharacterStats, GeneratedCard } from '../../lib/playys/cardTypes';
+import { TrumpCardFront, TrumpCardBack, CARD_W, CARD_H } from '../card/TrumpCard';
 
-export type MachineStep = 'head' | 'body' | 'symbol' | 'world' | 'name' | 'review';
+export type MachineStep = 'head' | 'body' | 'symbol' | 'world' | 'name' | 'quiz' | 'review';
 
 interface MagicalColoringMachineProps {
   config: PlayyConfiguration;
   onChangeConfig: (newConfig: PlayyConfiguration) => void;
+  card: GeneratedCard | null;
+  onCardChange: (card: GeneratedCard | null) => void;
   onFinishAndPrint: () => void;
   onAutoReset: () => void;
 }
 
-const STEPS_LIST: MachineStep[] = ['head', 'body', 'symbol', 'world', 'name', 'review'];
+const STEPS_LIST: MachineStep[] = ['head', 'body', 'symbol', 'world', 'name', 'quiz', 'review'];
+
+const STAT_KEYS: (keyof CharacterStats)[] = ['power', 'speed', 'intelligence', 'energy', 'courage'];
 
 const KEYBOARD_LETTERS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -33,11 +41,15 @@ const KEYBOARD_LETTERS = [
 export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   config,
   onChangeConfig,
+  card,
+  onCardChange,
   onFinishAndPrint,
   onAutoReset,
 }) => {
   const [currentStep, setCurrentStep] = useState<MachineStep>('head');
   const [idleSeconds, setIdleSeconds] = useState(45);
+  const [answers, setAnswers] = useState<number[]>([]);
+  const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
 
   const stepIndex = STEPS_LIST.indexOf(currentStep);
 
@@ -67,9 +79,41 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
     setCurrentStep(STEPS_LIST[nextIdx]);
   };
 
+  // Quiz: each answer adds its stat boost on top of the base stats (capped at 100)
+  const handleAnswer = (optionIndex: number) => {
+    resetIdleTimer();
+    nativeFeedback.selection();
+    const next = [...answers, optionIndex];
+    if (next.length < QUIZ_QUESTIONS.length) {
+      setAnswers(next);
+      return;
+    }
+    const stats: CharacterStats = { ...BASE_STATS };
+    next.forEach((optIdx, qIdx) => {
+      const boost = QUIZ_QUESTIONS[qIdx].options[optIdx].statBoost;
+      STAT_KEYS.forEach((k) => {
+        stats[k] = Math.min(100, stats[k] + (boost[k] ?? 0));
+      });
+    });
+    onCardChange({
+      id: Math.random().toString(36).substring(2, 9),
+      config,
+      stats,
+      archetype: calculateArchetype(stats),
+      createdAt: new Date().toISOString(),
+    });
+    setAnswers([]);
+    setCardSide('front');
+    setCurrentStep('review');
+  };
+
   const goBack = () => {
     resetIdleTimer();
     nativeFeedback.impactLight();
+    if (currentStep === 'quiz' && answers.length > 0) {
+      setAnswers(answers.slice(0, -1));
+      return;
+    }
     if (stepIndex === 0) {
       onAutoReset();
     } else {
@@ -157,7 +201,9 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       ? 'WHERE WILL YOUR PLAYY GO?'
       : currentStep === 'name'
       ? "WHAT'S YOUR NAME?"
-      : 'THIS IS YOUR PLAYY!';
+      : currentStep === 'quiz'
+      ? QUIZ_QUESTIONS[answers.length]?.question ?? ''
+      : 'YOUR PLAYY TRUMP CARD IS READY!';
 
   return (
     <div
@@ -193,7 +239,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
         </div>
 
         {/* Surprise me mini toy button */}
-        {currentStep !== 'name' && currentStep !== 'review' ? (
+        {currentStep !== 'name' && currentStep !== 'quiz' && currentStep !== 'review' ? (
           <button
             type="button"
             onClick={handleStepSurprise}
@@ -217,6 +263,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       {/* 3. Main Split Stage: Left is MAGIC MIRROR, Right is VISUAL CHOICES */}
       <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 my-auto py-2 z-10 w-full max-w-7xl mx-auto overflow-hidden">
         {/* LEFT COLUMN: THE MAGIC MIRROR (Reacts instantly to choices) */}
+        {currentStep !== 'review' && (
         <div className="w-full lg:w-[42%] flex flex-col items-center justify-center shrink-0">
           <div className="relative w-72 h-88 sm:w-88 sm:h-[450px] bg-white rounded-[40px] p-3.5 shadow-[0_25px_80px_rgba(0,0,0,0.7)] border-6 border-amber-300/90 flex items-center justify-center transform transition-all duration-300">
             {/* Top Mirror Emblem */}
@@ -227,7 +274,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             {/* Live Character Composition */}
             <PlayyComposition
               config={config}
-              mode={currentStep === 'review' ? 'coloring' : 'color'}
+              mode="color"
               showBackground={true}
               showLogoHeader={true}
               className="w-full h-full object-contain"
@@ -235,8 +282,10 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           </div>
         </div>
 
+        )}
+
         {/* RIGHT COLUMN: BIG VISUAL CHOICES (One decision per screen) */}
-        <div className="w-full lg:w-[58%] flex flex-col justify-between overflow-hidden">
+        <div className={`w-full ${currentStep === 'review' ? '' : 'lg:w-[58%]'} flex flex-col justify-between overflow-hidden`}>
           {/* STEP 1: CHOOSE YOUR HEAD */}
           {currentStep === 'head' && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-2">
@@ -433,54 +482,84 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             </div>
           )}
 
-          {/* STEP 6: THIS IS YOUR PLAYY! (REVIEW & CONFIRMATION) */}
-          {currentStep === 'review' && (
-            <div className="flex flex-col items-center justify-center text-center p-4 space-y-6">
-              {/* Very Small Summary Pill */}
-              <div className="flex flex-wrap justify-center gap-2 max-w-md">
-                <span className="bg-slate-900 border border-slate-700 px-3 py-1 rounded-full text-xs font-bold text-slate-300">
-                  HEAD: <strong>{config.head.toUpperCase()}</strong>
-                </span>
-                <span className="bg-slate-900 border border-slate-700 px-3 py-1 rounded-full text-xs font-bold text-slate-300">
-                  BODY: <strong>{config.pose.toUpperCase()}</strong>
-                </span>
-                <span className="bg-slate-900 border border-slate-700 px-3 py-1 rounded-full text-xs font-bold text-slate-300">
-                  POWER: <strong>{config.symbol.toUpperCase()}</strong>
-                </span>
-                <span className="bg-slate-900 border border-slate-700 px-3 py-1 rounded-full text-xs font-bold text-slate-300">
-                  WORLD: <strong>{config.background.toUpperCase()}</strong>
-                </span>
+          {/* STEP 6: QUESTIONNAIRE (3 questions, auto-advance) */}
+          {currentStep === 'quiz' && QUIZ_QUESTIONS[answers.length] && (
+            <div className="flex flex-col gap-4 p-2">
+              <div className="text-center">
+                <div className="text-sm font-bold text-amber-300 tracking-widest">
+                  QUESTION {answers.length + 1} OF {QUIZ_QUESTIONS.length}
+                </div>
+                <div className="text-slate-300 text-base">{QUIZ_QUESTIONS[answers.length].subtitle}</div>
               </div>
-
-              {/* Two Major Actions: CHANGE SOMETHING vs PRINT MY PLAYY! */}
-              <div className="w-full max-w-md flex flex-col gap-4 pt-2">
-                {/* Biggest Element: PRINT MY PLAYY! */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    nativeFeedback.notificationSuccess();
-                    onFinishAndPrint();
-                  }}
-                  className="btn-3d w-full py-6 px-8 font-bold text-2xl sm:text-3xl flex items-center justify-center gap-3"
-                >
-                  <span>🖨️</span>
-                  <span>PRINT MY PLAYY!</span>
-                </button>
-
-                {/* Secondary Button: CHANGE SOMETHING */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    nativeFeedback.impactLight();
-                    setCurrentStep('head');
-                  }}
-                  className="btn-3d btn-3d-blue w-full py-4 px-6 font-bold text-lg"
-                >
-                  <span>🔄 CHANGE SOMETHING</span>
-                </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {QUIZ_QUESTIONS[answers.length].options.map((opt, i) => (
+                  <button
+                    key={opt.label}
+                    type="button"
+                    onClick={() => handleAnswer(i)}
+                    className="min-h-[130px] p-5 rounded-[32px] flex flex-col items-center justify-center text-center cursor-pointer border-6 bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-amber-400 active:scale-95 transition-all"
+                  >
+                    <div className="text-4xl mb-2">{opt.icon}</div>
+                    <div className="text-lg font-black leading-tight">{opt.label}</div>
+                    <div className="text-xs text-slate-400 mt-1">{opt.description}</div>
+                  </button>
+                ))}
               </div>
             </div>
           )}
+
+          {/* STEP 7: TRUMP CARD REVEAL (flip front/back, then print) */}
+          {currentStep === 'review' && card && (() => {
+            const scale = Math.min(1, (window.innerHeight * 0.52) / CARD_H, (window.innerWidth - 48) / CARD_W);
+            return (
+              <div className="flex flex-col lg:flex-row items-center justify-center gap-8 p-2">
+                <div className="flex flex-col items-center gap-3">
+                  {cardSide === 'front' ? (
+                    <TrumpCardFront card={card} scale={scale} />
+                  ) : (
+                    <TrumpCardBack card={card} scale={scale} />
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetIdleTimer();
+                      nativeFeedback.impactLight();
+                      setCardSide(cardSide === 'front' ? 'back' : 'front');
+                    }}
+                    className="btn-3d btn-3d-blue py-3 px-6 font-bold text-base"
+                  >
+                    🔄 FLIP CARD
+                  </button>
+                </div>
+
+                <div className="w-full max-w-md flex flex-col gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      nativeFeedback.notificationSuccess();
+                      onFinishAndPrint();
+                    }}
+                    className="btn-3d w-full py-6 px-8 font-bold text-2xl sm:text-3xl flex items-center justify-center gap-3"
+                  >
+                    <span>🖨️</span>
+                    <span>PRINT MY PLAYY!</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      nativeFeedback.impactLight();
+                      onCardChange(null);
+                      setCurrentStep('head');
+                    }}
+                    className="btn-3d btn-3d-blue w-full py-4 px-6 font-bold text-lg"
+                  >
+                    <span>🔄 CHANGE SOMETHING</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -495,6 +574,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             ← BACK
           </button>
 
+          {currentStep !== 'quiz' && (
           <button
             type="button"
             onClick={goNext}
@@ -503,6 +583,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             <span>NEXT</span>
             <span>→</span>
           </button>
+          )}
         </div>
       )}
     </div>

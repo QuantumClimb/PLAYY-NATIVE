@@ -79,19 +79,29 @@
   }
 
   #printable-coloring-sheet,
-  #printable-coloring-sheet * {
+  #printable-coloring-sheet *,
+  #printable-card-sheet,
+  #printable-card-sheet * {
     visibility: visible;
   }
 
+  /* Page 1: coloring sheet. Page 2: trump card front + back (if a card exists). */
   #printable-coloring-sheet {
-    position: fixed;
-    inset: 0;
+    display: block !important;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     padding: 0;
     margin: 0;
-    display: block !important;
     background: #ffffff !important;
+    break-after: page;
+  }
+
+  #printable-card-sheet {
+    display: flex !important;
+    width: 100%;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
   }
 
   @page {

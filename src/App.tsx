@@ -10,6 +10,8 @@ import {
   generateRandomConfiguration,
 } from './lib/playys/configuration';
 
+import { PrintableCardSheet } from './components/card/PrintableCardSheet';
+import { GeneratedCard } from './lib/playys/cardTypes';
 import { PrintableColoringSheet } from './components/creator/PrintableColoringSheet';
 import { KioskIdleMovie } from './components/kiosk/KioskIdleMovie';
 import { MagicalColoringMachine } from './components/kiosk/MagicalColoringMachine';
@@ -22,6 +24,7 @@ export type MachinePhase = 'idle' | 'create' | 'celebrate';
 
 export default function App() {
   const [configuration, setConfiguration] = useState<PlayyConfiguration>(DEFAULT_CONFIGURATION);
+  const [card, setCard] = useState<GeneratedCard | null>(null);
   const [phase, setPhase] = useState<MachinePhase>('idle');
 
   // Hidden operator / admin modals
@@ -46,6 +49,7 @@ export default function App() {
 
   const handleResetToIdle = () => {
     setConfiguration(DEFAULT_CONFIGURATION);
+    setCard(null);
     setPhase('idle');
   };
 
@@ -68,9 +72,10 @@ export default function App() {
   }, []);
 
   return (
-    <div className="w-screen h-screen min-h-screen overflow-hidden bg-slate-950 text-white flex flex-col select-none print:bg-white print:p-0">
+    <div className="w-screen h-screen min-h-screen overflow-hidden bg-slate-950 text-white flex flex-col select-none print:bg-white print:p-0 print:h-auto print:overflow-visible">
       {/* 1. Dedicated Printable Sheet (Hidden on screen, activated during print) */}
       <PrintableColoringSheet config={configuration} />
+      <PrintableCardSheet card={card} />
 
       {/* 2. Full-Screen Full-Bleed Magical Coloring Machine */}
       <main className="w-full h-full flex-1 flex flex-col overflow-hidden print:hidden">
@@ -92,6 +97,8 @@ export default function App() {
                 <MagicalColoringMachine
                   config={configuration}
                   onChangeConfig={setConfiguration}
+                  card={card}
+                  onCardChange={setCard}
                   onFinishAndPrint={handleFinishAndPrint}
                   onAutoReset={handleResetToIdle}
                 />
