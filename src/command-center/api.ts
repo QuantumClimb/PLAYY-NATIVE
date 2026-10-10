@@ -16,6 +16,10 @@ export interface AssetMeta {
   faceDy?: number;
   /** Head only: size on a body, as a multiple of the head SVG's own size */
   headScale?: number;
+  /** Background only: character height as a fraction of the printable height */
+  charHeight?: number;
+  /** Symbol only: width on the chest as a % of the body width */
+  widthPct?: number;
   /** Attachment points in the asset's own viewBox coordinates (override anchor_* markers in the SVG) */
   anchors?: Record<string, { x: number; y: number }>;
 }
@@ -28,6 +32,7 @@ export const ANCHORS_BY_TYPE: Partial<Record<AssetType, { name: string; label: s
     { name: 'chest', label: 'Chest (where the symbol goes)' },
   ],
   symbol: [{ name: 'center', label: 'Center (placed on the chest point)' }],
+  background: [{ name: 'stand', label: 'Stand point (where the character\'s feet go)' }],
 };
 
 export interface Asset {

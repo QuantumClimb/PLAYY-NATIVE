@@ -104,8 +104,9 @@
     padding: 0;
   }
 
+  /* A4 with a 5 mm margin; the command center's print preview uses the same numbers (scene.ts) */
   @page {
-    size: portrait;
-    margin: 0.2in;
+    size: A4 portrait;
+    margin: 5mm;
   }
 }

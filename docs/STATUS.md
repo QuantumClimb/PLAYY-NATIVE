@@ -32,7 +32,10 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 - Head on body preview with a per-head size slider, in color and black-and-white.
 - Character colors, set per head: **head color**, **outfit color** (hoodie, trousers, shoes; follows the head color unless set) and a **fixed secondary color** (trim, soles, cuffs, tassles; auto-derived from the outfit unless set). Previewed live on the body.
 
-**Assets loaded:** heads Playy, Sparkyy, Dreamyy; shared face; body pose1.
+- Scene preview (head, body, symbol and background together) shown as an **A4 sheet**: 5 mm printable margin, background stretched (non-uniform) to fill it, color and black-and-white print preview side by side. The kiosk print page is now A4 portrait with a 5 mm margin.
+- Per-background **stand point** and character height; per-symbol **size on the chest**; chest anchor on bodies.
+
+**Assets loaded:** heads Playy, Sparkyy, Dreamyy; shared face; body pose1; 7 symbols (moon, fire, crown, cloud, paw, zap, heart); Background 01 (test).
 
 ## Decisions
 - Local SQLite behind one small module (`server/db.mjs`) so it can move to Neon or Supabase later.
@@ -41,9 +44,8 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 
 ## Next, in order
 1. Set the real outfit and secondary colors for Dreamyy (and Playy and Sparkyy if they need them) in the command center.
-2. Place the body neck anchor on pose1, then tune head sizes.
-3. Backgrounds (full 850x1100 scenes, with color and black-and-white versions).
-4. More poses and the symbols (chest anchor).
+2. Tune the placement in the scene preview: body neck and chest anchors on pose1, head sizes, symbol sizes, and the background stand point and character height.
+3. More backgrounds and poses. Symbols star and gear are missing (the old app had 9, 7 delivered).
 5. Connect the kiosk to the database and retire the hardcoded drawings.
 6. Phone number step after Name, with a consent line.
 7. Results screen showing the black-and-white and color versions.
@@ -53,6 +55,7 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 ## Open questions
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?
+- Background 01 artwork looks cropped at the left and right edges in the preview; confirm that is intended.
 - Where the trump card sits relative to the new black-and-white and color results screen.
 - Should submissions (name, phone, artwork) be stored in the database as a log?
 

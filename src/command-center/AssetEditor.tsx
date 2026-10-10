@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ANCHORS_BY_TYPE, Asset, AssetMeta, api } from './api';
 import { AssetPreview } from './AssetPreview';
+import { ScenePanel } from './ScenePanel';
 import { CompositePreview, DEFAULT_HEAD_SCALE, anchorOf } from './CompositePreview';
 import {
   BwRule,
@@ -237,6 +238,10 @@ export const AssetEditor: React.FC<AssetEditorProps> = ({ asset, face, assets, o
             </>
           )}
         </div>
+      )}
+
+      {['background', 'body', 'head', 'symbol'].includes(asset.type) && (
+        <ScenePanel draft={draft} assets={assets} face={face} setMeta={setMeta} />
       )}
 
       {anchorDefs.length > 0 && (

@@ -139,9 +139,15 @@ function viewBoxOf(root: SVGSVGElement) {
   return { x: 0, y: 0, w: parseFloat(root.getAttribute('width') || '100'), h: parseFloat(root.getAttribute('height') || '100') };
 }
 
-/** Wrapper group (the only element in the root) is just structure, not a part. */
+/**
+ * Structural groups are not parts: the only drawing group in the root, or Illustrator's automatic
+ * `Layer_1-2` style names (metadata and other non-drawing siblings are ignored when counting).
+ */
 function isWrapper(el: Element, root: Element) {
-  return el.nodeName === 'g' && el.parentElement === root && root.children.length === 1;
+  if (el.nodeName !== 'g') return false;
+  if (/^Layer[_-]\d+([_-]\d+)?$/i.test(el.id)) return true;
+  const drawing = Array.from(root.children).filter((c) => !['metadata', 'title', 'desc', 'defs'].includes(c.nodeName));
+  return el.parentElement === root && drawing.length === 1;
 }
 
 function partElements(root: SVGSVGElement): Element[] {
@@ -207,12 +213,14 @@ export interface RenderOptions {
   main: string;
   /** Fixed color for every derived part (instead of a lightness shift of main) */
   secondary?: string | null;
+  /** Stretch to fill its box, ignoring the aspect ratio (backgrounds printed on A4) */
+  stretch?: boolean;
   mode: 'color' | 'line';
   parts: PartsConfig;
 }
 
 /** Returns recolored SVG markup (ids stripped, width/height removed so CSS sizes it). */
-export function renderSvgAsset(svgText: string, { main, secondary, mode, parts }: RenderOptions): string {
+export function renderSvgAsset(svgText: string, { main, secondary, stretch, mode, parts }: RenderOptions): string {
   const root = parse(svgText);
   const mainHex = normalizeColor(main) ?? '#3b82f6';
   const secondaryHex = normalizeColor(secondary);
@@ -251,6 +259,7 @@ export function renderSvgAsset(svgText: string, { main, secondary, mode, parts }
   root.querySelectorAll('[id]').forEach((el) => el.removeAttribute('id'));
   root.removeAttribute('id');
   root.removeAttribute('data-name');
+  if (stretch) root.setAttribute('preserveAspectRatio', 'none');
   root.removeAttribute('width');
   root.removeAttribute('height');
   return new XMLSerializer().serializeToString(root);
