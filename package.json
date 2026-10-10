@@ -7,6 +7,8 @@
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
+    "start": "vite build && node server/kiosk-server.mjs",
+    "dev:all": "node scripts/dev-all.mjs",
     "server": "node server/kiosk-server.mjs",
     "printer-helper": "node server/kiosk-server.mjs",
     "clean": "rm -rf dist server.js",
@@ -14,6 +16,7 @@
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
+    "@neondatabase/serverless": "^1.2.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/canvas-confetti": "^1.9.0",
     "@vitejs/plugin-react": "^5.0.4",

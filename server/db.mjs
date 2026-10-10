@@ -1,61 +1,77 @@
-// Local SQLite database (node:sqlite, built into Node 22). One file, no setup.
-// All database access lives here so it can be swapped for Postgres (Neon/Supabase) later.
-import { DatabaseSync } from 'node:sqlite';
-import { mkdirSync } from 'node:fs';
-import path from 'node:path';
+// Postgres (Neon) access for the asset library. Uses Neon's serverless driver, which suits Vercel functions.
+// All database access lives here so it is easy to extend (submissions, email queue) or swap later.
+import { neon } from '@neondatabase/serverless';
 
-const DATA_DIR = path.resolve(process.env.PLAYYS_DATA_DIR || 'data');
-mkdirSync(DATA_DIR, { recursive: true });
-
-const db = new DatabaseSync(path.join(DATA_DIR, 'kiosk.db'));
-db.exec(`
-  PRAGMA journal_mode = WAL;
-  CREATE TABLE IF NOT EXISTS assets (
-    id       INTEGER PRIMARY KEY AUTOINCREMENT,
-    type     TEXT NOT NULL,              -- head | face | body | symbol | background
-    slug     TEXT NOT NULL,
-    name     TEXT NOT NULL,
-    svg      TEXT NOT NULL,              -- sanitized source SVG (named parts as ids)
-    parts    TEXT NOT NULL DEFAULT '{}', -- JSON: per-part mode / lightness offset / color / black-and-white rule
-    meta     TEXT NOT NULL DEFAULT '{}', -- JSON: default main color, face placement, anchors...
-    enabled  INTEGER NOT NULL DEFAULT 1,
-    sort     INTEGER NOT NULL DEFAULT 0,
-    updated  TEXT NOT NULL DEFAULT (datetime('now')),
-    UNIQUE (type, slug)
-  );
-`);
+const url = process.env.DATABASE_URL;
+if (!url) throw new Error('DATABASE_URL is not set. Add the Neon connection string to .env (or the Vercel project settings).');
+const sql = neon(url);
 
 export const ASSET_TYPES = ['head', 'face', 'body', 'symbol', 'background'];
 
-const row = (r) =>
-  r && { ...r, parts: JSON.parse(r.parts), meta: JSON.parse(r.meta), enabled: !!r.enabled };
+let ready;
+/** Creates the tables on first use (idempotent), once per server instance. */
+export function ensureSchema() {
+  ready ??= sql
+    .query(`
+      CREATE TABLE IF NOT EXISTS assets (
+        id      SERIAL PRIMARY KEY,
+        type    TEXT NOT NULL,                 -- head | face | body | symbol | background
+        slug    TEXT NOT NULL,
+        name    TEXT NOT NULL,
+        svg     TEXT NOT NULL,                 -- sanitized source SVG (named parts as ids)
+        parts   JSONB NOT NULL DEFAULT '{}',   -- per-part mode / lightness offset / color / black-and-white rule
+        meta    JSONB NOT NULL DEFAULT '{}',   -- default colors, face placement, anchors, sizes...
+        enabled BOOLEAN NOT NULL DEFAULT TRUE,
+        sort    INTEGER NOT NULL DEFAULT 0,
+        updated TIMESTAMPTZ NOT NULL DEFAULT now(),
+        UNIQUE (type, slug)
+      )`)
+    .catch((e) => {
+      ready = undefined; // retry next time
+      throw e;
+    });
+  return ready;
+}
 
-export function listAssets({ type, enabledOnly = false } = {}) {
+async function query(text, params = []) {
+  await ensureSchema();
+  return sql.query(text, params);
+}
+
+export async function listAssets({ type, enabledOnly = false } = {}) {
   const where = [];
   const args = [];
-  if (type) { where.push('type = ?'); args.push(type); }
-  if (enabledOnly) where.push('enabled = 1');
-  const sql = `SELECT * FROM assets ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY type, sort, id`;
-  return db.prepare(sql).all(...args).map(row);
+  if (type) { args.push(type); where.push(`type = $${args.length}`); }
+  if (enabledOnly) where.push('enabled');
+  return query(`SELECT * FROM assets ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY type, sort, id`, args);
 }
 
-export const getAsset = (id) => row(db.prepare('SELECT * FROM assets WHERE id = ?').get(id));
-
-export function createAsset({ type, slug, name, svg, parts = {}, meta = {} }) {
-  const r = db
-    .prepare(`INSERT INTO assets (type, slug, name, svg, parts, meta, sort)
-              VALUES (?, ?, ?, ?, ?, ?, (SELECT COALESCE(MAX(sort), 0) + 1 FROM assets WHERE type = ?))`)
-    .run(type, slug, name, svg, JSON.stringify(parts), JSON.stringify(meta), type);
-  return getAsset(Number(r.lastInsertRowid));
+export async function getAsset(id) {
+  return (await query('SELECT * FROM assets WHERE id = $1', [id]))[0] ?? null;
 }
 
-export function updateAsset(id, patch) {
-  const cur = getAsset(id);
+export async function createAsset({ type, slug, name, svg, parts = {}, meta = {} }) {
+  const rows = await query(
+    `INSERT INTO assets (type, slug, name, svg, parts, meta, sort)
+     VALUES ($1, $2, $3, $4, $5, $6, (SELECT COALESCE(MAX(sort), 0) + 1 FROM assets WHERE type = $1))
+     RETURNING *`,
+    [type, slug, name, svg, JSON.stringify(parts), JSON.stringify(meta)],
+  );
+  return rows[0];
+}
+
+export async function updateAsset(id, patch) {
+  const cur = await getAsset(id);
   if (!cur) return null;
   const next = { ...cur, ...patch };
-  db.prepare(`UPDATE assets SET name = ?, svg = ?, parts = ?, meta = ?, enabled = ?, sort = ?, updated = datetime('now') WHERE id = ?`)
-    .run(next.name, next.svg, JSON.stringify(next.parts), JSON.stringify(next.meta), next.enabled ? 1 : 0, next.sort, id);
-  return getAsset(id);
+  const rows = await query(
+    `UPDATE assets SET name = $2, svg = $3, parts = $4, meta = $5, enabled = $6, sort = $7, updated = now()
+     WHERE id = $1 RETURNING *`,
+    [id, next.name, next.svg, JSON.stringify(next.parts), JSON.stringify(next.meta), !!next.enabled, next.sort],
+  );
+  return rows[0] ?? null;
 }
 
-export const deleteAsset = (id) => db.prepare('DELETE FROM assets WHERE id = ?').run(id).changes > 0;
+export async function deleteAsset(id) {
+  return (await query('DELETE FROM assets WHERE id = $1 RETURNING id', [id])).length > 0;
+}

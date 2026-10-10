@@ -5,13 +5,14 @@ Last updated: 2026-10-10. Active app: the **Vite web kiosk**. The Expo app is pa
 ## How to run (kiosk PC)
 | What | Command |
 |---|---|
-| Kiosk server (printers, asset library, login) | `npm run server` (127.0.0.1:3001) |
-| Web app | `npm run dev` (http://localhost:3000) |
-| Command center | http://localhost:3000/command-center (password in `.env`: `COMMAND_CENTER_PASSWORD`) |
+| **Everything in one command** | `npm start` builds the site and serves it with the API at http://localhost:3001 |
+| Development (both servers, hot reload) | `npm run dev:all` (site on :3000, server on :3001) |
+| Server only / site only | `npm run server` / `npm run dev` |
+| Command center | `/command-center` on either address (password in `.env`: `COMMAND_CENTER_PASSWORD`) |
 | Printer dialog | `Alt+Shift+P` on any screen (needs the server running) |
 | Silent printing | Launch Chrome with `--kiosk --kiosk-printing` and set the default printer in the dialog |
 
-Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is `data/kiosk.db` (local SQLite, not in git).
+Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_URL` (the Neon connection string). The database is **Neon Postgres**, shared by local runs and Vercel, so assets uploaded anywhere are the same everywhere. The old local `data/kiosk.db` was copied into Neon with `scripts/migrate-sqlite-to-neon.mjs` and is no longer used (kept as a backup, not in git).
 
 ## Done
 **Kiosk look and flow**
@@ -20,6 +21,8 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 - Faux-3D glossy buttons (reusable `.btn-3d` class).
 - Flow: Head, Body, Power, World, Name, then a 3-question quiz, then the trump card (flip front/back), then print.
 - Printing sends two pages: the coloring sheet and the trump card front and back.
+
+**Kiosk now runs on the command-center assets.** Heads, poses, symbols and backgrounds are loaded from the server at start (`/api/assets`); the old hardcoded drawings are no longer used by the kiosk. The preview is an A4-shaped scene (background stretched to the printable area, character standing on it) and fills the whole height of the left side (704 px tall at 1280x800, 984 px at 1920x1080; it was 450 px). The coloring page, celebration screen and trump card all use the same scene. Choosing a head also decides the outfit and secondary colors.
 
 **Printer dialog** (Alt+Shift+P): lists installed printers with status, sets the default, test print. Detection runs in the local kiosk server because a browser cannot list printers.
 
@@ -38,7 +41,8 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 **Assets loaded:** heads Playy, Sparkyy, Dreamyy; shared face; body pose1; 7 symbols (moon, fire, crown, cloud, paw, zap, heart); Backgrounds 01, 02 and 03 (test).
 
 ## Decisions
-- Local SQLite behind one small module (`server/db.mjs`) so it can move to Neon or Supabase later.
+- Neon Postgres via Neon's serverless driver (plain SQL in `server/db.mjs`). Prisma was considered and left out: one table, and it adds a generate step and an adapter on Vercel. Add it later if the schema grows a lot.
+- The API is one Express app (`server/app.mjs`) with two launchers: `server/kiosk-server.mjs` (local, also serves the built site) and `api/index.mjs` (Vercel function, routed by `vercel.json`).
 - The face is a shared asset; its colors are fixed and editable in the command center.
 - Each head has a head color, an outfit color (defaults to the head color) and an optional fixed secondary color (defaults to a lighter shade of the outfit). Decided 2026-10-10 so characters like Dreamyy can have a white head with a colored outfit.
 
@@ -46,7 +50,8 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 1. Set the real outfit and secondary colors for Dreamyy (and Playy and Sparkyy if they need them) in the command center.
 2. Tune the placement in the scene preview: body neck and chest anchors on pose1, head sizes, symbol sizes, and the background stand point and character height.
 3. More backgrounds and poses. Symbols star and gear are missing (the old app had 9, 7 delivered).
-5. Connect the kiosk to the database and retire the hardcoded drawings.
+5. Remove the old hardcoded drawings and unused legacy screens (`src/components/playys`, `creator`, `expo`, `lib/playys/heads|poses|symbols|backgrounds`).
+5b. Deploy to Vercel: set `COMMAND_CENTER_PASSWORD` (and optionally `COMMAND_CENTER_SECRET`) in the Vercel project settings; `DATABASE_URL` comes from the Neon integration. The Vercel function entry has not been tested on Vercel yet.
 6. Phone number step after Name, with a consent line.
 7. Results screen showing the black-and-white and color versions.
 8. Email via SMTP: black-and-white PDF and color image to qcquantumclimb@gmail.com with the child's name and parent's phone. Retry queue so the kiosk never blocks.
@@ -61,7 +66,9 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 
 ## Known issues and notes
 - The trump card quiz is unbalanced: every stat starts at 50 and the highest wins, so most answers give "Cosmic Explorer".
-- `node:sqlite` prints an experimental warning on Node 22. It works, but pin the Node version on the kiosk PC.
+- Hosting: the server reads `PORT` and `HOST` (hosted = all interfaces) and turns the printer routes off unless `ENABLE_PRINTERS=1`. SQLite data does not survive redeploys on most hosts, hence Neon.
+- The kiosk now needs a connection to Neon to load its assets. For an offline-capable kiosk, cache the asset library on the PC (not built yet).
+- On Vercel the login rate limit is per function instance, so it is weaker than on the kiosk PC. Use a long password.
 - With `npm run dev` listening on all interfaces, the `/api` routes are reachable from the LAN. The command center is password protected, but the printer routes are not.
 - Expo app: Expo expects slightly different `react-native-svg` and `safe-area-context` versions (run `npx expo install --fix`), and `app.json` references icon and splash images that do not exist.
 - `docs/PKD_Create_Your_Play_Functional_Document_v7.docx` is a local file, not committed.
