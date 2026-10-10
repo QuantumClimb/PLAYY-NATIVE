@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { PlayyConfiguration } from '../../lib/playys/types';
-import { PlayyComposition } from '../playys/PlayyComposition';
+import { PlayyScene } from '../playys/PlayyScene';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 
 interface KioskCelebrationScreenProps {
@@ -83,7 +83,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
       {/* Center Hero: Physical Coloring Sheet Emerging */}
       <div className="flex-1 flex flex-col items-center justify-center my-auto z-10 w-full max-w-xl">
         <div
-          className={`relative w-72 h-96 sm:w-88 sm:h-[480px] bg-white rounded-[36px] p-3 shadow-[0_30px_90px_rgba(0,0,0,0.8)] border-6 border-emerald-400/80 flex items-center justify-center transform transition-all duration-700 ${
+          className={`relative h-[min(60vh,760px)] aspect-[200/287] bg-white rounded-[28px] p-2 shadow-[0_30px_90px_rgba(0,0,0,0.8)] border-6 border-emerald-400/80 flex items-center justify-center transform transition-all duration-700 ${
             isPaperFed ? 'translate-y-0 scale-100' : 'translate-y-8 scale-95 opacity-80'
           }`}
         >
@@ -93,13 +93,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
           </div>
 
           {/* Clean Vector Preview */}
-          <PlayyComposition
-            config={config}
-            mode="coloring"
-            showBackground={true}
-            showLogoHeader={true}
-            className="w-full h-full object-contain"
-          />
+          <PlayyScene config={config} mode="line" className="w-full h-full rounded-[18px]" />
         </div>
       </div>
 

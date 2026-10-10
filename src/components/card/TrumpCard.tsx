@@ -1,6 +1,6 @@
 import React from 'react';
 import { GeneratedCard } from '../../lib/playys/cardTypes';
-import { PlayyComposition } from '../playys/PlayyComposition';
+import { PlayyScene } from '../playys/PlayyScene';
 
 /** Cards are designed at a fixed 340x510 and scaled with `scale` so layout never changes. */
 export const CARD_W = 340;
@@ -82,8 +82,8 @@ export const TrumpCardFront: React.FC<TrumpCardProps> = ({ card, scale = 1 }) =>
         <div className="text-[11px] tracking-wider text-slate-400">{archetype.title}</div>
       </div>
 
-      <div className="rounded-2xl overflow-hidden bg-white p-1 flex items-center justify-center" style={{ height: CARD_H * 0.5 }}>
-        <PlayyComposition config={config} mode="color" showBackground={true} showLogoHeader={false} className="w-full h-full" />
+      <div className="rounded-2xl overflow-hidden bg-white p-1 flex items-center justify-center" style={{ height: CARD_H * 0.6 }}>
+        <PlayyScene config={config} mode="color" className="h-full" />
       </div>
 
       <div className="flex justify-around rounded-2xl p-1.5" style={{ ...exact, background: '#1E293B' }}>

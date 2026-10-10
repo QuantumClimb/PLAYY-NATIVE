@@ -6,11 +6,11 @@ import {
   SymbolId,
   BackgroundId,
 } from '../../lib/playys/types';
-import { HEADS } from '../../lib/playys/heads';
-import { POSES } from '../../lib/playys/poses';
-import { SYMBOLS } from '../../lib/playys/symbols';
-import { BACKGROUNDS } from '../../lib/playys/backgrounds';
-import { PlayyComposition } from '../playys/PlayyComposition';
+import { useAssetLibrary, useSelection } from '../../lib/assets/library';
+import { normalizeColor } from '../../lib/assets/svgParts';
+import { SCENE_H, SCENE_W } from '../../lib/assets/scene';
+import { AssetArt } from '../playys/AssetArt';
+import { PlayyScene } from '../playys/PlayyScene';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { QUIZ_QUESTIONS } from '../../lib/playys/questions';
 import { calculateArchetype } from '../../lib/playys/archetypes';
@@ -38,6 +38,28 @@ const KEYBOARD_LETTERS = [
   ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
 ];
 
+const ChoiceCard: React.FC<{
+  selected: boolean;
+  onClick: () => void;
+  label: string;
+  compact?: boolean;
+  children: React.ReactNode;
+}> = ({ selected, onClick, label, compact, children }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={`p-3 rounded-[28px] flex flex-col items-center justify-between gap-2 transition-all cursor-pointer border-[5px] ${
+      selected
+        ? 'bg-gradient-to-b from-indigo-700 to-indigo-900 text-white border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.6)] scale-[1.03]'
+        : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-slate-700'
+    }`}
+  >
+    <div className={`${compact ? 'h-20 sm:h-24' : 'h-32 sm:h-44'} w-full flex items-center justify-center`}>{children}</div>
+    <div className="text-sm sm:text-base font-black uppercase leading-tight text-center">{label}</div>
+    {selected && <div className="text-amber-300 font-black text-xs">✔ SELECTED</div>}
+  </button>
+);
+
 export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   config,
   onChangeConfig,
@@ -46,6 +68,8 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   onFinishAndPrint,
   onAutoReset,
 }) => {
+  const lib = useAssetLibrary();
+  const sel = useSelection(config);
   const [currentStep, setCurrentStep] = useState<MachineStep>('head');
   const [idleSeconds, setIdleSeconds] = useState(45);
   const [answers, setAnswers] = useState<number[]>([]);
@@ -174,18 +198,15 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   const handleStepSurprise = () => {
     resetIdleTimer();
     nativeFeedback.impactMedium();
+    const any = <T,>(list: T[]) => list[Math.floor(Math.random() * list.length)];
     if (currentStep === 'head') {
-      const random = HEADS[Math.floor(Math.random() * HEADS.length)].id;
-      onChangeConfig({ ...config, head: random });
+      onChangeConfig({ ...config, head: any(lib.heads).slug });
     } else if (currentStep === 'body') {
-      const random = POSES[Math.floor(Math.random() * POSES.length)].id;
-      onChangeConfig({ ...config, pose: random });
-    } else if (currentStep === 'symbol') {
-      const random = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)].id;
-      onChangeConfig({ ...config, symbol: random });
+      onChangeConfig({ ...config, pose: any(lib.bodies).slug });
+    } else if (currentStep === 'symbol' && lib.symbols.length) {
+      onChangeConfig({ ...config, symbol: any(lib.symbols).slug });
     } else if (currentStep === 'world') {
-      const random = BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)].id;
-      onChangeConfig({ ...config, background: random });
+      onChangeConfig({ ...config, background: any(lib.backgrounds).slug });
     }
   };
 
@@ -205,14 +226,32 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       ? QUIZ_QUESTIONS[answers.length]?.question ?? ''
       : 'YOUR PLAYY TRUMP CARD IS READY!';
 
+  const isReview = currentStep === 'review';
+
   return (
     <div
       onClick={resetIdleTimer}
-      className="w-full h-full min-h-0 bg-gradient-to-b from-indigo-950 via-slate-950 to-purple-950 text-white flex flex-col justify-between p-4 sm:p-8 select-none relative overflow-hidden"
+      className="w-full h-full min-h-0 bg-gradient-to-b from-indigo-950 via-slate-950 to-purple-950 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden"
     >
-      {/* 1. Subtle Kiosk Progress Indicator: ● ─ ● ─ ● ─ ● ─ ● */}
-      <div className="w-full flex items-center justify-between px-2 shrink-0 z-20">
-        <img src="/assets/logo.png" alt="PLAYYS" draggable={false} className="h-14 sm:h-16 w-auto object-contain" />
+      {/* LEFT: the live preview, as tall as the screen allows (an A4 page) */}
+      {!isReview && (
+        <div className="lg:w-[46%] h-[42vh] lg:h-full min-h-0 shrink-0 flex items-center justify-center">
+          <div
+            className="relative h-full max-w-full bg-white rounded-[30px] border-[6px] border-amber-300/90 shadow-[0_25px_80px_rgba(0,0,0,0.7)] overflow-hidden"
+            style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}
+          >
+            <PlayyScene config={config} mode="color" className="w-full h-full" />
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 font-black text-xs px-4 py-1 rounded-full shadow-md uppercase tracking-wider whitespace-nowrap">
+              ★ MAGIC MIRROR ★
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RIGHT: progress, the one big question, the choices, and navigation */}
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col">
+      <div className="w-full flex items-center justify-between gap-3 px-1 shrink-0 z-20">
+        <img src="/assets/logo.png" alt="PLAYYS" draggable={false} className="h-12 sm:h-14 w-auto object-contain" />
 
         {/* Minimal Stepper dots */}
         <div className="flex items-center gap-2 sm:gap-3">
@@ -243,7 +282,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <button
             type="button"
             onClick={handleStepSurprise}
-            className="btn-3d btn-3d-amber btn-3d-sm flex items-center gap-1.5 px-4 py-2 text-xs font-bold"
+            className="btn-3d btn-3d-amber btn-3d-sm flex items-center gap-1.5 px-4 py-2 text-xs font-bold whitespace-nowrap shrink-0"
           >
             <span>✨</span>
             <span className="hidden sm:inline">SURPRISE ME</span>
@@ -260,163 +299,48 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
         </h1>
       </div>
 
-      {/* 3. Main Split Stage: Left is MAGIC MIRROR, Right is VISUAL CHOICES */}
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-6 lg:gap-10 my-auto py-2 z-10 w-full max-w-7xl mx-auto overflow-hidden">
-        {/* LEFT COLUMN: THE MAGIC MIRROR (Reacts instantly to choices) */}
-        {currentStep !== 'review' && (
-        <div className="w-full lg:w-[42%] flex flex-col items-center justify-center shrink-0">
-          <div className="relative w-72 h-88 sm:w-88 sm:h-[450px] bg-white rounded-[40px] p-3.5 shadow-[0_25px_80px_rgba(0,0,0,0.7)] border-6 border-amber-300/90 flex items-center justify-center transform transition-all duration-300">
-            {/* Top Mirror Emblem */}
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 font-black text-xs px-5 py-1 rounded-full shadow-md uppercase tracking-wider whitespace-nowrap">
-              ★ MAGIC MIRROR ★
-            </div>
-
-            {/* Live Character Composition */}
-            <PlayyComposition
-              config={config}
-              mode="color"
-              showBackground={true}
-              showLogoHeader={true}
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </div>
-
-        )}
-
-        {/* RIGHT COLUMN: BIG VISUAL CHOICES (One decision per screen) */}
-        <div className={`w-full ${currentStep === 'review' ? '' : 'lg:w-[58%]'} flex flex-col justify-between overflow-hidden`}>
+      <div className="flex-1 min-h-0 overflow-y-auto py-2 z-10">
           {/* STEP 1: CHOOSE YOUR HEAD */}
           {currentStep === 'head' && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-2">
-              {HEADS.map((h) => {
-                const isSelected = config.head === h.id;
-                return (
-                  <button
-                    key={h.id}
-                    type="button"
-                    onClick={() => handleSelectHead(h.id)}
-                    className={`min-h-[160px] p-6 rounded-[36px] flex flex-col items-center justify-center text-center transition-all cursor-pointer border-6 ${
-                      isSelected
-                        ? 'bg-gradient-to-b from-indigo-700 to-indigo-900 text-white border-amber-400 shadow-[0_0_40px_rgba(251,191,36,0.6)] scale-105'
-                        : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    <div
-                      className="w-18 h-18 rounded-full border-4 border-white/90 mb-3 shadow-xl"
-                      style={{ backgroundColor: h.primaryColor }}
-                    />
-                    <div className="text-xl font-black tracking-wide uppercase">{h.name}</div>
-                    {isSelected && (
-                      <div className="mt-2 text-amber-300 font-black text-xs flex items-center gap-1">
-                        <span>✔</span>
-                        <span>SELECTED</span>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 p-2 min-h-full content-center">
+              {lib.heads.map((h) => (
+                <ChoiceCard key={h.id} selected={sel.head.slug === h.slug} onClick={() => handleSelectHead(h.slug)} label={h.name}>
+                  <AssetArt asset={h} face={lib.face} mode="color" main={normalizeColor(h.meta.main) ?? '#3b82f6'} className="h-full max-w-full" />
+                </ChoiceCard>
+              ))}
             </div>
           )}
 
           {/* STEP 2: HOW SHOULD YOUR PLAYY MOVE? */}
           {currentStep === 'body' && (
-            <div className="grid grid-cols-2 gap-4 p-2">
-              {POSES.map((p) => {
-                const isSelected = config.pose === p.id;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => handleSelectPose(p.id)}
-                    className={`min-h-[140px] p-6 rounded-[36px] flex flex-col items-center justify-center text-center transition-all cursor-pointer border-6 ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-indigo-700 to-indigo-900 text-white border-amber-400 shadow-[0_0_40px_rgba(251,191,36,0.6)] scale-105'
-                        : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    <span className="text-4xl mb-2">
-                      {p.id === 'hero' ? '🦸' : p.id === 'wave' ? '👋' : p.id === 'jump' ? '🏃' : '🛋️'}
-                    </span>
-                    <div className="text-xl font-black tracking-wide uppercase">{p.name}</div>
-                    {isSelected && (
-                      <div className="mt-1 text-amber-300 font-black text-xs">✔ SELECTED</div>
-                    )}
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 p-2 min-h-full content-center">
+              {lib.bodies.map((b) => (
+                <ChoiceCard key={b.id} selected={sel.body.slug === b.slug} onClick={() => handleSelectPose(b.slug)} label={b.name}>
+                  <AssetArt asset={b} mode="color" main={sel.outfit} secondary={sel.secondary} className="h-full max-w-full" />
+                </ChoiceCard>
+              ))}
             </div>
           )}
 
           {/* STEP 3: PICK YOUR POWER */}
           {currentStep === 'symbol' && (
-            <div className="grid grid-cols-3 gap-3 sm:gap-4 p-2">
-              {SYMBOLS.map((s) => {
-                const isSelected = config.symbol === s.id;
-                const emoji =
-                  s.id === 'star'
-                    ? '⭐'
-                    : s.id === 'heart'
-                    ? '💖'
-                    : s.id === 'lightning'
-                    ? '⚡'
-                    : s.id === 'cloud'
-                    ? '☁️'
-                    : s.id === 'flame'
-                    ? '🔥'
-                    : s.id === 'moon'
-                    ? '🌙'
-                    : s.id === 'crown'
-                    ? '👑'
-                    : s.id === 'paw'
-                    ? '🐾'
-                    : '⚙️';
-
-                return (
-                  <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => handleSelectSymbol(s.id)}
-                    className={`min-h-[105px] p-3 rounded-[30px] flex flex-col items-center justify-center text-center transition-all cursor-pointer border-5 ${
-                      isSelected
-                        ? 'bg-indigo-700 text-white border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.6)] scale-105'
-                        : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    <span className="text-4xl mb-1">{emoji}</span>
-                    <span className="text-sm font-black uppercase">{s.name}</span>
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 p-2 min-h-full content-center">
+              {lib.symbols.map((sy) => (
+                <ChoiceCard key={sy.id} selected={sel.symbol?.slug === sy.slug} onClick={() => handleSelectSymbol(sy.slug)} label={sy.name} compact>
+                  <AssetArt asset={sy} mode="color" main={sel.headMain} className="h-full max-w-full" />
+                </ChoiceCard>
+              ))}
             </div>
           )}
 
           {/* STEP 4: WHERE WILL YOUR PLAYY GO? */}
           {currentStep === 'world' && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 p-2">
-              {BACKGROUNDS.map((b) => {
-                const isSelected = config.background === b.id;
-                return (
-                  <button
-                    key={b.id}
-                    type="button"
-                    onClick={() => handleSelectBackground(b.id)}
-                    className={`min-h-[120px] p-4 rounded-[32px] flex flex-col items-center justify-center text-center transition-all cursor-pointer border-5 ${
-                      isSelected
-                        ? 'bg-indigo-700 text-white border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.6)] scale-105'
-                        : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-slate-700'
-                    }`}
-                  >
-                    <div
-                      className="w-12 h-12 rounded-2xl mb-2 shadow-md border-2 border-white/60"
-                      style={{ backgroundColor: b.themeColor }}
-                    />
-                    <span className="text-xs sm:text-sm font-black uppercase leading-tight">
-                      {b.name}
-                    </span>
-                  </button>
-                );
-              })}
+            <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 p-2 min-h-full content-center">
+              {lib.backgrounds.map((bg) => (
+                <ChoiceCard key={bg.id} selected={sel.background.slug === bg.slug} onClick={() => handleSelectBackground(bg.slug)} label={bg.name}>
+                  <AssetArt asset={bg} mode="color" main={sel.headMain} className="h-full max-w-full rounded-xl overflow-hidden" />
+                </ChoiceCard>
+              ))}
             </div>
           )}
 
@@ -560,7 +484,6 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               </div>
             );
           })()}
-        </div>
       </div>
 
       {/* 4. Bottom Navigation: BACK on left, ONE DOMINANT NEXT ON RIGHT */}
@@ -586,6 +509,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           )}
         </div>
       )}
+      </div>
     </div>
   );
 };

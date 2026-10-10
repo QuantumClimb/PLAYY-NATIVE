@@ -1,24 +1,10 @@
 import React, { useMemo } from 'react';
 import { parseSvgAsset } from '../lib/assets/svgParts';
+import { anchorOf, DEFAULT_HEAD_SCALE } from '../lib/assets/scene';
 import { Asset } from './api';
 import { AssetPreview } from './AssetPreview';
 
-type Pt = { x: number; y: number };
-
-/** Anchor from the CMS (meta), else an anchor_* marker in the SVG, else a sensible default. */
-export function anchorOf(asset: Asset, name: string, fallback: Pt): { pt: Pt; isDefault: boolean } {
-  const saved = asset.meta.anchors?.[name];
-  if (saved) return { pt: saved, isDefault: false };
-  try {
-    const marker = parseSvgAsset(asset.svg).anchors[name];
-    if (marker) return { pt: marker, isDefault: false };
-  } catch {
-    /* fall through to the default */
-  }
-  return { pt: fallback, isDefault: true };
-}
-
-export const DEFAULT_HEAD_SCALE = 0.5;
+export { anchorOf, DEFAULT_HEAD_SCALE };
 
 interface CompositePreviewProps {
   head: Asset;

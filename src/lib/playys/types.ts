@@ -1,9 +1,9 @@
 export type RenderMode = 'color' | 'coloring';
 
-export type HeadId = 'blue' | 'dreamyy' | 'sparkyy';
-export type PoseId = 'hero' | 'wave' | 'jump' | 'sitting';
-export type SymbolId = 'star' | 'cloud' | 'flame' | 'heart' | 'lightning' | 'moon' | 'paw' | 'gear' | 'crown';
-export type BackgroundId = 'happy-hills' | 'magic-castle' | 'space-world' | 'jungle-world' | 'cloud-kingdom' | 'city-adventure';
+export type HeadId = string; // asset slug from the command center
+export type PoseId = string;
+export type SymbolId = string;
+export type BackgroundId = string;
 
 export interface PlayyConfiguration {
   head: HeadId;

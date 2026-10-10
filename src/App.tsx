@@ -117,7 +117,7 @@ export default function App() {
               src="/assets/footer.png"
               alt=""
               draggable={false}
-              className="w-full h-auto max-h-24 object-contain shrink-0 bg-slate-950"
+              className="w-full h-auto max-h-20 object-contain shrink-0 bg-slate-950"
             />
           </div>
         )}

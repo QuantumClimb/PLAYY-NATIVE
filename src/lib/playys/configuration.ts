@@ -4,11 +4,12 @@ import { POSES } from './poses';
 import { SYMBOLS } from './symbols';
 import { BACKGROUNDS } from './backgrounds';
 
+// Empty slugs mean "the first asset of each kind"; see resolveSelection in lib/assets/library.
 export const DEFAULT_CONFIGURATION: PlayyConfiguration = {
-  head: 'blue',
-  pose: 'wave',
-  symbol: 'star',
-  background: 'happy-hills',
+  head: '',
+  pose: '',
+  symbol: '',
+  background: '',
   kidName: '',
 };
 

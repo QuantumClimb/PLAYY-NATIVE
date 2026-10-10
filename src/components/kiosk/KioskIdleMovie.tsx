@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { PlayyConfiguration } from '../../lib/playys/types';
-import { PlayyComposition } from '../playys/PlayyComposition';
 
 interface KioskIdleMovieProps {
   onStart: () => void;
