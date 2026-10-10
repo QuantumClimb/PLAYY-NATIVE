@@ -31,12 +31,7 @@
       "bundler": "metro"
     },
     "plugins": [
-      [
-        "expo-print",
-        {
-          "enablePdfExport": true
-        }
-      ]
+      "expo-asset"
     ]
   }
 }

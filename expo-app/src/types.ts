@@ -8,4 +8,5 @@ export interface PlayyConfig {
   pose: PoseId;
   symbol: SymbolId;
   background: BackgroundId;
+  kidName?: string;
 }

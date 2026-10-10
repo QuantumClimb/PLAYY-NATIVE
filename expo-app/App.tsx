@@ -9,6 +9,8 @@ import {
   Alert,
   Share,
   Platform,
+  TextInput,
+  useWindowDimensions,
 } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import * as Haptics from 'expo-haptics';
@@ -16,8 +18,15 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 import { PlayySvg } from './src/components/PlayySvg';
-import { generateColoringHtml } from './src/utils/printTemplate';
+import { generatePrintPackHtml } from './src/utils/printTemplate';
+import { QUIZ_QUESTIONS } from './src/data/questions';
+import { calculateArchetype } from './src/data/archetypes';
+import { BASE_STATS, CharacterStats, GeneratedCard } from './src/cardTypes';
+import { TrumpCardFront, TrumpCardBack, CARD_W, CARD_H } from './src/components/TrumpCard';
 import { PlayyConfig, HeadId, PoseId, SymbolId, BackgroundId } from './src/types';
+
+const STAT_KEYS: (keyof CharacterStats)[] = ['power', 'speed', 'intelligence', 'energy', 'courage'];
+const STEP_LABELS = ['Head', 'Pose', 'Symbol', 'World', 'Name', 'Quiz', 'Card'];
 
 const HEADS: { id: HeadId; name: string; color: string; desc: string }[] = [
   { id: 'blue', name: 'Bluey Head', color: '#2563EB', desc: 'Star crown & friendly smile' },
@@ -61,7 +70,10 @@ export default function App() {
     background: 'happy-hills',
   });
   const [activeStep, setActiveStep] = useState<number>(1);
-  const [renderMode, setRenderMode] = useState<'color' | 'coloring'>('color');
+  const [answers, setAnswers] = useState<number[]>([]);
+  const [card, setCard] = useState<GeneratedCard | null>(null);
+  const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const [isPrinting, setIsPrinting] = useState<boolean>(false);
 
   const triggerHaptic = (type: 'light' | 'medium' | 'success') => {
@@ -85,11 +97,45 @@ export default function App() {
     });
   }, []);
 
+  // Each answer adds its stat boost on top of the base stats (capped at 100)
+  const handleAnswer = (optionIndex: number) => {
+    triggerHaptic('light');
+    const next = [...answers, optionIndex];
+    if (next.length < QUIZ_QUESTIONS.length) {
+      setAnswers(next);
+      return;
+    }
+    const stats: CharacterStats = { ...BASE_STATS };
+    next.forEach((optIdx, qIdx) => {
+      const boost = QUIZ_QUESTIONS[qIdx].options[optIdx].statBoost;
+      STAT_KEYS.forEach((k) => {
+        stats[k] = Math.min(100, stats[k] + (boost[k] ?? 0));
+      });
+    });
+    setCard({
+      id: Math.random().toString(36).substring(2, 9),
+      config,
+      stats,
+      archetype: calculateArchetype(stats),
+      createdAt: new Date().toISOString(),
+    });
+    setAnswers([]);
+    setCardSide('front');
+    setActiveStep(7);
+  };
+
+  const goToStep = (step: number) => {
+    triggerHaptic('light');
+    if (step === 7 && !card) return;
+    if (step !== 6) setAnswers([]);
+    setActiveStep(step);
+  };
+
   const handlePrint = async () => {
     try {
       setIsPrinting(true);
       triggerHaptic('success');
-      const html = generateColoringHtml(config);
+      const html = generatePrintPackHtml(config, card);
       await Print.printAsync({ html });
     } catch (e: any) {
       Alert.alert('Printing Error', e?.message || 'Could not launch print service');
@@ -101,7 +147,7 @@ export default function App() {
   const handleShare = async () => {
     try {
       triggerHaptic('medium');
-      const html = generateColoringHtml(config);
+      const html = generatePrintPackHtml(config, card);
       const { uri } = await Print.printToFileAsync({ html });
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, {
@@ -144,58 +190,25 @@ export default function App() {
         </View>
       </View>
 
-      {/* Main Preview Hero */}
-      <View style={styles.previewContainer}>
-        <View style={styles.svgWrapper}>
-          <PlayySvg
-            config={config}
-            mode={activeStep === 5 ? renderMode : 'color'}
-            width={260}
-            height={320}
-          />
-        </View>
-
-        {activeStep === 5 && (
-          <View style={styles.modeToggle}>
-            <TouchableOpacity
-              style={[styles.modePill, renderMode === 'coloring' && styles.modePillActive]}
-              onPress={() => {
-                triggerHaptic('light');
-                setRenderMode('coloring');
-              }}
-            >
-              <Text style={[styles.modePillText, renderMode === 'coloring' && styles.modePillTextActive]}>
-                Coloring Page
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.modePill, renderMode === 'color' && styles.modePillActive]}
-              onPress={() => {
-                triggerHaptic('light');
-                setRenderMode('color');
-              }}
-            >
-              <Text style={[styles.modePillText, renderMode === 'color' && styles.modePillTextActive]}>
-                Color Preview
-              </Text>
-            </TouchableOpacity>
+      {/* Main Preview Hero (hidden on quiz / card steps to leave room) */}
+      {activeStep <= 5 && (
+        <View style={styles.previewContainer}>
+          <View style={styles.svgWrapper}>
+            <PlayySvg config={config} mode="color" width={260} height={320} />
           </View>
-        )}
-      </View>
+        </View>
+      )}
 
       {/* Step Tabs Indicator */}
       <View style={styles.stepsBar}>
-        {[1, 2, 3, 4, 5].map((s) => (
+        {[1, 2, 3, 4, 5, 6, 7].map((s) => (
           <TouchableOpacity
             key={s}
             style={[styles.stepItem, activeStep === s && styles.stepItemActive]}
-            onPress={() => {
-              triggerHaptic('light');
-              setActiveStep(s);
-            }}
+            onPress={() => goToStep(s)}
           >
             <Text style={[styles.stepText, activeStep === s && styles.stepTextActive]}>
-              {s === 1 ? '1. Head' : s === 2 ? '2. Pose' : s === 3 ? '3. Symbol' : s === 4 ? '4. World' : '5. Print'}
+              {s}. {STEP_LABELS[s - 1]}
             </Text>
           </TouchableOpacity>
         ))}
@@ -296,29 +309,80 @@ export default function App() {
 
         {activeStep === 5 && (
           <View style={styles.exportSection}>
-            <Text style={styles.exportTitle}>Your PLAYY Coloring Page is Ready!</Text>
-            <Text style={styles.exportSubtitle}>
-              Export high-resolution PDF or send straight to AirPrint / Wi-Fi printer.
-            </Text>
-
-            <TouchableOpacity
-              style={styles.primaryPrintBtn}
-              onPress={handlePrint}
-              disabled={isPrinting}
-            >
-              <Ionicons name="print" size={24} color="#451A03" />
-              <View>
-                <Text style={styles.printBtnTitle}>Print Coloring Sheet</Text>
-                <Text style={styles.printBtnSub}>Expo Print &bull; High Resolution 300 DPI</Text>
-              </View>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.secondaryShareBtn} onPress={handleShare}>
-              <Ionicons name="share-outline" size={22} color="#4338CA" />
-              <Text style={styles.shareBtnText}>Share PDF Page</Text>
-            </TouchableOpacity>
+            <Text style={styles.exportTitle}>What is your name?</Text>
+            <Text style={styles.exportSubtitle}>It goes on your trump card. You can skip this.</Text>
+            <TextInput
+              style={styles.nameInput}
+              value={config.kidName ?? ''}
+              onChangeText={(t) => setConfig({ ...config, kidName: t.toUpperCase().slice(0, 10) })}
+              placeholder="YOUR NAME"
+              placeholderTextColor="#94A3B8"
+              maxLength={10}
+              autoCapitalize="characters"
+            />
           </View>
         )}
+
+        {activeStep === 6 && QUIZ_QUESTIONS[answers.length] && (
+          <View style={styles.exportSection}>
+            <Text style={styles.quizCount}>
+              QUESTION {answers.length + 1} OF {QUIZ_QUESTIONS.length}
+            </Text>
+            <Text style={styles.exportTitle}>{QUIZ_QUESTIONS[answers.length].question}</Text>
+            <Text style={styles.exportSubtitle}>{QUIZ_QUESTIONS[answers.length].subtitle}</Text>
+            <View style={styles.optionsGrid}>
+              {QUIZ_QUESTIONS[answers.length].options.map((opt, i) => (
+                <TouchableOpacity key={opt.label} style={styles.optionCard} onPress={() => handleAnswer(i)}>
+                  <Text style={styles.quizIcon}>{opt.icon}</Text>
+                  <View style={styles.optionDetails}>
+                    <Text style={styles.optionName}>{opt.label}</Text>
+                    <Text style={styles.optionDesc}>{opt.description}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {activeStep === 7 && card && (() => {
+          const scale = Math.min(1, (windowHeight * 0.45) / CARD_H, (windowWidth - 32) / CARD_W);
+          return (
+            <View style={styles.exportSection}>
+              <Text style={styles.exportTitle}>Your PLAYY Trump Card is Ready!</Text>
+              <View style={{ alignItems: 'center', marginVertical: 8 }}>
+                {cardSide === 'front' ? (
+                  <TrumpCardFront card={card} scale={scale} />
+                ) : (
+                  <TrumpCardBack card={card} scale={scale} />
+                )}
+              </View>
+
+              <TouchableOpacity
+                style={styles.secondaryShareBtn}
+                onPress={() => {
+                  triggerHaptic('light');
+                  setCardSide(cardSide === 'front' ? 'back' : 'front');
+                }}
+              >
+                <Ionicons name="sync" size={20} color="#4338CA" />
+                <Text style={styles.shareBtnText}>Flip card to {cardSide === 'front' ? 'back' : 'front'}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.primaryPrintBtn} onPress={handlePrint} disabled={isPrinting}>
+                <Ionicons name="print" size={24} color="#451A03" />
+                <View>
+                  <Text style={styles.printBtnTitle}>Print Coloring Page + Card</Text>
+                  <Text style={styles.printBtnSub}>Expo Print &bull; AirPrint / Wi-Fi printer</Text>
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.secondaryShareBtn} onPress={handleShare}>
+                <Ionicons name="share-outline" size={22} color="#4338CA" />
+                <Text style={styles.shareBtnText}>Share PDF</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })()}
       </ScrollView>
 
       {/* Bottom Step Nav */}
@@ -328,7 +392,11 @@ export default function App() {
             style={styles.navBackBtn}
             onPress={() => {
               triggerHaptic('light');
-              setActiveStep(activeStep - 1);
+              if (activeStep === 6 && answers.length > 0) {
+                setAnswers(answers.slice(0, -1));
+              } else {
+                goToStep(activeStep - 1);
+              }
             }}
           >
             <Ionicons name="chevron-back" size={20} color="#475569" />
@@ -336,7 +404,7 @@ export default function App() {
           </TouchableOpacity>
         )}
 
-        {activeStep < 5 && (
+        {activeStep < 6 && (
           <TouchableOpacity
             style={styles.navNextBtn}
             onPress={() => {
@@ -345,7 +413,7 @@ export default function App() {
             }}
           >
             <Text style={styles.navNextText}>
-              {activeStep === 4 ? 'Create My Playy!' : 'Next'}
+              {activeStep === 5 ? 'Start Quiz' : 'Next'}
             </Text>
             <Ionicons name="arrow-forward" size={18} color="#0F172A" />
           </TouchableOpacity>
@@ -451,6 +519,21 @@ const styles = StyleSheet.create({
   modePillTextActive: {
     color: '#FFFFFF',
   },
+  nameInput: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#C7D2FE',
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 22,
+    fontWeight: '800',
+    textAlign: 'center',
+    color: '#0F172A',
+    marginTop: 12,
+  },
+  quizCount: { fontSize: 12, fontWeight: '800', color: '#F59E0B', letterSpacing: 1.5, textAlign: 'center' },
+  quizIcon: { fontSize: 30, marginRight: 12 },
   stepsBar: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
