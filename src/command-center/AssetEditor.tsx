@@ -87,6 +87,15 @@ export const AssetEditor: React.FC<AssetEditorProps> = ({ asset, face, assets, o
   // One character color: the head's main color drives the head, hoodie, trousers and shoes
   // (and the lighter parts derived from it). Editing a body previews with the chosen head's color.
   const characterColor = isHead ? mainHex : normalizeColor(pair?.meta.main) ?? mainHex;
+  // Outfit follows the head color unless this head sets its own; the secondary is auto unless fixed
+  const outfitColor = normalizeColor(isHead ? meta.outfit : pair?.meta.outfit) ?? characterColor;
+  const secondaryColor = normalizeColor(isHead ? meta.secondary : pair?.meta.secondary) ?? undefined;
+  const clearMeta = (key: 'outfit' | 'secondary') =>
+    setMeta((m) => {
+      const next = { ...m };
+      delete next[key];
+      return next;
+    });
   const pairBody = isHead ? pair : draft;
   const neckDefaults =
     pairHead && pairBody
@@ -149,12 +158,38 @@ export const AssetEditor: React.FC<AssetEditorProps> = ({ asset, face, assets, o
         <input value={main} onChange={(e) => setMain(e.target.value)} className={`${field} w-28`} />
         <span className="text-slate-400 text-xs">
           {asset.type === 'head'
-            ? 'Drives the head and the body (hoodie, trousers, shoes) together. Saved as this head\'s default color.'
+            ? 'The head color. The outfit follows it unless you set an outfit color below.'
             : asset.type === 'body'
             ? 'Only for this asset on its own. On a character the color comes from the head.'
             : 'Preview any color to check the shading.'}
         </span>
       </div>
+
+      {isHead && (
+        <div className="rounded-xl border border-slate-700 p-3 space-y-3 text-sm">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="w-32">Outfit color</span>
+            <input type="color" value={outfitColor} onChange={(e) => setMeta({ ...meta, outfit: e.target.value })} className="h-8 w-12 bg-transparent" />
+            <label className="flex items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" checked={!meta.outfit}
+                onChange={(e) => (e.target.checked ? clearMeta('outfit') : setMeta({ ...meta, outfit: mainHex }))} />
+              Same as head color
+            </label>
+            <span className="text-xs text-slate-400">Hoodie, trousers and shoes.</span>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="w-32">Secondary color</span>
+            <input type="color" value={secondaryColor ?? deriveColor(outfitColor, 12)}
+              onChange={(e) => setMeta({ ...meta, secondary: e.target.value })} className="h-8 w-12 bg-transparent" />
+            <label className="flex items-center gap-2 text-xs text-slate-300">
+              <input type="checkbox" checked={!meta.secondary}
+                onChange={(e) => (e.target.checked ? clearMeta('secondary') : setMeta({ ...meta, secondary: deriveColor(outfitColor, 12) }))} />
+              Auto (a lighter shade of the outfit)
+            </label>
+            <span className="text-xs text-slate-400">Trim, soles, cuffs and tassles. Fixed once set.</span>
+          </div>
+        </div>
+      )}
 
       {pairType && (
         <div className="rounded-xl border border-slate-700 p-3 space-y-3">
@@ -182,7 +217,8 @@ export const AssetEditor: React.FC<AssetEditorProps> = ({ asset, face, assets, o
                     <CompositePreview
                       head={pairHead} body={pairBody} face={face} mode={m}
                       headMain={characterColor}
-                      bodyMain={characterColor}
+                      bodyMain={outfitColor}
+                      bodySecondary={secondaryColor}
                       headScale={headScale} className="h-80"
                     />
                   </div>

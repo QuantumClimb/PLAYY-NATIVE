@@ -10,6 +10,8 @@ interface AssetPreviewProps {
   face?: Asset;
   mode: 'color' | 'line';
   main: string;
+  /** Fixed color for derived parts (body trim, soles, cuffs...) */
+  secondary?: string;
   className?: string;
   style?: React.CSSProperties;
   /** Anchor editing: markers are drawn over the asset; click or drag to place the active one */
@@ -20,7 +22,7 @@ interface AssetPreviewProps {
 
 /** Renders an asset (a head also gets the shared face placed on it, as it will on the kiosk). */
 export const AssetPreview: React.FC<AssetPreviewProps> = ({
-  asset, face, mode, main, className = '', style, anchors, activeAnchor, onPlaceAnchor,
+  asset, face, mode, main, secondary, className = '', style, anchors, activeAnchor, onPlaceAnchor,
 }) => {
   const overlayRef = useRef<SVGSVGElement>(null);
   const dragging = useRef(false);
@@ -28,12 +30,12 @@ export const AssetPreview: React.FC<AssetPreviewProps> = ({
     try {
       return {
         vb: parseSvgAsset(asset.svg).viewBox,
-        svg: renderSvgAsset(asset.svg, { main, mode, parts: asset.parts }),
+        svg: renderSvgAsset(asset.svg, { main, secondary, mode, parts: asset.parts }),
       };
     } catch {
       return null;
     }
-  }, [asset.svg, asset.parts, main, mode]);
+  }, [asset.svg, asset.parts, main, secondary, mode]);
 
   const faceLayer = useMemo(() => {
     if (asset.type !== 'head' || !face || !body) return null;

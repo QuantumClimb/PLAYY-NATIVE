@@ -4,8 +4,12 @@ export const ASSET_TYPES = ['head', 'face', 'body', 'symbol', 'background'] as c
 export type AssetType = (typeof ASSET_TYPES)[number];
 
 export interface AssetMeta {
-  /** Default main color for this asset */
+  /** Default main color for this asset (for a head: the head color) */
   main?: string;
+  /** Head only: outfit color (hoodie, trousers, shoes). Follows the head color when unset */
+  outfit?: string;
+  /** Head only: fixed color for the outfit's secondary parts (trim, soles, cuffs). Auto when unset */
+  secondary?: string;
   /** Head only: where the shared face sits on it (scale = face width / head width, offsets in % of head size) */
   faceScale?: number;
   faceDx?: number;

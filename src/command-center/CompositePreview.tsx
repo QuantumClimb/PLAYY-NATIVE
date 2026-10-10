@@ -26,14 +26,17 @@ interface CompositePreviewProps {
   face?: Asset;
   mode: 'color' | 'line';
   headMain: string;
+  /** Outfit color (hoodie, trousers, shoes) */
   bodyMain: string;
+  /** Fixed secondary color for the outfit's lighter parts; auto-derived when absent */
+  bodySecondary?: string;
   headScale: number;
   className?: string;
 }
 
 /** A head on a body: the head's neck anchor is pinned to the body's neck anchor. */
 export const CompositePreview: React.FC<CompositePreviewProps> = ({
-  head, body, face, mode, headMain, bodyMain, headScale, className = '',
+  head, body, face, mode, headMain, bodyMain, bodySecondary, headScale, className = '',
 }) => {
   const layout = useMemo(() => {
     try {
@@ -71,7 +74,7 @@ export const CompositePreview: React.FC<CompositePreviewProps> = ({
 
   return (
     <div className={`relative ${className}`} style={{ aspectRatio: `${layout.W} / ${layout.H}` }}>
-      <AssetPreview asset={body} mode={mode} main={bodyMain} style={layout.bodyBox} />
+      <AssetPreview asset={body} mode={mode} main={bodyMain} secondary={bodySecondary} style={layout.bodyBox} />
       <AssetPreview asset={head} face={face} mode={mode} main={headMain} style={layout.headBox} />
     </div>
   );

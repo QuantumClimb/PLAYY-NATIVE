@@ -30,17 +30,17 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 - SVG parts engine: named layers from Illustrator become parts with modes: main color, derived (HSL lightness offset), fixed, line art. Black-and-white version generated from the same SVG.
 - Anchors (neck, chest) placed by clicking the preview.
 - Head on body preview with a per-head size slider, in color and black-and-white.
-- One character color: the head color drives the head, hoodie, trousers and shoes; lighter parts derive from it.
+- Character colors, set per head: **head color**, **outfit color** (hoodie, trousers, shoes; follows the head color unless set) and a **fixed secondary color** (trim, soles, cuffs, tassles; auto-derived from the outfit unless set). Previewed live on the body.
 
 **Assets loaded:** heads Playy, Sparkyy, Dreamyy; shared face; body pose1.
 
 ## Decisions
 - Local SQLite behind one small module (`server/db.mjs`) so it can move to Neon or Supabase later.
 - The face is a shared asset; its colors are fixed and editable in the command center.
-- Character color is set once (on the head) and applies to the whole character.
+- Each head has a head color, an outfit color (defaults to the head color) and an optional fixed secondary color (defaults to a lighter shade of the outfit). Decided 2026-10-10 so characters like Dreamyy can have a white head with a colored outfit.
 
 ## Next, in order
-1. **Secondary clothing color per character (new requirement).** Example: Dreamyy's secondary color differs from the shared rule. Add a per-character override for the "derived" parts (trim, soles, cuffs, tassles) and probably an outfit color separate from the head color. To decide: is the override a fixed color, or a lightness/hue offset from the character color?
+1. Set the real outfit and secondary colors for Dreamyy (and Playy and Sparkyy if they need them) in the command center.
 2. Place the body neck anchor on pose1, then tune head sizes.
 3. Backgrounds (full 850x1100 scenes, with color and black-and-white versions).
 4. More poses and the symbols (chest anchor).
@@ -51,7 +51,6 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 9. WhatsApp sending when the client provides the API (sender interface so email is the first implementation).
 
 ## Open questions
-- Dreamyy: white cloud head with a colored outfit? (The override in item 1 solves this.)
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?
 - Where the trump card sits relative to the new black-and-white and color results screen.

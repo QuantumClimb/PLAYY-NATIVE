@@ -205,14 +205,17 @@ export function defaultParts(parsed: ParsedAsset): PartsConfig {
 
 export interface RenderOptions {
   main: string;
+  /** Fixed color for every derived part (instead of a lightness shift of main) */
+  secondary?: string | null;
   mode: 'color' | 'line';
   parts: PartsConfig;
 }
 
 /** Returns recolored SVG markup (ids stripped, width/height removed so CSS sizes it). */
-export function renderSvgAsset(svgText: string, { main, mode, parts }: RenderOptions): string {
+export function renderSvgAsset(svgText: string, { main, secondary, mode, parts }: RenderOptions): string {
   const root = parse(svgText);
   const mainHex = normalizeColor(main) ?? '#3b82f6';
+  const secondaryHex = normalizeColor(secondary);
 
   root.querySelectorAll('[id]').forEach((el) => { if (isAnchor(el.id)) el.remove(); });
 
@@ -233,7 +236,7 @@ export function renderSvgAsset(svgText: string, { main, mode, parts }: RenderOpt
       if (!cfg) continue;
       const next =
         cfg.mode === 'main' ? mainHex
-        : cfg.mode === 'derived' ? deriveColor(mainHex, cfg.dL ?? 0)
+        : cfg.mode === 'derived' ? secondaryHex ?? deriveColor(mainHex, cfg.dL ?? 0)
         : cfg.mode === 'fixed' ? normalizeColor(cfg.color) : null;
       if (next) shape.setAttribute('fill', next);
     } else {
