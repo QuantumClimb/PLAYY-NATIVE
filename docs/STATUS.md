@@ -35,7 +35,7 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD`. The database is
 - Scene preview (head, body, symbol and background together) shown as an **A4 sheet**: 5 mm printable margin, background stretched (non-uniform) to fill it, color and black-and-white print preview side by side. The kiosk print page is now A4 portrait with a 5 mm margin.
 - Per-background **stand point** and character height; per-symbol **size on the chest**; chest anchor on bodies.
 
-**Assets loaded:** heads Playy, Sparkyy, Dreamyy; shared face; body pose1; 7 symbols (moon, fire, crown, cloud, paw, zap, heart); Background 01 (test).
+**Assets loaded:** heads Playy, Sparkyy, Dreamyy; shared face; body pose1; 7 symbols (moon, fire, crown, cloud, paw, zap, heart); Backgrounds 01, 02 and 03 (test).
 
 ## Decisions
 - Local SQLite behind one small module (`server/db.mjs`) so it can move to Neon or Supabase later.
