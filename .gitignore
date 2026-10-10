@@ -6,3 +6,9 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# local kiosk database
+data/
+
+# editor lock files
+.~lock.*#

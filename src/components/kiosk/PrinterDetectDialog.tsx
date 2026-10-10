@@ -44,7 +44,7 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({
       const msg = (e as Error).message;
       setError(
         e instanceof SyntaxError || msg === 'Failed to fetch'
-          ? 'Printer helper not running. Start it with: npm run printer-helper'
+          ? 'Printer helper not running. Start it with: npm run server'
           : msg,
       );
     } finally {
