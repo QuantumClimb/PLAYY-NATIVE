@@ -56,7 +56,68 @@ const rectStyle = (r: { x: number; y: number; w: number; h: number }): React.CSS
   height: `${(r.h / SCENE_H) * 100}%`,
 });
 
-const regionLabel = (key: string) => key.replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+const FRIENDLY_REGION_NAMES: Record<string, string> = {
+  hoodie: 'Hoodie',
+  trousers: 'Trousers',
+  shoes: 'Shoes',
+  soles: 'Shoe Soles',
+  gloves: 'Gloves',
+  cuffs: 'Sleeve Cuffs',
+  trim: 'Clothing Trim',
+  tassles: 'Hoodie Strings',
+};
+
+const regionLabel = (key: string) => FRIENDLY_REGION_NAMES[key] ?? key.replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+const DISPLAY_STAGES = [
+  { label: 'FACE', icon: 'face' },
+  { label: 'POSE', icon: 'pose' },
+  { label: 'COLORS', icon: 'palette' },
+  { label: 'YOU', icon: 'heart' },
+  { label: 'POWER', icon: 'star' },
+  { label: 'BACKGROUND', icon: 'landscape' },
+  { label: 'NAME', icon: 'name' },
+  { label: 'PREVIEW', icon: 'printer' },
+] as const;
+
+const displayStageIndex = (step: MachineStep) => {
+  if (step === 'head') return 0;
+  if (step === 'pose') return 1;
+  if (step === 'colors') return 2;
+  if (step === 'quiz') return 3;
+  if (step === 'power') return 4;
+  if (step === 'world') return 5;
+  if (step === 'details') return 6;
+  return 7;
+};
+
+const StageIcon: React.FC<{ type: (typeof DISPLAY_STAGES)[number]['icon'] }> = ({ type }) => {
+  if (type === 'face') return <><circle cx="32" cy="28" r="11" /><circle cx="27" cy="27" r="2" fill="currentColor" stroke="none" /><circle cx="37" cy="27" r="2" fill="currentColor" stroke="none" /><path d="M26 32c3 4 9 4 12 0" /></>;
+  if (type === 'pose') return <><circle cx="32" cy="17" r="4" /><path d="M32 22v14M32 26l-9 7M32 26l9 7M32 36l-7 9M32 36l7 9" /></>;
+  if (type === 'palette') return <><path d="M32 14c-11 0-19 7-19 16 0 8 6 13 13 13h4c2 0 3-2 2-4-1-2 0-4 3-4h4c7 0 12-5 12-11 0-6-8-10-19-10Z" /><circle cx="22" cy="26" r="2" fill="currentColor" stroke="none" /><circle cx="29" cy="21" r="2" fill="currentColor" stroke="none" /><circle cx="38" cy="21" r="2" fill="currentColor" stroke="none" /><path d="m45 14 6-6" /></>;
+  if (type === 'heart') return <path d="M32 43S15 33 15 23c0-5 4-8 8-8 4 0 7 3 9 6 2-3 5-6 9-6 4 0 8 3 8 8 0 10-17 20-17 20Z" fill="currentColor" stroke="none" />;
+  if (type === 'star') return <path d="m32 13 5.5 11 12 1.8-8.7 8.5 2 12-10.8-5.7-10.8 5.7 2-12-8.7-8.5 12-1.8Z" fill="currentColor" stroke="none" />;
+  if (type === 'landscape') return <><path d="M15 43 27 29l6 7 6-8 10 15Z" fill="currentColor" stroke="none" /><circle cx="43" cy="20" r="4" fill="currentColor" stroke="none" /></>;
+  if (type === 'name') return <><path d="M17 19h30M17 29h30M17 39h21" /><path d="M23 12v34" /></>;
+  return <><rect x="17" y="18" width="30" height="22" rx="2" /><path d="M22 18v-6h20v6M23 40v6h18v-6M22 33h20" /><circle cx="41" cy="23" r="2" fill="currentColor" stroke="none" /></>;
+};
+
+const StageIndicator: React.FC<{ currentStep: MachineStep }> = ({ currentStep }) => {
+  const active = displayStageIndex(currentStep);
+  return (
+    <div className="stage-indicator" aria-label={`Progress: ${DISPLAY_STAGES[active].label}`}>
+      <div className="stage-indicator-line" aria-hidden="true" />
+      {DISPLAY_STAGES.map((stage, index) => (
+        <div className={`stage-item ${index === active ? 'is-active' : ''}`} key={stage.label}>
+          <div className="stage-badge">
+            <svg viewBox="0 0 64 64" aria-hidden="true"><StageIcon type={stage.icon} /></svg>
+          </div>
+          <span>{index + 1}. {stage.label}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const CMS_SCENE_BY_STEP: Record<MachineStep, SceneId> = {
   head: 'head',
@@ -81,7 +142,8 @@ const CharacterStagePreview: React.FC<{
 }> = ({ selection, config, mode = 'color', headOnly = false, showSymbol = false, showBackground = false }) => {
   if (headOnly) {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-white rounded-2xl p-8">
+      <div className="head-preview-inner w-full h-full flex items-center justify-center bg-white rounded-2xl p-8">
+        <div className="head-preview-shadow" aria-hidden="true" />
         <AssetArt
           asset={selection.head}
           face={selection.face}
@@ -189,12 +251,13 @@ const ChoiceCard: React.FC<{
   <button
     type="button"
     onClick={onClick}
-    className={`${selectionCard ? 'group flex h-full min-h-[238px] w-full flex-col items-center p-3 text-left focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-300/80' : 'flex flex-col items-center justify-between gap-2 p-3'} rounded-[28px] border-[5px] transition-all cursor-pointer ${
+    className={`${selectionCard ? 'group relative flex h-full min-h-[238px] w-full flex-col items-center p-3 text-left focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-300/80' : 'flex flex-col items-center justify-between gap-2 p-3'} rounded-[28px] border-[5px] transition-all cursor-pointer ${
       selected
         ? 'bg-gradient-to-b from-indigo-700 to-indigo-900 text-white border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.6)]'
         : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-slate-700'
     } ${!selectionCard && selected ? 'scale-[1.03]' : ''}`}
   >
+    {selectionCard && selected && <span className="head-selected-check" aria-label="Selected">✓</span>}
     {selectionCard ? (
       <div className="flex h-44 min-h-0 w-full items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-3 sm:h-52">
         <div className="flex h-full w-full min-h-0 items-center justify-center">{children}</div>
@@ -225,6 +288,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   const [detailsError, setDetailsError] = useState('');
   const [idleSeconds, setIdleSeconds] = useState(45);
   const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
+  const [activeColorRegion, setActiveColorRegion] = useState('body');
 
   const stepIndex = STEPS_LIST.indexOf(currentStep);
 
@@ -404,6 +468,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   const handleColorChange = (region: string, color: string) => {
     resetIdleTimer();
     nativeFeedback.selection();
+    setActiveColorRegion(region);
     if (region === 'body') {
       onChangeConfig({
         ...config,
@@ -453,7 +518,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       : currentStep === 'details'
       ? 'YOUR DETAILS'
       : currentStep === 'preview'
-      ? 'COLORING PAGE PREVIEW'
+      ? 'YOUR COLORING PAGE!'
       : currentStep === 'card'
       ? 'TRUMP CARD'
       : 'PRINT & COMPLETE';
@@ -465,15 +530,15 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   return (
     <div
       onClick={resetIdleTimer}
-      className="w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden"
+      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' ? 'head-selection-page' : currentStep === 'pose' ? 'pose-selection-page' : currentStep === 'colors' ? 'colors-selection-page' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : currentStep === 'world' ? 'world-selection-page' : ''}`}
     >
       {/* Dynamic CMS Scene Background */}
       <SceneBackground sceneId={CMS_SCENE_BY_STEP[currentStep]} />
       {/* LEFT: the live preview, as tall as the screen allows (an A4 page) */}
       {!isReview && currentStep !== 'complete' && (
-        <div className="lg:w-[46%] h-[42vh] lg:h-full min-h-0 shrink-0 flex items-center justify-center">
+        <div className="head-preview-column lg:w-[46%] h-[42vh] lg:h-full min-h-0 shrink-0 flex items-center justify-center">
           <div
-            className="relative h-full max-w-full bg-white rounded-[30px] border-[6px] border-amber-300/90 shadow-[0_25px_80px_rgba(0,0,0,0.7)] overflow-hidden"
+            className="head-preview-panel relative h-full max-w-full bg-white rounded-[30px] border-[6px] border-amber-300/90 shadow-[0_25px_80px_rgba(0,0,0,0.7)] overflow-hidden"
             style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}
           >
             <CharacterStagePreview
@@ -491,36 +556,28 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       )}
 
       {/* RIGHT: progress, the one big question, the choices, and navigation */}
-      <div className="flex-1 min-w-0 min-h-0 flex flex-col">
-      <div className="w-full flex items-center justify-between gap-3 px-1 shrink-0 z-20">
-        <img src="/assets/logo.png" alt="PLAYYS" draggable={false} className="h-12 sm:h-14 w-auto object-contain" />
+      <div className="head-content flex-1 min-w-0 min-h-0 flex flex-col">
+      <div className="head-header w-full flex items-center justify-between gap-3 px-1 shrink-0 z-20">
+        <img src="/assets/logo.png" alt="PLAYYS" draggable={false} className="head-page-logo h-12 sm:h-14 w-auto object-contain" />
 
-        {/* Minimal Stepper dots */}
-        <div className="flex items-center gap-2 sm:gap-3">
-          {STEPS_LIST.map((step, idx) => (
-            <React.Fragment key={step}>
-              <div
-                className={`w-3.5 h-3.5 rounded-full transition-all duration-300 ${
-                  idx === stepIndex
-                    ? 'bg-amber-400 scale-125 shadow-[0_0_12px_#FBBF24]'
-                    : idx < stepIndex
-                    ? 'bg-emerald-400'
-                    : 'bg-slate-800'
-                }`}
-              />
-              {idx < STEPS_LIST.length - 1 && (
-                <div
-                  className={`w-4 sm:w-6 h-1 rounded-full ${
-                    idx < stepIndex ? 'bg-emerald-500/80' : 'bg-slate-800'
-                  }`}
-                />
-              )}
-            </React.Fragment>
-          ))}
-        </div>
+        <StageIndicator currentStep={currentStep} />
 
-        {/* Surprise me mini toy button */}
-        {!['details', 'quiz', 'power', 'preview', 'card', 'complete'].includes(currentStep) ? (
+        {/* Keep the questionnaire's Surprise Me control in its normal slot, with progress beneath it. */}
+        {currentStep === 'quiz' ? (
+          <div className="quiz-header-actions">
+            <button
+              type="button"
+              onClick={handleStepSurprise}
+              className="btn-3d btn-3d-amber btn-3d-sm flex items-center gap-1.5 px-4 py-2 text-xs font-bold whitespace-nowrap shrink-0"
+            >
+              <span>✨</span>
+              <span className="hidden sm:inline">SURPRISE ME</span>
+            </button>
+            <div className="quiz-inline-meta quiz-header-counter" aria-label={`Question ${powerQuestionIdx + 1} of ${powerQuestions.length}`}>
+              <div>QUESTION {powerQuestionIdx + 1} OF {powerQuestions.length}</div>
+            </div>
+          </div>
+        ) : !['power'].includes(currentStep) ? (
           <button
             type="button"
             onClick={handleStepSurprise}
@@ -535,16 +592,33 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       </div>
 
       {/* 2. Top Title: ONE BIG QUESTION */}
-      <div className="w-full text-center py-2 shrink-0 z-20">
-        <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">
-          {questionTitle}
-        </h1>
+      <div className="head-title w-full text-center py-2 shrink-0 z-20">
+        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world') && <>
+          <span className="head-title-star head-title-star-left" aria-hidden="true">★</span>
+          <span className="head-title-star head-title-star-right" aria-hidden="true">★</span>
+          <span className="head-title-star head-title-star-bottom-left" aria-hidden="true">✦</span>
+          <span className="head-title-star head-title-star-bottom-right" aria-hidden="true">✦</span>
+        </>}
+        {currentStep === 'quiz' ? (
+          <h1 className="head-arched-heading quiz-question-heading" aria-label={questionTitle}>{questionTitle}</h1>
+        ) : currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' ? (
+          <h1 className="head-arched-heading" aria-label={currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : questionTitle}>
+            {(currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : 'CHOOSE YOUR BACKGROUND').split('').map((letter, index) => (
+              letter === ' '
+                ? <span className="head-heading-space" key={`space-${index}`} aria-hidden="true" />
+                : <span key={`${letter}-${index}`}>{letter}</span>
+            ))}
+          </h1>
+        ) : (
+          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">{questionTitle}</h1>
+        )}
+        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'card') && <p className="head-subtitle">{currentStep === 'head' ? 'Pick a face for your Playy!' : currentStep === 'pose' ? 'Pick a pose for your Playy!' : currentStep === 'colors' ? 'Make your Playy colourful!' : currentStep === 'world' ? 'Pick a world for your Playyy!' : currentStep === 'card' ? 'A special card just for you!' : (powerQuestions[powerQuestionIdx]?.subtitle || 'Choose the answer that feels most like you!')}</p>}
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto py-2 z-10">
+      <div className={`flex-1 min-h-0 overflow-y-auto py-2 z-10 ${currentStep === 'colors' ? 'colors-scroll-area' : ''}`}>
           {/* STEP 1: CHOOSE YOUR HEAD */}
           {currentStep === 'head' && (
-            <div className="grid grid-cols-2 items-stretch gap-4 p-2 min-h-full content-center xl:grid-cols-3">
+            <div className="head-options grid grid-cols-2 items-stretch gap-4 p-2 min-h-full content-center xl:grid-cols-3">
               {lib.heads.map((h) => (
                 <ChoiceCard key={h.id} selected={sel.head.slug === h.slug} onClick={() => handleSelectHead(h.slug)} label={h.name} selectionCard>
                   <AssetArt asset={h} face={lib.face} mode="color" main={normalizeColor(h.meta.main) ?? '#3b82f6'} className="h-full w-auto max-w-full" />
@@ -555,7 +629,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 2: CHOOSE YOUR POSE */}
           {currentStep === 'pose' && (
-            <div className="grid grid-cols-2 items-stretch gap-4 p-2 min-h-full content-center xl:grid-cols-3">
+            <div className="pose-options grid grid-cols-2 items-stretch gap-4 p-2 min-h-full content-center xl:grid-cols-3">
               {lib.bodies.map((b) => (
                 <ChoiceCard key={b.id} selected={sel.body.slug === b.slug} onClick={() => handleSelectPose(b.slug)} label={b.name} selectionCard>
                   <PoseCardPreview selection={sel} body={b} config={config} />
@@ -566,7 +640,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 3: CHOOSE YOUR COLORS */}
           {currentStep === 'colors' && (
-            <div className="flex flex-col gap-4 p-2 min-h-full justify-center">
+            <div className="colors-options flex flex-col gap-4 p-2 min-h-full justify-center">
               <div className="rounded-[28px] border-4 border-indigo-800/70 bg-slate-950/85 p-5 shadow-xl">
                 <div className="mb-4 text-center">
                   <h2 className="text-2xl font-black text-amber-300">Color Your Playy</h2>
@@ -578,7 +652,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                     label: regionLabel(key),
                     value: config.colors?.clothing?.[key] ?? '',
                   }))].map((region) => (
-                    <div key={region.key} className="rounded-2xl border border-slate-800 bg-slate-900/80 p-3">
+                    <div key={region.key} className={`color-region rounded-2xl border border-slate-800 bg-slate-900/80 p-3 ${activeColorRegion === region.key ? 'is-active' : ''}`}>
                       <div className="mb-2 flex items-center justify-between gap-3">
                         <span className="text-sm font-black uppercase tracking-wide text-white">{region.label}</span>
                         <span className="font-mono text-xs font-bold uppercase text-slate-400">{region.value || 'AUTO'}</span>
@@ -617,18 +691,8 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             <div className="flex flex-col gap-4 p-2 min-h-full justify-center">
               {powerQuizAnswers.length < powerQuestions.length ? (
                 <>
-                  {/* Progress Subtitle */}
-                  <div className="text-center mb-1">
-                    <div className="text-xs font-black text-amber-300 tracking-widest uppercase">
-                      QUESTION {powerQuestionIdx + 1} OF {powerQuestions.length}
-                    </div>
-                    <div className="text-slate-300 text-sm mt-0.5">
-                      {powerQuestions[powerQuestionIdx]?.subtitle || 'Choose one answer'}
-                    </div>
-                  </div>
-
                   {/* 4 Choices Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="quiz-options grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {powerQuestions[powerQuestionIdx]?.options.map((opt, i) => (
                       <button
                         key={opt.id || i}
@@ -686,7 +750,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 5: POWER AWARD */}
           {currentStep === 'power' && (
-            <div className="flex min-h-full flex-col items-center justify-center gap-5 p-4 text-center">
+            <div className="power-award-layout flex min-h-full items-center justify-center p-3">
               {(() => {
                 const symbolInfo = SYMBOL_MAP[config.symbol] || {
                   name: 'Power Symbol',
@@ -694,16 +758,35 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                   icon: '✨',
                 };
                 return (
-                  <div className="w-full max-w-xl rounded-[32px] border-4 border-amber-400 bg-slate-900/95 p-6 shadow-2xl">
-                    <div className="mb-2 text-6xl animate-bounce">{symbolInfo.icon}</div>
-                    <div className="text-xs font-black uppercase tracking-widest text-amber-300">POWER AWARDED</div>
-                    <h2 className="mt-2 text-3xl font-black uppercase text-white sm:text-4xl">{symbolInfo.name}</h2>
-                    <p className="mt-2 text-base font-bold text-teal-300">{symbolInfo.attribute}</p>
-                    <p className="mt-4 text-sm font-medium italic text-slate-200">Your completed character now carries this power symbol.</p>
-                    <div className="mx-auto mt-5 h-36 w-32 rounded-3xl border-2 border-amber-300 bg-white p-2">
-                      <CharacterStagePreview selection={sel} config={config} showSymbol />
+                  <section className="power-award-panel" aria-labelledby="power-awarded-title">
+                    <div className="power-award-ribbon">
+                      <span id="power-awarded-title">POWER AWARDED!</span>
+                      <i aria-hidden="true">â˜…</i>
+                      <b aria-hidden="true">â˜…</b>
                     </div>
-                  </div>
+                    <div className="power-award-main">
+                      <div className="power-symbol-display" aria-label={symbolInfo.name}>
+                        <div className="power-symbol-glow" aria-hidden="true" />
+                        {sel.symbol ? (
+                          <AssetArt asset={sel.symbol} mode="color" main={sel.headMain} className="power-symbol-art" />
+                        ) : (
+                          <span className="power-symbol-fallback">{symbolInfo.icon}</span>
+                        )}
+                      </div>
+                      <div className="power-award-copy">
+                        <span className="power-award-label">YOUR POWER</span>
+                        <h2>{symbolInfo.name}</h2>
+                        <p className="power-award-attribute">{symbolInfo.attribute}</p>
+                        <p className="power-award-description">Your Playy now carries this power symbol on all your creations!</p>
+                      </div>
+                    </div>
+                    <div className="power-award-strip">
+                      <div className="power-award-thumb" aria-hidden="true">
+                        <AssetArt asset={sel.head} face={sel.face} mode="color" main={sel.headMain} />
+                      </div>
+                      <span>Your Playy carries this special power wherever your imagination takes you!</span>
+                    </div>
+                  </section>
                 );
               })()}
             </div>
@@ -711,9 +794,9 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 6: CHOOSE YOUR BACKGROUND */}
           {currentStep === 'world' && (
-            <div className="grid grid-cols-2 xl:grid-cols-3 gap-4 p-2 min-h-full content-center">
+            <div className="world-options grid grid-cols-2 xl:grid-cols-3 gap-4 p-2 min-h-full content-center">
               {lib.backgrounds.map((bg) => (
-                <ChoiceCard key={bg.id} selected={sel.background.slug === bg.slug} onClick={() => handleSelectBackground(bg.slug)} label={bg.name}>
+                <ChoiceCard key={bg.id} selected={sel.background.slug === bg.slug} onClick={() => handleSelectBackground(bg.slug)} label={bg.name} selectionCard>
                   <AssetArt asset={bg} mode="color" main={sel.headMain} className="h-full max-w-full rounded-xl overflow-hidden" />
                 </ChoiceCard>
               ))}
@@ -722,22 +805,22 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 7: YOUR DETAILS */}
           {currentStep === 'details' && (
-            <div className="flex flex-col items-center justify-center p-2 space-y-4">
+              <div className="details-form flex flex-col items-center justify-center p-2 space-y-4">
               <div className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Your Details · Step {detailsStep} of 3</div>
-              <div className="grid w-full max-w-2xl grid-cols-3 gap-2">
+              <div className="details-fields grid w-full max-w-2xl grid-cols-3 gap-2">
                 {([['name', 'Your Name'], ['phone', 'Your Phone Number'], ['email', 'Your Email']] as const).map(([field, label]) => (
-                  <button key={field} type="button" onClick={() => { setActiveDetailField(field); setDetailsStep(field === 'name' ? 1 : field === 'phone' ? 2 : 3); setDetailsError(''); }} className={`rounded-xl border-2 p-2 text-left ${activeDetailField === field ? 'border-amber-300 bg-amber-400/20' : 'border-slate-700 bg-slate-900/80'}`}>
+                  <button key={field} type="button" onClick={() => { setActiveDetailField(field); setDetailsStep(field === 'name' ? 1 : field === 'phone' ? 2 : 3); setDetailsError(''); }} className={`details-field rounded-xl border-2 p-2 text-left ${activeDetailField === field ? 'is-active' : ''}`}>
                     <span className="block text-[10px] font-black uppercase text-sky-200">{label}</span>
                     <span className="mt-1 block min-h-6 truncate text-sm font-bold text-white">{detailValue(field) || 'Tap to enter'}</span>
                   </button>
                 ))}
               </div>
               {activeDetailField === 'phone' ? (
-                <div className="grid w-full max-w-2xl grid-cols-4 gap-2 rounded-2xl border-2 border-sky-800/70 bg-slate-900/90 p-3">
+                <div className="details-keyboard phone-keyboard grid w-full max-w-2xl grid-cols-4 gap-2 rounded-2xl border-2 border-sky-800/70 bg-slate-900/90 p-3">
                   {['1','2','3','4','5','6','7','8','9','+','0','BACKSPACE'].map((key) => <button key={key} type="button" onClick={() => handleDetailKey(key)} className="min-h-12 rounded-xl bg-slate-800 text-lg font-black text-white active:bg-amber-400 active:text-slate-950">{key === 'BACKSPACE' ? '⌫' : key}</button>)}
                 </div>
               ) : (
-                <div className="w-full max-w-2xl rounded-2xl border-2 border-sky-800/70 bg-slate-900/90 p-3">
+                <div className={`details-keyboard w-full max-w-2xl rounded-2xl border-2 border-sky-800/70 bg-slate-900/90 p-3 ${activeDetailField === 'email' ? 'email-keyboard' : ''}`}>
                   <div className="grid grid-cols-10 gap-1.5">
                     {(activeDetailField === 'email' ? [...'1234567890', ...'QWERTYUIOP', ...'ASDFGHJKL', ...'ZXCVBNM'] : KEYBOARD_LETTERS.flat()).map((key, index) => <button key={`${key}-${index}`} type="button" onClick={() => handleDetailKey(key)} className="min-h-10 rounded-lg bg-slate-800 text-base font-black text-white active:bg-amber-400 active:text-slate-950">{activeDetailField === 'name' && !nameShift ? key.toLowerCase() : key}</button>)}
                   </div>
@@ -747,6 +830,10 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                   <button type="button" onClick={() => handleDetailKey('BACKSPACE')} className="mt-2 min-h-11 w-full rounded-xl bg-rose-900 text-lg font-black text-white">⌫ BACKSPACE</button>
                 </div>
               )}
+              <div className="details-actions flex w-full max-w-2xl gap-3">
+                <button type="button" onClick={() => handleDetailKey('BACKSPACE')} className="details-action-backspace">⌫</button>
+                <button type="button" onClick={goNext} className="details-action-done">DONE ✓</button>
+              </div>
               {detailsError && <div className="text-center text-sm font-bold text-rose-300">{detailsError}</div>}
               {/* Legacy name keyboard is intentionally replaced by the field-aware touchscreen keyboard above. */}
               {false && <>
@@ -807,11 +894,11 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               </button>
               </>}
 
-              {detailsStep === 2 && <div className="w-full max-w-lg rounded-2xl border-2 border-sky-800/70 bg-slate-900/80 p-5">
+              {detailsStep === 2 && <div className="details-native-field details-phone-field w-full max-w-lg rounded-2xl border-2 border-sky-800/70 bg-slate-900/80 p-5">
                 <label htmlFor="phone" className="block text-sm font-black uppercase tracking-wide text-sky-200">Phone Number</label>
                 <input id="phone" type="tel" inputMode="tel" value={config.phone || ''} onChange={(event) => handlePhone(event.target.value)} placeholder="Enter phone number" className="mt-3 w-full rounded-xl border-2 border-slate-700 bg-slate-800 px-4 py-3 text-base font-bold text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" />
               </div>}
-              {detailsStep === 3 && <div className="w-full max-w-lg rounded-2xl border-2 border-sky-800/70 bg-slate-900/80 p-5">
+              {detailsStep === 3 && <div className="details-native-field details-email-field w-full max-w-lg rounded-2xl border-2 border-sky-800/70 bg-slate-900/80 p-5">
                 <label htmlFor="email" className="block text-sm font-black uppercase tracking-wide text-sky-200">Email</label>
                 <input id="email" type="email" inputMode="email" value={config.email || ''} onChange={(event) => handleEmail(event.target.value)} placeholder="Enter email address" className="mt-3 w-full rounded-xl border-2 border-slate-700 bg-slate-800 px-4 py-3 text-base font-bold text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" />
               </div>}
@@ -820,13 +907,13 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 9: COLORING PAGE PREVIEW */}
           {currentStep === 'preview' && (
-            <div className="grid min-h-full grid-cols-1 gap-4 p-2 lg:grid-cols-2">
+            <div className="preview-panels grid h-full min-h-0 grid-cols-1 gap-4 p-2 lg:grid-cols-[3fr_2fr]">
               {[
                 { label: 'BLACK & WHITE', mode: 'line' as const, border: 'border-slate-300' },
                 { label: 'FULL COLOR', mode: 'color' as const, border: 'border-amber-300' },
               ].map((preview) => (
-                <div key={preview.label} className={`flex min-h-[360px] flex-col rounded-[28px] border-4 ${preview.border} bg-white p-3 shadow-xl`}>
-                  <div className="mb-2 text-center text-xs font-black tracking-widest text-slate-700">{preview.label}</div>
+                <div key={preview.label} className={`preview-panel preview-panel-${preview.mode} flex min-h-[360px] flex-col rounded-[28px] border-4 ${preview.border} bg-white p-3 shadow-xl`}>
+                  <div className="preview-panel-label mb-2 text-center text-xs font-black tracking-widest text-slate-700">{preview.mode === 'line' ? '✏️ YOUR COLORING PAGE' : '🎨 FULL COLOUR PREVIEW'}</div>
                   <div className="min-h-0 flex-1">
                     <PlayyScene config={config} mode={preview.mode} className="h-full w-full" />
                   </div>
@@ -839,7 +926,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           {currentStep === 'card' && card && (() => {
             const scale = Math.min(1, (window.innerHeight * 0.52) / CARD_H, (window.innerWidth - 48) / CARD_W);
             return (
-              <div className="flex flex-col lg:flex-row items-center justify-center gap-8 p-2">
+              <div className="card-review-layout flex flex-col lg:flex-row items-center justify-center gap-8 p-2">
                 <div className="flex flex-col items-center gap-3">
                   {cardSide === 'front' ? (
                     <TrumpCardFront card={card} scale={scale} />
@@ -899,7 +986,9 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 11: PRINT & COMPLETE (printing behavior intentionally unchanged for Phase 1) */}
           {currentStep === 'complete' && (
-            <div className="flex min-h-full flex-col items-center justify-center gap-5 p-4 text-center">
+            <div className="complete-page flex min-h-full flex-col items-end justify-center gap-5 p-4 text-right">
+              <h2 className="complete-page-heading">PRINT &amp;<br />COMPLETE</h2>
+              <img className="complete-mascot" src="/assets/generated/print-mascot.png" alt="Playyy holding the completed coloring page" />
               <div className="w-full max-w-xl rounded-[32px] border-4 border-emerald-400 bg-slate-900/95 p-6 shadow-2xl">
                 <div className="text-5xl">✨</div>
                 <h2 className="mt-2 text-3xl font-black uppercase text-white">Ready to Print &amp; Complete</h2>
@@ -921,8 +1010,9 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                   onClick={() => setCurrentStep('card')}
                   className="btn-3d btn-3d-blue mt-4 w-full py-3 px-6 font-bold text-base"
                 >
-                  BACK TO TRUMP CARD
+                  EDIT MY PLAYYY
                 </button>
+                <button type="button" onClick={() => { nativeFeedback.notificationSuccess(); onAutoReset(); }} className="complete-finish btn-3d mt-4 w-full py-3 px-6 font-bold text-base">→ FINISH</button>
               </div>
             </div>
           )}
@@ -930,11 +1020,11 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
       {/* 4. Bottom Navigation: BACK on left, ONE DOMINANT NEXT ON RIGHT */}
       {!['card', 'complete'].includes(currentStep) && (
-        <div className="w-full flex items-center justify-between px-2 pt-2 shrink-0 z-20">
+        <div className={`machine-navigation w-full flex items-center justify-between px-2 pt-2 shrink-0 z-20 ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'world' ? 'head-navigation' : ''}`}>
           <button
             type="button"
             onClick={goBack}
-            className="btn-3d btn-3d-blue py-4 px-8 font-bold text-lg"
+            className={`btn-3d btn-3d-blue py-4 px-8 font-bold text-lg ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'world' ? 'head-nav-button' : ''}`}
           >
             ← BACK
           </button>
@@ -943,7 +1033,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <button
             type="button"
             onClick={goNext}
-            className="btn-3d py-5 px-10 font-bold text-xl sm:text-2xl flex items-center gap-3"
+            className={`btn-3d py-5 px-10 font-bold text-xl sm:text-2xl flex items-center gap-3 ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'world' ? 'head-nav-button head-nav-next' : ''}`}
           >
             <span>NEXT</span>
             <span>→</span>

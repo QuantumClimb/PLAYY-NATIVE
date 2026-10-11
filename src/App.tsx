@@ -89,7 +89,7 @@ export default function App() {
 
         {/* Inner pages share the footer; the start page has none */}
         {phase !== 'idle' && (
-          <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+          <div className="kiosk-create-shell flex-1 min-h-0 flex flex-col overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
               {/* PHASE 2: ONE SCREEN = ONE DECISION CREATION MACHINE
                   HEAD -> BODY -> POWER -> WORLD -> NAME -> REVIEW */}
@@ -117,7 +117,7 @@ export default function App() {
               src="/assets/footer.png"
               alt=""
               draggable={false}
-              className="w-full h-auto max-h-20 object-contain shrink-0 bg-slate-950"
+              className="kiosk-footer w-full h-auto max-h-20 object-contain shrink-0 bg-slate-950"
             />
           </div>
         )}

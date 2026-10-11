@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, Cloud, Flower2, Printer } from 'lucide-react';
+import { Star, Palette, Gamepad2, Printer, Play } from 'lucide-react';
 import { SceneBackground } from '../backgrounds/SceneBackground';
 import { useSceneBackgrounds } from '../../lib/backgrounds/context';
 import {
@@ -95,14 +95,14 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({
         return 'top-8 sm:top-12 right-6 sm:right-12 lg:right-16';
       case 'right-center':
       default:
-        return 'right-6 sm:right-12 lg:right-20 top-1/2 -translate-y-1/2';
+        return 'right-3 sm:right-8 lg:right-16 top-[37%] -translate-y-1/2';
     }
   };
 
   return (
     <div
       onClick={onStart}
-      className="w-full h-full min-h-screen bg-slate-950 text-white flex flex-col items-center justify-between select-none relative overflow-hidden cursor-pointer"
+      className="playys-intro-screen w-full h-full min-h-screen bg-slate-950 text-white flex flex-col items-center justify-between select-none relative overflow-hidden cursor-pointer"
     >
       {/* 1. Dynamic CMS Scene Background (Image or Video) */}
       <SceneBackground sceneId="intro" />
@@ -113,13 +113,17 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({
         onMouseUp={handleLogoTouchEnd}
         onTouchStart={handleLogoTouchStart}
         onTouchEnd={handleLogoTouchEnd}
-        className="absolute left-1/2 top-4 z-20 max-w-[calc(100vw-2rem)] -translate-x-1/2 cursor-pointer select-none drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)] transition-transform hover:scale-105 sm:top-6 md:top-8"
+        className="absolute inset-x-0 top-3 z-20 flex justify-center select-none drop-shadow-[0_10px_25px_rgba(0,0,0,0.8)] sm:top-5 md:top-6"
       >
+        <div className="intro-wood-sign intro-top-sign cursor-pointer transition-transform hover:scale-105" aria-hidden="true">
+          <span>Let’s Make</span>
+          <strong>Something Awesome!</strong>
+        </div>
         <img
           src="/assets/logo.png"
           alt="PLAYYS"
           draggable={false}
-          className="h-16 w-auto max-w-full object-contain sm:h-24 md:h-28"
+          className="intro-logo absolute left-4 top-0 h-16 w-auto max-w-[13rem] cursor-pointer object-contain sm:left-7 sm:h-20 md:left-8 md:h-24"
         />
       </div>
 
@@ -134,41 +138,41 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({
           {/* Interactive Feature Badges Row */}
           <div className="flex flex-wrap sm:flex-nowrap items-center justify-center gap-3 sm:gap-5">
             {/* Choose Badge */}
-            <div className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-white shadow-lg border-2 border-slate-100 min-w-[78px] sm:min-w-[104px]">
+            <div className="intro-shortcut intro-shortcut-yellow">
               <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-500 mb-1.5">
-                <Star className="w-7 h-7 sm:w-9 sm:h-9 fill-amber-400 stroke-amber-500" />
+                <Star className="w-7 h-7 sm:w-9 sm:h-9 fill-current" />
               </div>
-              <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">
+              <span className="intro-shortcut-label">
                 Choose
               </span>
             </div>
 
             {/* Color Badge */}
-            <div className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-white shadow-lg border-2 border-slate-100 min-w-[78px] sm:min-w-[104px]">
+            <div className="intro-shortcut intro-shortcut-blue">
               <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-cyan-100 flex items-center justify-center text-cyan-500 mb-1.5">
-                <Cloud className="w-7 h-7 sm:w-9 sm:h-9 fill-cyan-400 stroke-cyan-500" />
+                <Palette className="w-7 h-7 sm:w-9 sm:h-9 fill-current" />
               </div>
-              <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">
+              <span className="intro-shortcut-label">
                 Color
               </span>
             </div>
 
             {/* Play Badge */}
-            <div className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-white shadow-lg border-2 border-slate-100 min-w-[78px] sm:min-w-[104px]">
+            <div className="intro-shortcut intro-shortcut-purple">
               <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-500 mb-1.5">
-                <Flower2 className="w-7 h-7 sm:w-9 sm:h-9 fill-purple-400 stroke-purple-500" />
+                <Gamepad2 className="w-7 h-7 sm:w-9 sm:h-9 fill-current" />
               </div>
-              <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">
+              <span className="intro-shortcut-label">
                 Play
               </span>
             </div>
 
             {/* Print Badge */}
-            <div className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-white shadow-lg border-2 border-slate-100 min-w-[78px] sm:min-w-[104px]">
+            <div className="intro-shortcut intro-shortcut-mint">
               <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-sky-100 flex items-center justify-center text-sky-500 mb-1.5">
-                <Printer className="w-7 h-7 sm:w-9 sm:h-9 fill-sky-400 stroke-sky-500" />
+                <Printer className="w-7 h-7 sm:w-9 sm:h-9 fill-current" />
               </div>
-              <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">
+              <span className="intro-shortcut-label">
                 Print
               </span>
             </div>
@@ -178,7 +182,7 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({
 
       {/* 3. CMS Controlled Start Button Container */}
       <div
-        className={`absolute z-20 pointer-events-auto transition-all duration-300 ${
+        className={`absolute z-20 pointer-events-auto transition-all duration-300 intro-controls intro-controls-group ${
           badgePlacement === 'below-start-button'
             ? `${getStartButtonPlacementClass(startButtonPlacement)} flex w-[min(100vw-2rem,40rem)] max-w-full flex-col items-center`
             : getStartButtonPlacementClass(startButtonPlacement)
@@ -188,19 +192,25 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({
           onStart();
         }}
       >
+        <div className="intro-wood-sign intro-group-sign cursor-pointer transition-transform hover:scale-105" aria-hidden="true">
+          <span>Let&apos;s Make</span>
+          <strong>Something Awesome!</strong>
+        </div>
         <button
           type="button"
           onClick={onStart}
-          className={`btn-3d group w-full max-w-full cursor-pointer bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-yellow-300 hover:to-amber-400 border-4 border-yellow-200 text-slate-950 font-black ${buttonSizeClass} rounded-full shadow-[0_18px_35px_rgba(245,158,11,0.38)] flex items-center justify-center gap-3 sm:gap-5 active:scale-95 transition-all select-none ${floatClass}`}
+          className={`intro-start-button btn-3d btn-3d-amber group w-full max-w-full cursor-pointer text-slate-950 font-black ${buttonSizeClass} rounded-[2rem] active:scale-[.98] transition-all select-none ${floatClass}`}
         >
-          <div className={`${iconSizeClass} rounded-full bg-white flex items-center justify-center text-amber-500 shadow-md shrink-0`}>
-            <span className="text-xl sm:text-2xl lg:text-3xl ml-0.5 sm:ml-1">▶</span>
-          </div>
-          <span
-            className="font-extrabold tracking-tight drop-shadow-sm whitespace-nowrap"
-            style={{ fontFamily: "'Fredoka', sans-serif" }}
-          >
-            Tap to Start!
+          <span className="intro-start-content">
+            <span className={`${iconSizeClass} intro-start-icon rounded-full bg-white flex items-center justify-center text-orange-500 shadow-md shrink-0`}>
+              <Play className="w-1/2 h-1/2 fill-current" />
+            </span>
+            <span
+              className="font-extrabold tracking-tight drop-shadow-sm whitespace-nowrap"
+              style={{ fontFamily: "'Fredoka', sans-serif" }}
+            >
+              Tap to Start
+            </span>
           </span>
         </button>
 
@@ -210,29 +220,29 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({
             onClick={(e) => e.stopPropagation()}
           >
             {/* Existing badges, kept in their original order and appearance. */}
-            <div className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-white shadow-lg border-2 border-slate-100 min-w-[78px] sm:min-w-[104px]">
+            <div className="intro-shortcut intro-shortcut-yellow">
               <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-500 mb-1.5">
-                <Star className="w-7 h-7 sm:w-9 sm:h-9 fill-amber-400 stroke-amber-500" />
+                <Star className="w-7 h-7 sm:w-9 sm:h-9 fill-current" />
               </div>
-              <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">Choose</span>
+              <span className="intro-shortcut-label">Choose</span>
             </div>
-            <div className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-white shadow-lg border-2 border-slate-100 min-w-[78px] sm:min-w-[104px]">
+            <div className="intro-shortcut intro-shortcut-blue">
               <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-cyan-100 flex items-center justify-center text-cyan-500 mb-1.5">
-                <Cloud className="w-7 h-7 sm:w-9 sm:h-9 fill-cyan-400 stroke-cyan-500" />
+                <Palette className="w-7 h-7 sm:w-9 sm:h-9 fill-current" />
               </div>
-              <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">Color</span>
+              <span className="intro-shortcut-label">Color</span>
             </div>
-            <div className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-white shadow-lg border-2 border-slate-100 min-w-[78px] sm:min-w-[104px]">
+            <div className="intro-shortcut intro-shortcut-purple">
               <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-purple-100 flex items-center justify-center text-purple-500 mb-1.5">
-                <Flower2 className="w-7 h-7 sm:w-9 sm:h-9 fill-purple-400 stroke-purple-500" />
+                <Gamepad2 className="w-7 h-7 sm:w-9 sm:h-9 fill-current" />
               </div>
-              <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">Play</span>
+              <span className="intro-shortcut-label">Play</span>
             </div>
-            <div className="flex flex-col items-center justify-center p-3 sm:p-4 rounded-3xl bg-white shadow-lg border-2 border-slate-100 min-w-[78px] sm:min-w-[104px]">
+            <div className="intro-shortcut intro-shortcut-mint">
               <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-2xl bg-sky-100 flex items-center justify-center text-sky-500 mb-1.5">
                 <Printer className="w-7 h-7 sm:w-9 sm:h-9 fill-sky-400 stroke-sky-500" />
               </div>
-              <span className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-tight">Print</span>
+              <span className="intro-shortcut-label">Print</span>
             </div>
           </div>
         )}

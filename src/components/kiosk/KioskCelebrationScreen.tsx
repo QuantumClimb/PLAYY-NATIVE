@@ -61,7 +61,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
   }, [onAllDone]);
 
   return (
-    <div className="w-full h-full min-h-0 text-white flex flex-col items-center justify-between p-6 sm:p-10 select-none relative overflow-hidden">
+    <div className="celebration-page w-full h-full min-h-0 text-white flex flex-col items-center justify-between p-6 sm:p-10 select-none relative overflow-hidden">
       {/* Dynamic CMS Scene Background */}
       <SceneBackground sceneId="celebrate" />
       {/* Background Star Bursts */}
@@ -86,7 +86,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
       {/* Center Hero: Physical Coloring Sheet Emerging */}
       <div className="flex-1 flex flex-col items-center justify-center my-auto z-10 w-full max-w-xl">
         <div
-          className={`relative h-[min(60vh,760px)] aspect-[200/287] bg-white rounded-[28px] p-2 shadow-[0_30px_90px_rgba(0,0,0,0.8)] border-6 border-emerald-400/80 flex items-center justify-center transform transition-all duration-700 ${
+          className={`celebration-sheet relative h-[min(48vh,608px)] aspect-[200/287] bg-white rounded-[28px] p-2 shadow-[0_30px_90px_rgba(0,0,0,0.8)] border-6 border-emerald-400/80 flex items-center justify-center transform transition-all duration-700 ${
             isPaperFed ? 'translate-y-0 scale-100' : 'translate-y-8 scale-95 opacity-80'
           }`}
         >
@@ -101,7 +101,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
       </div>
 
       {/* Bottom Big Action Buttons: ALL DONE vs PRINT ANOTHER */}
-      <div className="w-full max-w-3xl flex flex-col sm:flex-row items-center justify-center gap-4 z-20 shrink-0 pb-2">
+      <div className="celebration-actions w-full max-w-3xl flex flex-row items-center justify-center gap-5 z-20 shrink-0 pb-4">
         {/* Giant Primary: ALL DONE! */}
         <button
           type="button"
