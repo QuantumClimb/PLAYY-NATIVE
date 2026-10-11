@@ -3,6 +3,7 @@ import confetti from 'canvas-confetti';
 import { PlayyConfiguration } from '../../lib/playys/types';
 import { PlayyScene } from '../playys/PlayyScene';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
+import { SceneBackground } from '../backgrounds/SceneBackground';
 
 interface KioskCelebrationScreenProps {
   config: PlayyConfiguration;
@@ -60,7 +61,9 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
   }, [onAllDone]);
 
   return (
-    <div className="w-full h-full min-h-0 bg-gradient-to-b from-indigo-950 via-slate-950 to-purple-950 text-white flex flex-col items-center justify-between p-6 sm:p-10 select-none relative overflow-hidden">
+    <div className="w-full h-full min-h-0 text-white flex flex-col items-center justify-between p-6 sm:p-10 select-none relative overflow-hidden">
+      {/* Dynamic CMS Scene Background */}
+      <SceneBackground sceneId="celebrate" />
       {/* Background Star Bursts */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-400/10 rounded-full blur-3xl animate-pulse" />

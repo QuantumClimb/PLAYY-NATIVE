@@ -33,7 +33,14 @@ export const PlayyScene: React.FC<PlayySceneProps> = ({ config, mode, className 
   return (
     <div className={`relative overflow-hidden bg-white ${className}`} style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}>
       <AssetArt asset={sel.background} mode={mode} main={sel.headMain} stretch style={rectStyle(layout.background)} />
-      <AssetArt asset={sel.body} mode={mode} main={sel.outfit} secondary={sel.secondary} style={rectStyle(layout.body)} />
+      <AssetArt
+        asset={sel.body}
+        mode={mode}
+        main={config.colors?.body ?? sel.outfit}
+        secondary={sel.secondary}
+        partColors={config.colors?.clothing}
+        style={rectStyle(layout.body)}
+      />
       {sel.symbol && layout.symbol && (
         <AssetArt asset={sel.symbol} mode={mode} main={sel.headMain} style={rectStyle(layout.symbol)} />
       )}

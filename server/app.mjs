@@ -3,8 +3,26 @@
 import 'dotenv/config';
 import express from 'express';
 import crypto from 'node:crypto';
+import fs from 'node:fs';
+import path from 'node:path';
 import { listPrinters, setDefault } from './printers.mjs';
-import { ASSET_TYPES, listAssets, getAsset, createAsset, updateAsset, deleteAsset } from './db.mjs';
+import {
+  ASSET_TYPES,
+  listAssets,
+  getAsset,
+  createAsset,
+  updateAsset,
+  deleteAsset,
+  listSceneBackgrounds,
+  getSceneBackground,
+  upsertSceneBackground,
+  resetSceneBackground,
+  createMediaFile,
+  getMediaFile,
+  getPowerQuizQuestions,
+  savePowerQuizQuestions,
+  resetPowerQuizQuestions,
+} from './db.mjs';
 
 // Printers belong to the kiosk PC, so they are off on Vercel unless ENABLE_PRINTERS=1
 const HOSTED = !!process.env.VERCEL;
@@ -16,7 +34,7 @@ const SECRET =
 const SESSION_MS = 8 * 60 * 60 * 1000;
 
 const app = express();
-app.use(express.json({ limit: '3mb' }));
+app.use(express.json({ limit: '50mb' }));
 
 // ---------- Printers (used by the Alt+Shift+P dialog) ----------
 const wrap = (fn) => (req, res) => Promise.resolve(fn(req, res)).catch((e) => res.status(500).json({ error: e.message }));
@@ -134,6 +152,215 @@ app.put('/api/cc/assets/:id', requireAdmin, wrap(async (req, res) => {
 
 app.delete('/api/cc/assets/:id', requireAdmin, wrap(async (req, res) =>
   (await deleteAsset(Number(req.params.id))) ? res.json({ ok: true }) : res.status(404).json({ error: 'Not found' })));
+
+// ---------- Scene Backgrounds & Media API ----------
+const VALID_SCENE_IDS = ['intro', 'head', 'body', 'symbol', 'world', 'name', 'quiz', 'review', 'celebrate'];
+const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
+
+app.get('/api/scene-backgrounds', wrap(async (_req, res) => {
+  const list = await listSceneBackgrounds();
+  const map = {};
+  list.forEach((s) => {
+    map[s.scene_id] = {
+      sceneId: s.scene_id,
+      bgType: s.bg_type,
+      mediaId: s.media_id,
+      fallbackMediaId: s.fallback_media_id,
+      mediaUrl: s.media_id ? `/api/media/${s.media_id}` : null,
+      fallbackMediaUrl: s.fallback_media_id ? `/api/media/${s.fallback_media_id}` : null,
+      fit: s.fit,
+      position: s.position,
+      overlayColor: s.overlay_color,
+      overlayOpacity: Number(s.overlay_opacity),
+      badgePlacement: s.badge_placement,
+      startButtonPlacement: s.start_button_placement,
+      startButtonSize: s.start_button_size,
+      badgeGap: s.badge_gap,
+      floatAnimation: s.float_animation,
+      updatedAt: s.updated,
+    };
+  });
+  res.json({ scenes: map });
+}));
+
+app.get('/api/media/:id', wrap(async (req, res) => {
+  const { id } = req.params;
+  if (id === 'cheerful-castle-initial') {
+    const filePath = path.resolve('public/assets/Cheerful-Mascot-Castle-Adventure.png');
+    if (fs.existsSync(filePath)) {
+      res.setHeader('Content-Type', 'image/png');
+      return fs.createReadStream(filePath).pipe(res);
+    }
+  }
+
+  const media = await getMediaFile(id);
+  if (!media) return res.status(404).json({ error: 'Media not found' });
+
+  const buffer = Buffer.from(media.data_base64, 'base64');
+  const mimeType = media.mime_type;
+
+  const range = req.headers.range;
+  if (range) {
+    const parts = range.replace(/bytes=/, '').split('-');
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : buffer.length - 1;
+    const chunksize = end - start + 1;
+    res.writeHead(206, {
+      'Content-Range': `bytes ${start}-${end}/${buffer.length}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunksize,
+      'Content-Type': mimeType,
+    });
+    res.end(buffer.subarray(start, end + 1));
+  } else {
+    res.writeHead(200, {
+      'Content-Length': buffer.length,
+      'Accept-Ranges': 'bytes',
+      'Content-Type': mimeType,
+    });
+    res.end(buffer);
+  }
+}));
+
+app.post('/api/cc/scene-backgrounds/upload', requireAdmin, wrap(async (req, res) => {
+  const { filename, mimeType, base64 } = req.body ?? {};
+  if (!filename || !mimeType || !base64) {
+    return res.status(400).json({ error: 'Missing filename, mimeType or base64 data' });
+  }
+
+  const isImage = ALLOWED_IMAGE_TYPES.includes(mimeType);
+  const isVideo = ALLOWED_VIDEO_TYPES.includes(mimeType);
+  if (!isImage && !isVideo) {
+    return res.status(400).json({ error: 'Unsupported file type. Allowed: PNG, JPG, WebP, MP4, WebM.' });
+  }
+
+  const buffer = Buffer.from(base64, 'base64');
+  const maxBytes = isVideo ? 30 * 1024 * 1024 : 10 * 1024 * 1024;
+  if (buffer.length > maxBytes) {
+    return res.status(400).json({
+      error: `File size (${(buffer.length / (1024 * 1024)).toFixed(1)}MB) exceeds limit of ${isVideo ? '30MB for video' : '10MB for image'}.`,
+    });
+  }
+
+  const id = `med_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+  await createMediaFile({ id, filename, mimeType, dataBase64: base64, sizeBytes: buffer.length });
+
+  res.status(201).json({
+    mediaId: id,
+    mediaUrl: `/api/media/${id}`,
+    filename,
+    mimeType,
+    sizeBytes: buffer.length,
+  });
+}));
+
+app.put('/api/cc/scene-backgrounds/:sceneId', requireAdmin, wrap(async (req, res) => {
+  const { sceneId } = req.params;
+  if (!VALID_SCENE_IDS.includes(sceneId)) {
+    return res.status(400).json({ error: `Invalid scene ID: ${sceneId}` });
+  }
+
+  const { bgType, mediaId, fallbackMediaId, fit, position, overlayColor, overlayOpacity, badgePlacement, startButtonPlacement, startButtonSize, badgeGap, floatAnimation } = req.body ?? {};
+  if (bgType && !['default', 'image', 'video'].includes(bgType)) {
+    return res.status(400).json({ error: 'Invalid background type' });
+  }
+  if (fit && !['cover', 'contain'].includes(fit)) {
+    return res.status(400).json({ error: 'Invalid fit option' });
+  }
+  if (startButtonSize && !['large', 'extra-large'].includes(startButtonSize)) {
+    return res.status(400).json({ error: 'Invalid start button size' });
+  }
+  if (badgeGap && !['comfortable', 'relaxed'].includes(badgeGap)) {
+    return res.status(400).json({ error: 'Invalid badge gap' });
+  }
+  if (floatAnimation && !['none', 'gentle', 'slow'].includes(floatAnimation)) {
+    return res.status(400).json({ error: 'Invalid float animation' });
+  }
+
+  const result = await upsertSceneBackground(sceneId, {
+    bg_type: bgType,
+    media_id: mediaId,
+    fallback_media_id: fallbackMediaId,
+    fit,
+    position,
+    overlay_color: overlayColor,
+    overlay_opacity: overlayOpacity,
+    badge_placement: badgePlacement,
+    start_button_placement: startButtonPlacement,
+    start_button_size: startButtonSize,
+    badge_gap: badgeGap,
+    float_animation: floatAnimation,
+  });
+
+  res.json({
+    scene: {
+      sceneId: result.scene_id,
+      bgType: result.bg_type,
+      mediaId: result.media_id,
+      fallbackMediaId: result.fallback_media_id,
+      mediaUrl: result.media_id ? `/api/media/${result.media_id}` : null,
+      fallbackMediaUrl: result.fallback_media_id ? `/api/media/${result.fallback_media_id}` : null,
+      fit: result.fit,
+      position: result.position,
+      overlayColor: result.overlay_color,
+      overlayOpacity: Number(result.overlay_opacity),
+      badgePlacement: result.badge_placement,
+      startButtonPlacement: result.start_button_placement,
+      startButtonSize: result.start_button_size,
+      badgeGap: result.badge_gap,
+      floatAnimation: result.float_animation,
+      updatedAt: result.updated,
+    },
+  });
+}));
+
+app.post('/api/cc/scene-backgrounds/:sceneId/reset', requireAdmin, wrap(async (req, res) => {
+  const { sceneId } = req.params;
+  if (!VALID_SCENE_IDS.includes(sceneId)) {
+    return res.status(400).json({ error: `Invalid scene ID: ${sceneId}` });
+  }
+
+  const result = await resetSceneBackground(sceneId);
+  res.json({
+    scene: {
+      sceneId: result.scene_id,
+      bgType: result.bg_type,
+      mediaId: result.media_id,
+      fallbackMediaId: result.fallback_media_id,
+      mediaUrl: null,
+      fallbackMediaUrl: null,
+      fit: result.fit,
+      position: result.position,
+      overlayColor: result.overlay_color,
+      overlayOpacity: Number(result.overlay_opacity),
+      badgePlacement: result.badge_placement,
+      startButtonPlacement: result.start_button_placement,
+      startButtonSize: result.start_button_size,
+      badgeGap: result.badge_gap,
+      floatAnimation: result.float_animation,
+      updatedAt: result.updated,
+    },
+  });
+}));
+
+// ---------- Power Quiz Questions API ----------
+app.get('/api/power-quiz-questions', wrap(async (_req, res) => {
+  const saved = await getPowerQuizQuestions();
+  res.json({ questions: saved || null });
+}));
+
+app.put('/api/cc/power-quiz-questions', requireAdmin, wrap(async (req, res) => {
+  const { questions } = req.body ?? {};
+  if (!Array.isArray(questions)) return res.status(400).json({ error: 'Questions must be an array' });
+  const saved = await savePowerQuizQuestions(questions);
+  res.json({ questions: saved });
+}));
+
+app.post('/api/cc/power-quiz-questions/reset', requireAdmin, wrap(async (_req, res) => {
+  await resetPowerQuizQuestions();
+  res.json({ ok: true });
+}));
 
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));
 

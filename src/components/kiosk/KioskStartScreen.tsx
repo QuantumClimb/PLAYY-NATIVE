@@ -17,6 +17,8 @@ import { PlayyComposition } from '../playys/PlayyComposition';
 import { CharacterPreviewOnly } from '../playys/CharacterPreviewOnly';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 
+import { SceneBackground } from '../backgrounds/SceneBackground';
+
 interface KioskStartScreenProps {
   onStart: () => void;
   onSurpriseStart: () => void;
@@ -65,8 +67,9 @@ export const KioskStartScreen: React.FC<KioskStartScreenProps> = ({
   return (
     <div
       onClick={handleStartClick}
-      className="w-full h-full min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-sky-950 text-white flex flex-col justify-between p-6 sm:p-10 select-none relative overflow-hidden cursor-pointer"
+      className="w-full h-full min-h-screen bg-slate-950 text-white flex flex-col justify-between p-6 sm:p-10 select-none relative overflow-hidden cursor-pointer"
     >
+      <SceneBackground sceneId="intro" />
       {/* Background Decorative Ambient Blobs & Sparkles */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-pink-500/15 rounded-full blur-3xl animate-pulse" />

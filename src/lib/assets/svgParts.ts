@@ -247,6 +247,15 @@ export function renderSvgAsset(svgText: string, { main, secondary, stretch, mode
         : cfg.mode === 'derived' ? secondaryHex ?? deriveColor(mainHex, cfg.dL ?? 0)
         : cfg.mode === 'fixed' ? normalizeColor(cfg.color) : null;
       if (next) shape.setAttribute('fill', next);
+      // Some exported Illustrator SVGs use presentation styles. The style
+      // declaration wins over the fill attribute, so clear only fill styling
+      // after resolving the selected CMS color; strokes/outlines are untouched.
+      if (next) {
+        const style = shape.getAttribute('style');
+        if (style && /(?:^|;)\s*fill\s*:/i.test(style)) {
+          shape.setAttribute('style', style.replace(/(?:^|;)\s*fill\s*:[^;]*/ig, '').replace(/^;|;;/g, '').trim());
+        }
+      }
     } else {
       const current = cfg?.mode === 'fixed' ? normalizeColor(cfg.color) ?? drawn : drawn;
       const rule: BwRule = cfg?.bw ?? 'auto';

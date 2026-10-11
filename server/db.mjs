@@ -11,8 +11,8 @@ export const ASSET_TYPES = ['head', 'face', 'body', 'symbol', 'background'];
 let ready;
 /** Creates the tables on first use (idempotent), once per server instance. */
 export function ensureSchema() {
-  ready ??= sql
-    .query(`
+  ready ??= (async () => {
+    await sql.query(`
       CREATE TABLE IF NOT EXISTS assets (
         id      SERIAL PRIMARY KEY,
         type    TEXT NOT NULL,                 -- head | face | body | symbol | background
@@ -25,11 +25,81 @@ export function ensureSchema() {
         sort    INTEGER NOT NULL DEFAULT 0,
         updated TIMESTAMPTZ NOT NULL DEFAULT now(),
         UNIQUE (type, slug)
-      )`)
-    .catch((e) => {
-      ready = undefined; // retry next time
-      throw e;
-    });
+      )`);
+
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS media_files (
+        id          TEXT PRIMARY KEY,
+        filename    TEXT NOT NULL,
+        mime_type   TEXT NOT NULL,
+        data_base64 TEXT NOT NULL,
+        size_bytes  INTEGER NOT NULL,
+        created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS scene_backgrounds (
+        scene_id               TEXT PRIMARY KEY,
+        bg_type                TEXT NOT NULL DEFAULT 'default',
+        media_id               TEXT,
+        fallback_media_id      TEXT,
+        fit                    TEXT NOT NULL DEFAULT 'cover',
+        position               TEXT NOT NULL DEFAULT 'center',
+        overlay_color          TEXT NOT NULL DEFAULT '#000000',
+        overlay_opacity        NUMERIC NOT NULL DEFAULT 0,
+        badge_placement        TEXT NOT NULL DEFAULT 'top-center',
+        start_button_placement TEXT NOT NULL DEFAULT 'right-center',
+        start_button_size      TEXT NOT NULL DEFAULT 'extra-large',
+        badge_gap              TEXT NOT NULL DEFAULT 'comfortable',
+        float_animation        TEXT NOT NULL DEFAULT 'gentle',
+        updated                TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
+    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS badge_placement TEXT NOT NULL DEFAULT 'top-center'`);
+    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS start_button_placement TEXT NOT NULL DEFAULT 'right-center'`);
+    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS start_button_size TEXT NOT NULL DEFAULT 'extra-large'`);
+    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS badge_gap TEXT NOT NULL DEFAULT 'comfortable'`);
+    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS float_animation TEXT NOT NULL DEFAULT 'gentle'`);
+
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS power_quiz_questions (
+        id      INTEGER PRIMARY KEY DEFAULT 1,
+        data    JSONB NOT NULL DEFAULT '[]',
+        updated TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
+    // Seed initial intro background setting if not present
+    await sql.query(`
+      INSERT INTO scene_backgrounds (scene_id, bg_type, media_id, fit, position, overlay_color, overlay_opacity, badge_placement, start_button_placement, start_button_size, badge_gap, float_animation)
+      VALUES ('intro', 'image', 'cheerful-castle-initial', 'cover', 'center', '#000000', 0, 'below-start-button', 'right-center', 'extra-large', 'comfortable', 'gentle')
+      ON CONFLICT (scene_id) DO NOTHING
+    `);
+
+    // Preserve the current intro background/assets while migrating existing
+    // installs once to the CMS-managed button-and-badges layout.
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS app_migrations (
+        id TEXT PRIMARY KEY,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT now()
+      )
+    `);
+    const migration = await sql.query(`
+      INSERT INTO app_migrations (id)
+      VALUES ('intro-badges-below-start-button')
+      ON CONFLICT (id) DO NOTHING
+      RETURNING id
+    `);
+    if (migration.length > 0) {
+      await sql.query(`
+        UPDATE scene_backgrounds
+        SET badge_placement = 'below-start-button'
+        WHERE scene_id = 'intro' AND badge_placement = 'top-center'
+      `);
+    }
+  })().catch((e) => {
+    ready = undefined; // retry next time
+    throw e;
+  });
   return ready;
 }
 
@@ -74,4 +144,113 @@ export async function updateAsset(id, patch) {
 
 export async function deleteAsset(id) {
   return (await query('DELETE FROM assets WHERE id = $1 RETURNING id', [id])).length > 0;
+}
+
+export async function listSceneBackgrounds() {
+  return query('SELECT * FROM scene_backgrounds ORDER BY scene_id');
+}
+
+export async function getSceneBackground(sceneId) {
+  const rows = await query('SELECT * FROM scene_backgrounds WHERE scene_id = $1', [sceneId]);
+  return rows[0] ?? null;
+}
+
+export async function upsertSceneBackground(sceneId, settings) {
+  const { bg_type, media_id, fallback_media_id, fit, position, overlay_color, overlay_opacity, badge_placement, start_button_placement, start_button_size, badge_gap, float_animation } = settings;
+  const rows = await query(
+    `INSERT INTO scene_backgrounds (scene_id, bg_type, media_id, fallback_media_id, fit, position, overlay_color, overlay_opacity, badge_placement, start_button_placement, start_button_size, badge_gap, float_animation, updated)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now())
+     ON CONFLICT (scene_id) DO UPDATE SET
+       bg_type = EXCLUDED.bg_type,
+       media_id = EXCLUDED.media_id,
+       fallback_media_id = EXCLUDED.fallback_media_id,
+       fit = EXCLUDED.fit,
+       position = EXCLUDED.position,
+       overlay_color = EXCLUDED.overlay_color,
+       overlay_opacity = EXCLUDED.overlay_opacity,
+       badge_placement = EXCLUDED.badge_placement,
+       start_button_placement = EXCLUDED.start_button_placement,
+       start_button_size = EXCLUDED.start_button_size,
+       badge_gap = EXCLUDED.badge_gap,
+       float_animation = EXCLUDED.float_animation,
+       updated = now()
+     RETURNING *`,
+    [
+      sceneId,
+      bg_type || 'default',
+      media_id || null,
+      fallback_media_id || null,
+      fit || 'cover',
+      position || 'center',
+      overlay_color || '#000000',
+      overlay_opacity ?? 0,
+      badge_placement || 'top-center',
+      start_button_placement || 'right-center',
+      start_button_size || 'extra-large',
+      badge_gap || 'comfortable',
+      float_animation || 'gentle',
+    ],
+  );
+  return rows[0];
+}
+
+export async function resetSceneBackground(sceneId) {
+  const defaultBadgePlacement = sceneId === 'intro' ? 'below-start-button' : 'top-center';
+  const rows = await query(
+    `INSERT INTO scene_backgrounds (scene_id, bg_type, media_id, fallback_media_id, fit, position, overlay_color, overlay_opacity, badge_placement, start_button_placement, start_button_size, badge_gap, float_animation, updated)
+     VALUES ($1, 'default', NULL, NULL, 'cover', 'center', '#000000', 0, $2, 'right-center', $3, 'comfortable', 'gentle', now())
+     ON CONFLICT (scene_id) DO UPDATE SET
+       bg_type = 'default',
+       media_id = NULL,
+       fallback_media_id = NULL,
+       fit = 'cover',
+       position = 'center',
+       overlay_color = '#000000',
+       overlay_opacity = 0,
+       badge_placement = $2,
+       start_button_placement = 'right-center',
+       start_button_size = $3,
+       badge_gap = 'comfortable',
+       float_animation = 'gentle',
+       updated = now()
+     RETURNING *`,
+    [sceneId, defaultBadgePlacement, 'extra-large'],
+  );
+  return rows[0];
+}
+
+export async function createMediaFile({ id, filename, mimeType, dataBase64, sizeBytes }) {
+  const rows = await query(
+    `INSERT INTO media_files (id, filename, mime_type, data_base64, size_bytes)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id, filename, mime_type, size_bytes, created_at`,
+    [id, filename, mimeType, dataBase64, sizeBytes],
+  );
+  return rows[0];
+}
+
+export async function getMediaFile(id) {
+  const rows = await query('SELECT * FROM media_files WHERE id = $1', [id]);
+  return rows[0] ?? null;
+}
+
+export async function getPowerQuizQuestions() {
+  const rows = await query('SELECT data FROM power_quiz_questions WHERE id = 1');
+  return rows[0]?.data ?? null;
+}
+
+export async function savePowerQuizQuestions(questions) {
+  const rows = await query(
+    `INSERT INTO power_quiz_questions (id, data, updated)
+     VALUES (1, $1, now())
+     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated = now()
+     RETURNING data`,
+    [JSON.stringify(questions)]
+  );
+  return rows[0]?.data;
+}
+
+export async function resetPowerQuizQuestions() {
+  await query('DELETE FROM power_quiz_questions WHERE id = 1');
+  return null;
 }

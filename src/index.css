@@ -110,3 +110,23 @@
     margin: 5mm;
   }
 }
+
+@keyframes playysIntroFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.playys-intro-float {
+  animation: playysIntroFloat 3.6s ease-in-out infinite;
+}
+
+.playys-intro-float-slow {
+  animation: playysIntroFloat 5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playys-intro-float,
+  .playys-intro-float-slow {
+    animation: none;
+  }
+}

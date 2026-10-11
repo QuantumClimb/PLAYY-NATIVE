@@ -5,12 +5,24 @@ export type PoseId = string;
 export type SymbolId = string;
 export type BackgroundId = string;
 
+export interface CharacterColorConfiguration {
+  /** CMS-compatible palette values used by the coloring stage. */
+  palette?: string[];
+  /** Main body color. */
+  body?: string;
+  /** Explicit colors for editable body/clothing SVG regions. */
+  clothing?: Record<string, string>;
+}
+
 export interface PlayyConfiguration {
   head: HeadId;
   pose: PoseId;
   symbol: SymbolId;
   background: BackgroundId;
   kidName?: string;
+  phone?: string;
+  email?: string;
+  colors?: CharacterColorConfiguration;
 }
 
 export interface HeadDefinition {
