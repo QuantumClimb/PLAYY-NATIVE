@@ -12,3 +12,5 @@ data/
 
 # editor lock files
 .~lock.*#
+playwright-report/
+test-results/
