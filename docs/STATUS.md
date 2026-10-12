@@ -89,9 +89,19 @@ The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps 
 ## 8. Open items
 
 **Needs the client**
-1. SMTP details and password, and the WhatsApp token (questions sent to you for the system administrator).
+1. WhatsApp (pending, see the list below). Email is set up and tested (Google Workspace, noreply@vgpplayykingdom.in); add the same SMTP variables to Vercel.
 2. The kiosk PC's printer, and silent printing with `--kiosk-printing`.
 3. Confirm the Vercel deploy with all environment variables once SMTP is set.
+
+**Pending: WhatsApp (waiting on the client's administrator)**
+The token received (32 characters) is rejected by Meta, so the sending code is not built yet. Needed:
+1. A permanent access token (`EAA...`) from a System User with `whatsapp_business_messaging` and `whatsapp_business_management`. Why: the server sends with it; temporary tokens expire in about 24 hours.
+2. The Phone Number ID of +91 72006 37887 (WhatsApp Manager, API Setup). Why: every send is addressed to it.
+3. The WhatsApp Business Account ID (optional). Why: lists and checks templates.
+4. An approved utility template with a PDF header and a name variable. Why: WhatsApp allows free text only within 24 hours of the visitor messaging us; a kiosk visitor has not.
+5. The number registered on the Cloud API (it then stops working in the phone app) and business verification with a payment method. Why: a server cannot drive an app-only number; unverified accounts have a very low daily limit and messages are billed.
+6. Consent line on the details screen. Why: messaging rules and DPDP.
+To build then: sending code and command center switch, token only on the server, PDF upload and template send, result logged like email. Open decisions: default country code +91 when no "+" is typed (with a hint "Outside India? Start with +"), which countries to send to (cost differs), and showing the number back on the preview to catch typos. Today the phone keypad already accepts international numbers (digits and a leading "+", 7 to 15 characters).
 
 **Known issues**
 - The Users tab does not yet show each visitor's card stats (they are saved with every submission in its `config`).
