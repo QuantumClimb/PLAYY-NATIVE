@@ -568,7 +568,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       : 'PRINT & COMPLETE';
 
   const isReview = currentStep === 'card';
-  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' || currentStep === 'colors' || currentStep === 'details' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'preview';
+  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' || currentStep === 'colors' || currentStep === 'details' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'preview' || currentStep === 'card';
   const colorMode = config.colors?.mode ?? 'simple';
   // Advanced mode: one panel per part, in a sensible order (gloves are always white, so they are not offered)
   const REGION_ORDER = ['hoodie', 'trousers', 'shoes', 'cuffs', 'trim', 'soles', 'tassles'];
@@ -589,7 +589,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   return (
     <div
       onClick={resetIdleTimer}
-      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'world' ? 'pick-page pick-world' : currentStep === 'details' ? 'pick-page pick-details' : currentStep === 'quiz' ? 'pick-page pick-quiz' : currentStep === 'power' ? 'pick-page pick-power' : currentStep === 'preview' ? 'pick-page pick-preview' : ''}`}
+      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'world' ? 'pick-page pick-world' : currentStep === 'details' ? 'pick-page pick-details' : currentStep === 'quiz' ? 'pick-page pick-quiz' : currentStep === 'power' ? 'pick-page pick-power' : currentStep === 'preview' ? 'pick-page pick-preview' : currentStep === 'card' ? 'pick-page pick-trump' : ''}`}
     >
       {/* Dynamic CMS Scene Background */}
       <SceneBackground sceneId={CMS_SCENE_BY_STEP[currentStep]} />
@@ -644,7 +644,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               <div>QUESTION {powerQuestionIdx + 1} OF {powerQuestions.length}</div>
             </div>
           </div>
-        ) : !['power', 'preview'].includes(currentStep) && !(currentStep === 'details' && detailsStep !== 1) ? (
+        ) : !['power', 'preview', 'card'].includes(currentStep) && !(currentStep === 'details' && detailsStep !== 1) ? (
           <button
             type="button"
             onClick={handleStepSurprise}
@@ -660,14 +660,14 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
       {/* 2. Top Title: ONE BIG QUESTION */}
       <div className="head-title w-full text-center py-2 shrink-0 z-20">
-        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'details') && <>
+        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'details' || currentStep === 'preview' || currentStep === 'card') && <>
           <span className="head-title-star head-title-star-left" aria-hidden="true">★</span>
           <span className="head-title-star head-title-star-right" aria-hidden="true">★</span>
           <span className="head-title-star head-title-star-bottom-left" aria-hidden="true">✦</span>
           <span className="head-title-star head-title-star-bottom-right" aria-hidden="true">✦</span>
         </>}
-        {currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' || currentStep === 'details' || currentStep === 'quiz' || currentStep === 'preview' ? (() => {
-          const headingText = currentStep === 'quiz' ? questionTitle : currentStep === 'preview' ? 'YOUR COLORING PAGE!' : currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : currentStep === 'details' ? DETAIL_TITLES[detailsStep - 1] : 'CHOOSE YOUR BACKGROUND';
+        {currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' || currentStep === 'details' || currentStep === 'quiz' || currentStep === 'preview' || currentStep === 'card' ? (() => {
+          const headingText = currentStep === 'quiz' ? questionTitle : currentStep === 'preview' ? 'YOUR COLORING PAGE!' : currentStep === 'card' ? 'YOUR TRUMP CARD!' : currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : currentStep === 'details' ? DETAIL_TITLES[detailsStep - 1] : 'CHOOSE YOUR BACKGROUND';
           return (
             <h1 className="head-arched-heading" style={{ ['--title-chars' as string]: headingText.length } as React.CSSProperties} aria-label={headingText}>
               {headingText.split('').map((letter, index) => (
@@ -681,7 +681,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">{questionTitle}</h1>
         )}
         {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'details' || currentStep === 'preview' || currentStep === 'card') && (() => {
-          const subtitleText: string = currentStep === 'head' ? 'Pick a face for your Playy!' : currentStep === 'pose' ? 'Pick a pose for your Playy!' : currentStep === 'colors' ? (colorMode === 'advanced' ? 'Pick a colour for each part of your Playyy!' : 'Pick a main colour and a secondary colour for your Playyy!') : currentStep === 'world' ? 'Pick a world for your Playyy!' : currentStep === 'details' ? DETAIL_SUBTITLES[detailsStep - 1] : currentStep === 'preview' ? 'Here is how your Playyy looks. Ready to print?' : currentStep === 'card' ? 'A special card just for you!' : (powerQuestions[powerQuestionIdx]?.subtitle || 'Choose the answer that feels most like you!');
+          const subtitleText: string = currentStep === 'head' ? 'Pick a face for your Playy!' : currentStep === 'pose' ? 'Pick a pose for your Playy!' : currentStep === 'colors' ? (colorMode === 'advanced' ? 'Pick a colour for each part of your Playyy!' : 'Pick a main colour and a secondary colour for your Playyy!') : currentStep === 'world' ? 'Pick a world for your Playyy!' : currentStep === 'details' ? DETAIL_SUBTITLES[detailsStep - 1] : currentStep === 'preview' ? 'Here is how your Playyy looks. Ready to print?' : currentStep === 'card' ? 'A collectible card made just for you!' : (powerQuestions[powerQuestionIdx]?.subtitle || 'Choose the answer that feels most like you!');
           return <p className="head-subtitle" style={{ ['--sub-chars' as string]: subtitleText.length } as React.CSSProperties}>{subtitleText}</p>;
         })()}
       </div>
@@ -892,64 +892,23 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             </div>
           )}
 
-          {/* STEP 10: TRUMP CARD */}
+          {/* STEP 10: TRUMP CARD: the front is the final artwork, tap to flip to the stats on the back */}
           {currentStep === 'card' && card && (() => {
-            const scale = Math.min(1, (window.innerHeight * 0.52) / CARD_H, (window.innerWidth - 48) / CARD_W);
+            const scale = Math.min((window.innerHeight * 0.6) / CARD_H, (window.innerWidth * 0.46) / CARD_W);
             return (
-              <div className="card-review-layout flex flex-col lg:flex-row items-center justify-center gap-8 p-2">
-                <div className="flex flex-col items-center gap-3">
-                  {cardSide === 'front' ? (
-                    <TrumpCardFront card={card} scale={scale} />
-                  ) : (
-                    <TrumpCardBack card={card} scale={scale} />
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      resetIdleTimer();
-                      nativeFeedback.impactLight();
-                      setCardSide(cardSide === 'front' ? 'back' : 'front');
-                    }}
-                    className="btn-3d btn-3d-blue py-3 px-6 font-bold text-base"
-                  >
-                    🔄 FLIP CARD
-                  </button>
-                </div>
-
-                <div className="w-full max-w-md flex flex-col gap-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      resetIdleTimer();
-                      nativeFeedback.impactLight();
-                      setCurrentStep('complete');
-                    }}
-                    className="btn-3d w-full py-6 px-8 font-bold text-2xl sm:text-3xl flex items-center justify-center gap-3"
-                  >
-                    <span>🖨️</span>
-                    <span>CONTINUE TO PRINT</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setCurrentStep('preview')}
-                    className="btn-3d btn-3d-blue w-full py-3 px-6 font-bold text-base"
-                  >
-                    BACK TO PREVIEW
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      nativeFeedback.impactLight();
-                      onCardChange(null);
-                      setCurrentStep('head');
-                    }}
-                    className="btn-3d btn-3d-blue w-full py-4 px-6 font-bold text-lg"
-                  >
-                    <span>🔄 CHANGE SOMETHING</span>
-                  </button>
-                </div>
+              <div className="trump-stage">
+                <button
+                  type="button"
+                  data-sfx="reveal"
+                  aria-label={cardSide === 'front' ? 'Flip the card to see the stats' : 'Flip the card to see the picture'}
+                  className={`trump-flip ${cardSide === 'back' ? 'is-back' : ''}`}
+                  style={{ width: CARD_W * scale, height: CARD_H * scale }}
+                  onClick={() => { resetIdleTimer(); nativeFeedback.impactLight(); setCardSide(cardSide === 'front' ? 'back' : 'front'); }}
+                >
+                  <div className="trump-face"><TrumpCardFront card={card} scale={scale} /></div>
+                  <div className="trump-face trump-face-back"><TrumpCardBack card={card} scale={scale} /></div>
+                </button>
+                <div className="trump-hint">{cardSide === 'front' ? 'Tap the card to see its stats!' : 'Tap the card to see your picture!'}</div>
               </div>
             );
           })()}
@@ -989,7 +948,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       </div>
 
       {/* 4. Bottom Navigation: BACK on left, ONE DOMINANT NEXT ON RIGHT */}
-      {!['card', 'complete'].includes(currentStep) && (
+      {!['complete'].includes(currentStep) && (
         <div className={`machine-navigation w-full flex items-center justify-between px-2 pt-2 shrink-0 z-20 ${isPick || currentStep === 'quiz' || currentStep === 'power' ? 'head-navigation' : ''}`}>
           <button
             type="button"
@@ -1006,7 +965,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             onClick={goNext}
             className={`btn-3d py-5 px-10 font-bold text-xl sm:text-2xl flex items-center gap-3 ${isPick || currentStep === 'quiz' || currentStep === 'power' ? 'head-nav-button head-nav-next' : ''}`}
           >
-            <span>{currentStep === 'preview' ? 'CONTINUE' : 'NEXT'}</span>
+            <span>{currentStep === 'preview' || currentStep === 'card' ? 'CONTINUE' : 'NEXT'}</span>
             <ArrowRight strokeWidth={3.4} aria-hidden="true" />
           </button>
           )}

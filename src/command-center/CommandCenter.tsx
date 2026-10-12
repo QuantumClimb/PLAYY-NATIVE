@@ -5,6 +5,7 @@ import { SceneBackgroundsPanel } from './SceneBackgroundsPanel';
 import { PowerQuizPanel } from './PowerQuizPanel';
 import { IntroBadgesPanel } from './IntroBadgesPanel';
 import { ProgressTabsPanel } from './ProgressTabsPanel';
+import { TrumpCardPanel } from './TrumpCardPanel';
 import { LogoPanel } from './LogoPanel';
 import { SoundsPanel } from './SoundsPanel';
 import { defaultParts, parseSvgAsset } from '../lib/assets/svgParts';
@@ -60,7 +61,7 @@ const Login: React.FC<{ enabled: boolean; onDone: () => void }> = ({ enabled, on
 
 export const CommandCenter: React.FC = () => {
   const [state, setState] = useState<'loading' | 'out' | 'in' | 'offline'>('loading');
-  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz' | 'intro-badges' | 'progress-tabs' | 'logo' | 'sounds'>('assets');
+  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz' | 'intro-badges' | 'progress-tabs' | 'trump-card' | 'logo' | 'sounds'>('assets');
   const [enabled, setEnabled] = useState(true);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
@@ -116,6 +117,7 @@ export const CommandCenter: React.FC = () => {
     { id: 'scene-backgrounds', label: 'Scene backgrounds' },
     { id: 'intro-badges', label: 'Intro badges' },
     { id: 'progress-tabs', label: 'Progress tabs' },
+    { id: 'trump-card', label: 'Trump card' },
     { id: 'power-quiz', label: 'Power quiz' },
     { id: 'logo', label: 'Logo' },
     { id: 'sounds', label: 'Sounds' },
@@ -256,6 +258,7 @@ export const CommandCenter: React.FC = () => {
           {activeTab === 'power-quiz' && <PowerQuizPanel />}
           {activeTab === 'intro-badges' && <IntroBadgesPanel />}
           {activeTab === 'progress-tabs' && <ProgressTabsPanel />}
+          {activeTab === 'trump-card' && <TrumpCardPanel />}
           {activeTab === 'logo' && <LogoPanel />}
           {activeTab === 'sounds' && <SoundsPanel />}
         </div>

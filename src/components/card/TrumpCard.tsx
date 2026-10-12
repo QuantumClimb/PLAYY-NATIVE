@@ -1,6 +1,10 @@
 import React from 'react';
 import { GeneratedCard } from '../../lib/playys/cardTypes';
 import { PlayyScene } from '../playys/PlayyScene';
+import { AssetArt } from '../playys/AssetArt';
+import { useSelection } from '../../lib/assets/library';
+import { SYMBOL_MAP } from '../../lib/playys/powerQuiz';
+import { TrumpCardSettings, useTrumpCardSettings } from '../../lib/card/settings';
 
 /** Cards are designed at a fixed 340x510 and scaled with `scale` so layout never changes. */
 export const CARD_W = 340;
@@ -9,6 +13,8 @@ export const CARD_H = 510;
 interface TrumpCardProps {
   card: GeneratedCard;
   scale?: number;
+  /** Formatting to use instead of the saved one (the command center's live preview) */
+  settings?: TrumpCardSettings;
 }
 
 const exact: React.CSSProperties = {
@@ -16,9 +22,11 @@ const exact: React.CSSProperties = {
   printColorAdjust: 'exact',
 };
 
-const ScaledFrame: React.FC<{ scale: number; border: string; children: React.ReactNode }> = ({
+/** The card with its thick outline; `children` fill the space inside it. */
+const ScaledFrame: React.FC<{ scale: number; settings: TrumpCardSettings; background: string; children: React.ReactNode }> = ({
   scale,
-  border,
+  settings,
+  background,
   children,
 }) => (
   <div style={{ width: CARD_W * scale, height: CARD_H * scale }}>
@@ -29,22 +37,18 @@ const ScaledFrame: React.FC<{ scale: number; border: string; children: React.Rea
         height: CARD_H,
         transform: `scale(${scale})`,
         transformOrigin: 'top left',
-        background: border,
-        borderRadius: 24,
-        padding: 8,
+        background: settings.outlineColor,
+        borderRadius: settings.radius,
+        padding: settings.outlineWidth,
         boxSizing: 'border-box',
-        boxShadow: '0 8px 16px rgba(0,0,0,0.25)',
       }}
     >
       <div
-        className="w-full h-full flex flex-col justify-between text-white"
+        className="relative h-full w-full overflow-hidden"
         style={{
           ...exact,
-          background: '#0F172A',
-          borderRadius: 18,
-          padding: 12,
-          boxSizing: 'border-box',
-          border: '2px solid #FEF08A',
+          background,
+          borderRadius: Math.max(0, settings.radius - settings.outlineWidth),
         }}
       >
         {children}
@@ -55,57 +59,27 @@ const ScaledFrame: React.FC<{ scale: number; border: string; children: React.Rea
 
 export const heroName = (card: GeneratedCard) => (card.config.kidName?.trim() || 'PLAYY HERO').toUpperCase();
 
-export const TrumpCardFront: React.FC<TrumpCardProps> = ({ card, scale = 1 }) => {
-  const { config, stats, archetype, id } = card;
-  const pills = [
-    { icon: '⚔️', val: stats.power, lbl: 'PWR' },
-    { icon: '⚡', val: stats.speed, lbl: 'SPD' },
-    { icon: '🧠', val: stats.intelligence, lbl: 'INT' },
-    { icon: '✨', val: stats.energy, lbl: 'NRG' },
-  ];
-
+/** The front: only the final colored artwork the visitor made, inside the outline. */
+export const TrumpCardFront: React.FC<TrumpCardProps> = ({ card, scale = 1, settings }) => {
+  const saved = useTrumpCardSettings();
+  const s = settings ?? saved;
   return (
-    <ScaledFrame scale={scale} border="#FACC15">
-      <div className="flex items-center justify-between">
-        <span className="px-2.5 py-1 rounded-xl text-xs border border-sky-400" style={{ ...exact, background: '#1E293B' }}>
-          {archetype.element}
-        </span>
-        <span className="px-2.5 py-1 rounded-xl text-[11px] tracking-wider text-yellow-300" style={{ ...exact, background: '#7C3AED' }}>
-          {archetype.rarity.toUpperCase()}
-        </span>
-      </div>
-
-      <div className="text-center">
-        <div className="text-lg truncate" style={{ fontFamily: "'Sniglet', 'Fredoka', sans-serif", fontWeight: 800 }}>
-          {heroName(card)}
-        </div>
-        <div className="text-[11px] tracking-wider text-slate-400">{archetype.title}</div>
-      </div>
-
-      <div className="rounded-2xl overflow-hidden bg-white p-1 flex items-center justify-center" style={{ height: CARD_H * 0.6 }}>
-        <PlayyScene config={config} mode="color" className="h-full" />
-      </div>
-
-      <div className="flex justify-around rounded-2xl p-1.5" style={{ ...exact, background: '#1E293B' }}>
-        {pills.map((p) => (
-          <div key={p.lbl} className="flex flex-col items-center leading-tight">
-            <span className="text-[13px]">{p.icon}</span>
-            <span className="text-[13px] text-yellow-400">{p.val}</span>
-            <span className="text-[9px] text-slate-500">{p.lbl}</span>
-          </div>
-        ))}
-      </div>
-
-      <div className="flex justify-between pt-1 text-[10px] border-t border-slate-700">
-        <span className="text-slate-500">ID: #{id.toUpperCase()}</span>
-        <span className="text-sky-400">PLAYYS TRUMP CARD</span>
-      </div>
+    <ScaledFrame scale={scale} settings={s} background="#ffffff">
+      {/* The A4 artwork fills the card (centered, a sliver of the sides is trimmed) */}
+      <PlayyScene config={card.config} mode="color" className="absolute left-1/2 top-0 h-full -translate-x-1/2" />
     </ScaledFrame>
   );
 };
 
-export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1 }) => {
+const FONT = "'Sniglet', 'Fredoka', sans-serif";
+
+/** The back: the power, the stats and the special abilities. */
+export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1, settings }) => {
+  const saved = useTrumpCardSettings();
+  const s = settings ?? saved;
+  const sel = useSelection(card.config);
   const { stats, archetype, id } = card;
+  const power = SYMBOL_MAP[card.config.symbol] ?? { name: 'Power Symbol', attribute: 'Special Ability', icon: '✨' };
   const rows = [
     { label: 'POWER', val: stats.power, color: '#EF4444', icon: '⚔️' },
     { label: 'SPEED', val: stats.speed, color: '#EAB308', icon: '⚡' },
@@ -114,49 +88,59 @@ export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1 }) => 
     { label: 'COURAGE', val: stats.courage, color: '#10B981', icon: '🦁' },
   ];
   const abilities = [archetype.specialAbility1, archetype.specialAbility2];
+  const panel: React.CSSProperties = { ...exact, background: 'rgba(0, 0, 0, .24)' };
 
   return (
-    <ScaledFrame scale={scale} border="#3B82F6">
-      <div className="text-center">
-        <div className="text-[10px] tracking-[0.2em] text-sky-400">CHARACTER DOSSIER</div>
-        <div className="text-lg" style={{ fontFamily: "'Sniglet', 'Fredoka', sans-serif", fontWeight: 800 }}>
-          {archetype.title.toUpperCase()}
+    <ScaledFrame scale={scale} settings={s} background={s.backBackground}>
+      <div className="flex h-full w-full flex-col justify-between p-3 text-white">
+        <div className="text-center">
+          <div className="text-[10px] tracking-[0.2em]" style={{ color: s.backAccent }}>{heroName(card)}</div>
+          <div className="text-lg leading-tight" style={{ fontFamily: FONT, fontWeight: 800 }}>{archetype.title.toUpperCase()}</div>
+          <div className="text-[11px] text-white/70">{archetype.subTitle}</div>
         </div>
-        <div className="text-[11px] text-slate-400">{archetype.subTitle}</div>
-      </div>
 
-      <div className="space-y-1.5 rounded-2xl p-2.5" style={{ ...exact, background: '#1E293B' }}>
-        {rows.map((r) => (
-          <div key={r.label} className="flex items-center gap-2 text-[10px]">
-            <span className="w-28 shrink-0 text-slate-300">
-              {r.icon} {r.label}
-            </span>
-            <div className="flex-1 h-2 rounded-full bg-slate-700 overflow-hidden" style={exact}>
-              <div className="h-full rounded-full" style={{ ...exact, width: `${r.val}%`, background: r.color }} />
-            </div>
-            <span className="w-6 text-right text-yellow-400">{r.val}</span>
+        <div className="flex items-center gap-3 rounded-2xl p-2" style={panel}>
+          <div className="h-12 w-12 shrink-0 rounded-full bg-white p-1.5 flex items-center justify-center">
+            {sel.symbol ? <AssetArt asset={sel.symbol} mode="color" main={sel.headMain} className="h-full w-auto" /> : <span className="text-2xl">{power.icon}</span>}
           </div>
-        ))}
-      </div>
-
-      <div className="space-y-1.5">
-        <div className="text-[11px] tracking-wider text-yellow-300">⚡ SPECIAL ABILITIES</div>
-        {abilities.map((a) => (
-          <div key={a.name} className="rounded-xl p-2" style={{ ...exact, background: '#1E293B' }}>
-            <div className="flex justify-between text-xs">
-              <span>{a.name}</span>
-              <span className="text-yellow-400">DMG: {a.damage}</span>
-            </div>
-            <div className="text-[10px] text-slate-400">{a.description}</div>
+          <div className="min-w-0 leading-tight">
+            <div className="text-[9px] tracking-widest" style={{ color: s.backAccent }}>YOUR POWER</div>
+            <div className="truncate text-sm" style={{ fontFamily: FONT, fontWeight: 800 }}>{power.name}</div>
+            <div className="truncate text-[10px] text-white/70">{power.attribute}</div>
           </div>
-        ))}
-      </div>
+        </div>
 
-      <div className="text-center text-[11px] italic text-violet-300">"{archetype.quote}"</div>
+        <div className="space-y-1.5 rounded-2xl p-2.5" style={panel}>
+          {rows.map((r) => (
+            <div key={r.label} className="flex items-center gap-2 text-[10px]">
+              <span className="w-28 shrink-0 text-white/85">{r.icon} {r.label}</span>
+              <div className="h-2 flex-1 overflow-hidden rounded-full bg-black/30" style={exact}>
+                <div className="h-full rounded-full" style={{ ...exact, width: `${r.val}%`, background: r.color }} />
+              </div>
+              <span className="w-6 text-right" style={{ color: s.backAccent }}>{r.val}</span>
+            </div>
+          ))}
+        </div>
 
-      <div className="flex justify-between pt-1 text-[9px] border-t border-slate-700">
-        <span className="text-slate-500">CARD SERIAL: #{id.toUpperCase()}</span>
-        <span className="text-yellow-400">AUTHENTIC COLLECTIBLE ★</span>
+        <div className="space-y-1.5">
+          <div className="text-[11px] tracking-wider" style={{ color: s.backAccent }}>⚡ SPECIAL ABILITIES</div>
+          {abilities.map((a) => (
+            <div key={a.name} className="rounded-xl p-2" style={panel}>
+              <div className="flex justify-between text-xs">
+                <span>{a.name}</span>
+                <span style={{ color: s.backAccent }}>DMG: {a.damage}</span>
+              </div>
+              <div className="text-[10px] text-white/70">{a.description}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center text-[11px] italic text-white/80">"{archetype.quote}"</div>
+
+        <div className="flex justify-between border-t border-white/20 pt-1 text-[9px]">
+          <span className="text-white/60">CARD SERIAL: #{id.toUpperCase()}</span>
+          <span style={{ color: s.backAccent }}>AUTHENTIC COLLECTIBLE ★</span>
+        </div>
       </div>
     </ScaledFrame>
   );

@@ -28,6 +28,9 @@ import {
   getProgressTabs,
   saveProgressTabs,
   resetProgressTabs,
+  getTrumpCard,
+  saveTrumpCard,
+  resetTrumpCard,
   getBrand,
   saveBrandLogo,
   saveBrandSettings,
@@ -541,6 +544,33 @@ app.put('/api/cc/progress-tabs', requireAdmin, wrap(async (req, res) => {
 
 app.post('/api/cc/progress-tabs/reset', requireAdmin, wrap(async (_req, res) => {
   await resetProgressTabs();
+  res.json({ ok: true });
+}));
+
+// ---------- Trump card formatting ----------
+const HEX = /^#[0-9a-fA-F]{6}$/;
+
+function checkTrumpCard(b) {
+  if (!b) return 'Missing settings';
+  for (const k of ['outlineColor', 'backBackground', 'backAccent']) if (typeof b[k] !== 'string' || !HEX.test(b[k])) return `Invalid ${k}`;
+  if (!Number.isFinite(b.outlineWidth) || b.outlineWidth < 0 || b.outlineWidth > 40) return 'Outline thickness must be between 0 and 40';
+  if (!Number.isFinite(b.radius) || b.radius < 0 || b.radius > 60) return 'Corner radius must be between 0 and 60';
+  return null;
+}
+
+app.get('/api/trump-card', wrap(async (_req, res) => {
+  res.json({ settings: (await getTrumpCard()) || null });
+}));
+
+app.put('/api/cc/trump-card', requireAdmin, wrap(async (req, res) => {
+  const problem = checkTrumpCard(req.body);
+  if (problem) return res.status(400).json({ error: problem });
+  const { outlineColor, outlineWidth, radius, backBackground, backAccent } = req.body;
+  res.json({ settings: await saveTrumpCard({ outlineColor, outlineWidth, radius, backBackground, backAccent }) });
+}));
+
+app.post('/api/cc/trump-card/reset', requireAdmin, wrap(async (_req, res) => {
+  await resetTrumpCard();
   res.json({ ok: true });
 }));
 

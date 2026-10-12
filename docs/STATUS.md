@@ -92,6 +92,12 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 - Power awarded: the character stands on the left (no card) holding the symbol; the award panel is on the right.
 - The old quiz-selection-page and power-selection-page styles were removed.
 
+## Preview and trump card
+- Preview page: the black-and-white and full-colour A4 pages side by side, with Back and Continue only.
+- Trump card page: one large card, tap to flip. Front = only the finished coloured artwork inside a thick outline; back = the power (symbol and name from the power-up page), the stats and abilities. Back and Continue only, no footer.
+- Command center has a Trump card tab (table `trump_card`): outline colour and thickness, corner roundness, back background and highlight colour, with a live preview. The power icons and stat icons are fixed (not editable there).
+- Continue on the card goes on to the print and complete screen (still the old layout).
+
 ## Open questions
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?

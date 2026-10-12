@@ -399,19 +399,6 @@
 /* Coloring-page preview screen. */
 
 /* Trump-card review screen. */
-.kiosk-machine:has(.card-review-layout) .head-page-logo { position: fixed; z-index: 50; left: 1rem; top: .55rem; height: 4.1rem; pointer-events: auto; }
-.kiosk-machine:has(.card-review-layout) .head-header { min-height: 4.5rem; justify-content: flex-end; position: static; gap: .75rem; }
-.kiosk-machine:has(.card-review-layout) .head-header .stage-indicator { width: min(100%, 56rem); flex: 0 1 56rem; margin-inline: 0; }
-.kiosk-machine:has(.card-review-layout) > .absolute.inset-0.z-0 { opacity: .45; }
-.kiosk-machine:has(.card-review-layout) .head-title { margin-top: 1rem; padding-bottom: .5rem; }
-.kiosk-machine:has(.card-review-layout) .head-title h1 { color: #ffe34d; font-family: 'Sniglet','Fredoka',system-ui,sans-serif; font-size: clamp(2rem, 3.8vw, 3.8rem); line-height: 1; -webkit-text-stroke: 4px #151515; text-shadow: 0 6px 0 #777, 0 11px 14px rgba(35,35,35,.55); }
-.kiosk-machine:has(.card-review-layout) .head-subtitle { margin-top: .55rem; }
-.kiosk-machine:has(.card-review-layout) .card-review-layout { align-items: flex-start; gap: 2rem; padding: 1.25rem 1.5rem .5rem; }
-.kiosk-machine:has(.card-review-layout) .card-review-layout > :first-child { filter: drop-shadow(0 14px 18px rgba(30,20,92,.4)); transform: scale(.8); transform-origin: top center; }
-.kiosk-machine:has(.card-review-layout) .card-review-layout > :first-child > button { border-radius: 999px; background: linear-gradient(#b86cff,#7b2ee5); border: 4px solid white; box-shadow: inset 0 5px 0 rgba(255,255,255,.3), 0 5px 0 #43158d; }
-.kiosk-machine:has(.card-review-layout) .card-review-layout > :last-child { width: min(100%, 34rem); padding: 1.5rem; border: 3px solid #20d8ff; border-radius: 2rem; background: linear-gradient(145deg,#122f70,#07143e); box-shadow: inset 0 4px 0 rgba(255,255,255,.12), 0 12px 24px rgba(23,16,86,.4); }
-.kiosk-machine:has(.card-review-layout) .card-review-layout > :last-child .btn-3d:not(.btn-3d-blue) { background: linear-gradient(#5eead4,#2dd4bf); }
-.kiosk-machine:has(.card-review-layout) .machine-navigation { justify-content: center !important; gap: 24px; padding-bottom: 1rem; }
 
 /* Print-complete celebration screen. */
 .kiosk-machine:has(.complete-page) .head-page-logo { position: fixed; z-index: 50; left: 1rem; top: .55rem; height: 4.1rem; pointer-events: auto; }
@@ -911,3 +898,23 @@
 .pick-page.pick-preview .head-nav-next { position: absolute; left: 50%; right: auto; transform: translateX(-50%); margin: 0; width: 30%; }
 .pick-page.pick-preview .pick-options-area { top: 29.5%; height: 56%; }
 .preview-card-label { top: -4.6vh; }
+
+/* ===== Trump card page: one big card, tap to flip ===== */
+.pick-page.pick-trump .head-title { left: 20%; width: 60%; top: 10.8%; }
+.pick-page.pick-trump .pick-options-area { left: 20%; top: 25%; width: 60%; height: 62%; }
+.pick-page.pick-trump .head-nav-next { position: absolute; left: 50%; right: auto; transform: translateX(-50%); margin: 0; width: 30%; }
+.trump-stage { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6vh; }
+.trump-flip { position: relative; padding: 0; border: 0; background: none; cursor: pointer; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3, .7, .3, 1); perspective: none; filter: drop-shadow(0 2.4vh 2.4vh rgba(15, 10, 80, .45)); }
+.trump-flip.is-back { transform: rotateY(180deg); }
+.trump-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.trump-face-back { transform: rotateY(180deg); }
+.trump-hint {
+  padding: .8vh 2.2vw; border-radius: 999px; background: rgba(255, 255, 255, .92); color: #17246f;
+  font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(1.45vw, 2.6vh); box-shadow: 0 .6vh 0 rgba(120, 100, 190, .35);
+}
+.pick-page.pick-trump .pick-options-area { top: 24%; height: 64%; }
+.trump-flip { filter: none; }
+.trump-face { filter: drop-shadow(0 2.4vh 2.4vh rgba(15, 10, 80, .45)); }
+.trump-stage { position: relative; }
+.trump-hint { position: absolute; left: calc(50% + 21vw); top: 50%; transform: translateY(-50%); width: 15vw; text-align: center; font-size: min(1.5vw, 2.7vh); }
+.trump-hint { width: 17vw; left: calc(50% + 20.5vw); border-radius: 2.4vw; }

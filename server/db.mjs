@@ -83,6 +83,13 @@ export function ensureSchema() {
       )`);
 
     await sql.query(`
+      CREATE TABLE IF NOT EXISTS trump_card (
+        id      INTEGER PRIMARY KEY DEFAULT 1,
+        data    JSONB NOT NULL DEFAULT '{}',
+        updated TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
+    await sql.query(`
       CREATE TABLE IF NOT EXISTS brand (
         id       INTEGER PRIMARY KEY DEFAULT 1,
         logo_svg TEXT,                         -- sanitized SVG, or NULL to use the built-in PNG logo
@@ -324,6 +331,27 @@ export async function saveProgressTabs(tabs) {
 
 export async function resetProgressTabs() {
   await query('DELETE FROM progress_tabs WHERE id = 1');
+}
+
+// ---------- Trump card formatting (outline color and width, back colors) ----------
+export async function getTrumpCard() {
+  const rows = await query('SELECT data FROM trump_card WHERE id = 1');
+  return rows[0]?.data ?? null;
+}
+
+export async function saveTrumpCard(settings) {
+  const rows = await query(
+    `INSERT INTO trump_card (id, data, updated)
+     VALUES (1, $1, now())
+     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated = now()
+     RETURNING data`,
+    [JSON.stringify(settings)],
+  );
+  return rows[0]?.data;
+}
+
+export async function resetTrumpCard() {
+  await query('DELETE FROM trump_card WHERE id = 1');
 }
 
 // ---------- Brand: the logo slot (SVG) and its outline settings ----------
