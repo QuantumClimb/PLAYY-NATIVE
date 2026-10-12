@@ -10,10 +10,5 @@
       "source": "/((?!api/|assets/).*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/index.mjs": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
