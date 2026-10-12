@@ -568,7 +568,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       : 'PRINT & COMPLETE';
 
   const isReview = currentStep === 'card';
-  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' || currentStep === 'colors' || currentStep === 'details';
+  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' || currentStep === 'colors' || currentStep === 'details' || currentStep === 'quiz' || currentStep === 'power';
   const colorMode = config.colors?.mode ?? 'simple';
   // Advanced mode: one panel per part, in a sensible order (gloves are always white, so they are not offered)
   const REGION_ORDER = ['hoodie', 'trousers', 'shoes', 'cuffs', 'trim', 'soles', 'tassles'];
@@ -589,12 +589,12 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   return (
     <div
       onClick={resetIdleTimer}
-      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'world' ? 'pick-page pick-world' : currentStep === 'details' ? 'pick-page pick-details' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : ''}`}
+      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'world' ? 'pick-page pick-world' : currentStep === 'details' ? 'pick-page pick-details' : currentStep === 'quiz' ? 'pick-page pick-quiz' : currentStep === 'power' ? 'pick-page pick-power' : ''}`}
     >
       {/* Dynamic CMS Scene Background */}
       <SceneBackground sceneId={CMS_SCENE_BY_STEP[currentStep]} />
       {/* LEFT: the live preview, as tall as the screen allows (an A4 page) */}
-      {!isReview && currentStep !== 'complete' && (
+      {!isReview && currentStep !== 'complete' && currentStep !== 'quiz' && (
         <div className="head-preview-column lg:w-[46%] h-[42vh] lg:h-full min-h-0 shrink-0 flex items-center justify-center">
           <div
             className="head-preview-panel relative h-full max-w-full bg-white rounded-[30px] border-[6px] border-amber-300/90 shadow-[0_25px_80px_rgba(0,0,0,0.7)] overflow-hidden"
@@ -611,7 +611,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               headOnly={currentStep === 'head'}
               showSymbol={['power', 'world', 'details', 'preview'].includes(currentStep)}
               showBackground={['world', 'details', 'preview'].includes(currentStep)}
-              fit={currentStep === 'pose' || currentStep === 'colors' ? 'crop' : currentStep === 'world' ? 'scene' : undefined}
+              fit={currentStep === 'pose' || currentStep === 'colors' || currentStep === 'power' ? 'crop' : currentStep === 'world' ? 'scene' : undefined}
             />
             )}
             {currentStep === 'head' && [1, 2, 3, 4, 5, 6].map((n) => <i key={n} className={`pick-spark pick-spark-${n}`} aria-hidden="true" />)}
@@ -666,10 +666,8 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <span className="head-title-star head-title-star-bottom-left" aria-hidden="true">✦</span>
           <span className="head-title-star head-title-star-bottom-right" aria-hidden="true">✦</span>
         </>}
-        {currentStep === 'quiz' ? (
-          <h1 className="head-arched-heading quiz-question-heading" aria-label={questionTitle}>{questionTitle}</h1>
-        ) : currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' || currentStep === 'details' ? (() => {
-          const headingText = currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : currentStep === 'details' ? DETAIL_TITLES[detailsStep - 1] : 'CHOOSE YOUR BACKGROUND';
+        {currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' || currentStep === 'details' || currentStep === 'quiz' ? (() => {
+          const headingText = currentStep === 'quiz' ? questionTitle : currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : currentStep === 'details' ? DETAIL_TITLES[detailsStep - 1] : 'CHOOSE YOUR BACKGROUND';
           return (
             <h1 className="head-arched-heading" style={{ ['--title-chars' as string]: headingText.length } as React.CSSProperties} aria-label={headingText}>
               {headingText.split('').map((letter, index) => (
@@ -745,23 +743,20 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 4: POWER QUESTIONNAIRE */}
           {currentStep === 'quiz' && (
-            <div className="flex flex-col gap-4 p-2 min-h-full justify-center">
+            <div className="quiz-panel">
               {powerQuizAnswers.length < powerQuestions.length ? (
                 <>
-                  {/* 4 Choices Grid */}
-                  <div className="quiz-options grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="quiz-options">
                     {powerQuestions[powerQuestionIdx]?.options.map((opt, i) => (
                       <button
                         key={opt.id || i}
                         type="button"
                         data-sfx="answer"
                         onClick={() => handlePowerAnswer(i)}
-                        className="min-h-[115px] p-4 rounded-[28px] flex flex-col items-center justify-center text-center cursor-pointer border-[5px] bg-slate-900/90 hover:bg-indigo-950 text-slate-200 border-slate-800 hover:border-amber-400 active:scale-95 transition-all shadow-xl"
+                        className="quiz-card"
                       >
-                        {opt.icon && <div className="text-3xl mb-1.5">{opt.icon}</div>}
-                        <div className="text-base sm:text-lg font-black leading-tight uppercase">
-                          {opt.label}
-                        </div>
+                        <div className="quiz-card-art">{opt.icon && <span>{opt.icon}</span>}</div>
+                        <div className="quiz-card-label">{opt.label}</div>
                       </button>
                     ))}
                   </div>
@@ -819,8 +814,8 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                   <section className="power-award-panel" aria-labelledby="power-awarded-title">
                     <div className="power-award-ribbon">
                       <span id="power-awarded-title">POWER AWARDED!</span>
-                      <i aria-hidden="true">â˜…</i>
-                      <b aria-hidden="true">â˜…</b>
+                      <i aria-hidden="true">★</i>
+                      <b aria-hidden="true">★</b>
                     </div>
                     <div className="power-award-main">
                       <div className="power-symbol-display" aria-label={symbolInfo.name}>

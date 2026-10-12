@@ -86,6 +86,12 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 - Background page: portrait (A4) preview on the left; the world cards are portrait with the artwork edge to edge and the name laid over the bottom.
 - Poses whose layers have no roles in the CMS follow the head's colour (see AssetArt).
 
+## Power-up questions and power awarded
+- Both screens use the shared pick-page chrome (progress tabs, Pick for Me, Back and Next in the shared bottom container).
+- Questions: no character preview; the answers are a centred row of pastel cards (icon panel on top, label below) with a "Question x of y" badge. Tapping an answer moves on at once, so there is no Next button on the questions.
+- Power awarded: the character stands on the left (no card) holding the symbol; the award panel is on the right.
+- The old quiz-selection-page and power-selection-page styles were removed.
+
 ## Open questions
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?
