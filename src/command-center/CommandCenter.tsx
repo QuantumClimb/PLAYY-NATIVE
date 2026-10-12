@@ -3,6 +3,8 @@ import { ASSET_TYPES, Asset, AssetType, api } from './api';
 import { AssetEditor } from './AssetEditor';
 import { SceneBackgroundsPanel } from './SceneBackgroundsPanel';
 import { PowerQuizPanel } from './PowerQuizPanel';
+import { IntroBadgesPanel } from './IntroBadgesPanel';
+import { LogoPanel } from './LogoPanel';
 import { defaultParts, parseSvgAsset } from '../lib/assets/svgParts';
 
 const TYPE_LABEL: Record<AssetType, string> = {
@@ -53,7 +55,7 @@ const Login: React.FC<{ enabled: boolean; onDone: () => void }> = ({ enabled, on
 
 export const CommandCenter: React.FC = () => {
   const [state, setState] = useState<'loading' | 'out' | 'in' | 'offline'>('loading');
-  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz'>('assets');
+  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz' | 'intro-badges' | 'logo'>('assets');
   const [enabled, setEnabled] = useState(true);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
@@ -161,6 +163,32 @@ export const CommandCenter: React.FC = () => {
                   <span>⚡</span>
                   <span>Power Quiz Questions</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('intro-badges')}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'intro-badges'
+                      ? 'bg-pink-900/60 border border-pink-500 text-pink-200 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>🏷️</span>
+                  <span>Intro Badges</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('logo')}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                    activeTab === 'logo'
+                      ? 'bg-sky-900/60 border border-sky-500 text-sky-200 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  <span>✨</span>
+                  <span>Logo</span>
+                </button>
               </div>
             </div>
 
@@ -266,6 +294,8 @@ export const CommandCenter: React.FC = () => {
 
           {/* TAB 3: Power Quiz Questions CMS */}
           {activeTab === 'power-quiz' && <PowerQuizPanel />}
+          {activeTab === 'intro-badges' && <IntroBadgesPanel />}
+          {activeTab === 'logo' && <LogoPanel />}
         </div>
       )}
     </div>

@@ -10,6 +10,7 @@ import { normalizeColor } from '../../lib/assets/svgParts';
 import { SCENE_H, SCENE_W, layoutScene } from '../../lib/assets/scene';
 import { AssetArt } from '../playys/AssetArt';
 import { PlayyScene } from '../playys/PlayyScene';
+import { BrandLogo } from '../../lib/brand/brand';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { calculateArchetype } from '../../lib/playys/archetypes';
 import { BASE_STATS, CharacterStats, GeneratedCard } from '../../lib/playys/cardTypes';
@@ -558,7 +559,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       {/* RIGHT: progress, the one big question, the choices, and navigation */}
       <div className="head-content flex-1 min-w-0 min-h-0 flex flex-col">
       <div className="head-header w-full flex items-center justify-between gap-3 px-1 shrink-0 z-20">
-        <img src="/assets/logo.png" alt="PLAYYS" draggable={false} className="head-page-logo h-12 sm:h-14 w-auto object-contain" />
+        <BrandLogo className="head-page-logo h-12 sm:h-14 w-auto object-contain" />
 
         <StageIndicator currentStep={currentStep} />
 

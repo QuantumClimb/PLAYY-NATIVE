@@ -68,6 +68,21 @@ export function ensureSchema() {
         updated TIMESTAMPTZ NOT NULL DEFAULT now()
       )`);
 
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS intro_badges (
+        id      INTEGER PRIMARY KEY DEFAULT 1,
+        data    JSONB NOT NULL DEFAULT '[]',
+        updated TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS brand (
+        id       INTEGER PRIMARY KEY DEFAULT 1,
+        logo_svg TEXT,                         -- sanitized SVG, or NULL to use the built-in PNG logo
+        settings JSONB NOT NULL DEFAULT '{}',  -- logo outline: { enabled, color, size }
+        updated  TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
     // Seed initial intro background setting if not present
     await sql.query(`
       INSERT INTO scene_backgrounds (scene_id, bg_type, media_id, fit, position, overlay_color, overlay_opacity, badge_placement, start_button_placement, start_button_size, badge_gap, float_animation)
@@ -253,4 +268,50 @@ export async function savePowerQuizQuestions(questions) {
 export async function resetPowerQuizQuestions() {
   await query('DELETE FROM power_quiz_questions WHERE id = 1');
   return null;
+}
+
+// ---------- Intro screen badges (label, icon, color), edited in the command center ----------
+export async function getIntroBadges() {
+  const rows = await query('SELECT data FROM intro_badges WHERE id = 1');
+  return rows[0]?.data ?? null;
+}
+
+export async function saveIntroBadges(badges) {
+  const rows = await query(
+    `INSERT INTO intro_badges (id, data, updated)
+     VALUES (1, $1, now())
+     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated = now()
+     RETURNING data`,
+    [JSON.stringify(badges)],
+  );
+  return rows[0]?.data;
+}
+
+export async function resetIntroBadges() {
+  await query('DELETE FROM intro_badges WHERE id = 1');
+}
+
+// ---------- Brand: the logo slot (SVG) and its outline settings ----------
+export async function getBrand() {
+  return (await query('SELECT * FROM brand WHERE id = 1'))[0] ?? null;
+}
+
+export async function saveBrandLogo(svg) {
+  const rows = await query(
+    `INSERT INTO brand (id, logo_svg, updated) VALUES (1, $1, now())
+     ON CONFLICT (id) DO UPDATE SET logo_svg = EXCLUDED.logo_svg, updated = now()
+     RETURNING *`,
+    [svg],
+  );
+  return rows[0];
+}
+
+export async function saveBrandSettings(settings) {
+  const rows = await query(
+    `INSERT INTO brand (id, settings, updated) VALUES (1, $1, now())
+     ON CONFLICT (id) DO UPDATE SET settings = EXCLUDED.settings, updated = now()
+     RETURNING *`,
+    [JSON.stringify(settings)],
+  );
+  return rows[0];
 }

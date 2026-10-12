@@ -22,6 +22,12 @@ import {
   getPowerQuizQuestions,
   savePowerQuizQuestions,
   resetPowerQuizQuestions,
+  getIntroBadges,
+  saveIntroBadges,
+  resetIntroBadges,
+  getBrand,
+  saveBrandLogo,
+  saveBrandSettings,
 } from './db.mjs';
 
 // Printers belong to the kiosk PC, so they are off on Vercel unless ENABLE_PRINTERS=1
@@ -359,6 +365,100 @@ app.put('/api/cc/power-quiz-questions', requireAdmin, wrap(async (req, res) => {
 
 app.post('/api/cc/power-quiz-questions/reset', requireAdmin, wrap(async (_req, res) => {
   await resetPowerQuizQuestions();
+  res.json({ ok: true });
+}));
+
+// ---------- Brand logo (SVG slot) ----------
+const DEFAULT_SHADOW = { enabled: true, blur: 2, offsetY: 1.5, opacity: 0.45 };
+const DEFAULT_STROKE = { enabled: true, color: '#ffffff', width: 1.5 };
+
+app.get('/api/brand', wrap(async (_req, res) => {
+  const row = await getBrand();
+  res.json({
+    logoUrl: row?.logo_svg ? `/api/brand/logo?v=${Date.parse(row.updated)}` : null,
+    shadow: { ...DEFAULT_SHADOW, ...(row?.settings?.shadow ?? {}) },
+    stroke: { ...DEFAULT_STROKE, ...(row?.settings?.stroke ?? {}) },
+  });
+}));
+
+// Served as an image, with a locked-down policy on top of the upload checks
+app.get('/api/brand/logo', wrap(async (_req, res) => {
+  const row = await getBrand();
+  if (!row?.logo_svg) return res.status(404).json({ error: 'No custom logo' });
+  res.set({
+    'Content-Type': 'image/svg+xml; charset=utf-8',
+    'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+    'X-Content-Type-Options': 'nosniff',
+    'Cache-Control': 'public, max-age=300',
+  });
+  res.send(row.logo_svg);
+}));
+
+app.put('/api/cc/brand/logo', requireAdmin, wrap(async (req, res) => {
+  const svg = req.body?.svg;
+  if (svg === null) {
+    await saveBrandLogo(null); // back to the built-in PNG logo
+    return res.json({ ok: true });
+  }
+  const problem = checkSvg(svg);
+  if (problem) return res.status(400).json({ error: problem });
+  await saveBrandLogo(svg);
+  res.json({ ok: true });
+}));
+
+const inRange = (v, min, max) => typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
+
+app.put('/api/cc/brand/settings', requireAdmin, wrap(async (req, res) => {
+  const { shadow, stroke } = req.body ?? {};
+  if (shadow !== undefined) {
+    if (typeof shadow?.enabled !== 'boolean' || !inRange(shadow.blur, 0, 20) || !inRange(shadow.offsetY, -10, 20) || !inRange(shadow.opacity, 0, 1)) {
+      return res.status(400).json({ error: 'Shadow needs enabled, blur 0-20, offsetY -10 to 20 and opacity 0-1' });
+    }
+  }
+  if (stroke !== undefined) {
+    if (typeof stroke?.enabled !== 'boolean' || !/^#[0-9a-fA-F]{6}$/.test(stroke.color) || !inRange(stroke.width, 0, 8)) {
+      return res.status(400).json({ error: 'Stroke needs enabled, a #rrggbb color and a width from 0 to 8' });
+    }
+  }
+  const row = await getBrand();
+  const settings = { ...(row?.settings ?? {}) };
+  if (shadow) settings.shadow = { enabled: shadow.enabled, blur: shadow.blur, offsetY: shadow.offsetY, opacity: shadow.opacity };
+  if (stroke) settings.stroke = { enabled: stroke.enabled, color: stroke.color, width: stroke.width };
+  await saveBrandSettings(settings);
+  res.json({ shadow: settings.shadow ?? DEFAULT_SHADOW, stroke: settings.stroke ?? DEFAULT_STROKE });
+}));
+
+// ---------- Intro badges ----------
+const BADGE_ICON = /^(lucide:[A-Za-z0-9]{1,40}|media:[A-Za-z0-9_-]{1,80}|emoji:.{1,8})$/u;
+
+function checkBadges(list) {
+  if (!Array.isArray(list) || list.length > 5) return 'Badges must be a list of at most 5';
+  for (const b of list) {
+    if (!b || typeof b.label !== 'string' || !b.label.trim() || b.label.length > 14) return 'Each badge needs a label of 1 to 14 characters';
+    if (typeof b.icon !== 'string' || !BADGE_ICON.test(b.icon)) return 'Invalid badge icon';
+    if (typeof b.color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(b.color)) return 'Invalid badge color';
+  }
+  return null;
+}
+
+app.get('/api/intro-badges', wrap(async (_req, res) => {
+  res.json({ badges: (await getIntroBadges()) || null });
+}));
+
+app.put('/api/cc/intro-badges', requireAdmin, wrap(async (req, res) => {
+  const problem = checkBadges(req.body?.badges);
+  if (problem) return res.status(400).json({ error: problem });
+  const badges = req.body.badges.map((b, i) => ({
+    id: typeof b.id === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(b.id) ? b.id : `badge-${i + 1}`,
+    label: b.label.trim(),
+    icon: b.icon,
+    color: b.color,
+  }));
+  res.json({ badges: await saveIntroBadges(badges) });
+}));
+
+app.post('/api/cc/intro-badges/reset', requireAdmin, wrap(async (_req, res) => {
+  await resetIntroBadges();
   res.json({ ok: true });
 }));
 
