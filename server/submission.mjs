@@ -7,7 +7,20 @@ const BASE64 = /^[A-Za-z0-9+/=]+$/;
 const THUMBNAIL = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 const MAX_THUMBNAIL_LENGTH = 120_000;
 const MAX_IMAGE_LENGTH = 4_000_000;
+const STAT_NAMES = ['power', 'speed', 'intelligence', 'energy', 'courage'];
 const CHARACTER_FIELDS = ['head', 'pose', 'symbol', 'background', 'colors'];
+
+/** The stats, character type and rarity of the card, kept with the visitor for marketing. */
+function cardSummary(card) {
+  if (!card || typeof card !== 'object') return null;
+  const stats = {};
+  for (const stat of STAT_NAMES) {
+    const value = Number(card.stats?.[stat]);
+    if (!Number.isFinite(value)) return null;
+    stats[stat] = Math.round(Math.min(100, Math.max(0, value)));
+  }
+  return { stats, type: text(card.type, 40), rarity: text(card.rarity, 20) };
+}
 
 const text = (value, max) =>
   String(value ?? '')
@@ -33,6 +46,8 @@ export function parseSubmission(body) {
 
   const character = {};
   for (const field of CHARACTER_FIELDS) if (config?.[field] !== undefined) character[field] = config[field];
+  const card = cardSummary(config?.card);
+  if (card) character.card = card;
 
   return {
     who,

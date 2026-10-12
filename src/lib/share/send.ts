@@ -1,4 +1,5 @@
 import { api } from '../../data/api';
+import type { GeneratedCard } from '../playys/cardTypes';
 import type { PlayyConfiguration } from '../playys/types';
 import type { ShareCapture } from './capture';
 
@@ -13,7 +14,7 @@ interface Pending {
   email: string;
   phone: string;
   thumbnail: string;
-  config: Partial<PlayyConfiguration>;
+  config: Partial<PlayyConfiguration> & { card?: { stats: GeneratedCard['stats']; type: string; rarity: string } };
   images: ShareCapture['images'];
 }
 
@@ -25,7 +26,11 @@ async function post(body: Pending): Promise<ShareResult> {
 }
 
 /** Logs the Playy and has the server email the PDFs. If the server cannot be reached it is kept to try again later. */
-export async function sendShare(config: PlayyConfiguration, capture: ShareCapture): Promise<ShareResult> {
+export async function sendShare(
+  config: PlayyConfiguration,
+  capture: ShareCapture,
+  card: GeneratedCard | null = null,
+): Promise<ShareResult> {
   const body: Pending = {
     name: config.kidName ?? '',
     email: config.email ?? '',
@@ -37,6 +42,7 @@ export async function sendShare(config: PlayyConfiguration, capture: ShareCaptur
       symbol: config.symbol,
       background: config.background,
       colors: config.colors,
+      card: card ? { stats: card.stats, type: card.archetype.title, rarity: card.archetype.rarity } : undefined,
     },
     images: capture.images,
   };

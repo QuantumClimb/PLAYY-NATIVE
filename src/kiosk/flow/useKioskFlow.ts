@@ -42,7 +42,8 @@ export function useKioskFlow({ config, onChangeConfig, onCardChange, library, se
   const questions = usePowerQuizQuestions();
   const quiz = usePowerQuiz(questions);
   const details = useDetailsForm(config, change);
-  const share = useShare({ config, selection, touch, onDone: onFinish });
+  const [card, setCard] = useState<GeneratedCard | null>(null);
+  const share = useShare({ config, selection, card, touch, onDone: onFinish });
 
   const colorMode = config.colors?.mode ?? 'simple';
   const context: StepContext = { colorMode, detailsStep: details.step, question: quiz.question };
@@ -118,7 +119,9 @@ export function useKioskFlow({ config, onChangeConfig, onCardChange, library, se
     );
     const finishedConfig = { ...config, symbol };
     onChangeConfig(finishedConfig);
-    onCardChange(makeCard(finishedConfig));
+    const made = makeCard(finishedConfig, questions, answers);
+    setCard(made);
+    onCardChange(made);
     setStep('power');
   };
 

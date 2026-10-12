@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { AssetLibraryProvider } from '../lib/assets/library';
 import { DEFAULT_CONFIGURATION } from '../lib/playys/configuration';
-import { BASE_STATS, GeneratedCard } from '../lib/playys/cardTypes';
-import { calculateArchetype } from '../lib/playys/archetypes';
+import { GeneratedCard } from '../lib/playys/cardTypes';
+import { makeCard } from '../lib/playys/card';
+import { DEFAULT_POWER_QUIZ_QUESTIONS } from '../lib/playys/powerQuiz';
 import { DEFAULT_TRUMP_CARD, TrumpCardSettings, cleanTrumpCard } from '../lib/card/settings';
 import { TrumpCardBack, TrumpCardFront } from '../components/card/TrumpCard';
 import { CmsPanel, SaveBar } from './CmsPanel';
@@ -38,11 +39,12 @@ export const TrumpCardPanel: React.FC = () => {
   // A sample card so the preview shows real artwork from the library
   const sample = useMemo<GeneratedCard>(
     () => ({
+      ...makeCard(
+        { ...DEFAULT_CONFIGURATION, kidName: 'Arjun', symbol: 'warm-heart' },
+        DEFAULT_POWER_QUIZ_QUESTIONS,
+        [0, 1, 2, 3, 0],
+      ),
       id: 'sample',
-      config: { ...DEFAULT_CONFIGURATION, kidName: 'Arjun' },
-      stats: { ...BASE_STATS },
-      archetype: calculateArchetype({ ...BASE_STATS }),
-      createdAt: new Date().toISOString(),
     }),
     [],
   );

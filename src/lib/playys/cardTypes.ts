@@ -27,11 +27,3 @@ export interface GeneratedCard {
   archetype: PersonalityArchetype;
   createdAt: string;
 }
-
-export const BASE_STATS: CharacterStats = {
-  power: 50,
-  speed: 50,
-  intelligence: 50,
-  energy: 50,
-  courage: 50,
-};

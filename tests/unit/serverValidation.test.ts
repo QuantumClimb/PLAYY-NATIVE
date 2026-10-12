@@ -94,6 +94,17 @@ describe('parseSubmission', () => {
     expect(Object.keys(parsed.images)).toEqual(IMAGE_KEYS);
   });
 
+  it('keeps the card summary and drops one that is not numbers', () => {
+    const stats = { power: 41, speed: 35, intelligence: 60.4, energy: 52, courage: 98 };
+    const card = { stats, type: 'Forest Protector', rarity: 'Legendary', extra: 'dropped' };
+    expect(parseSubmission({ ...body, config: { card } }).config.card).toEqual({
+      stats: { ...stats, intelligence: 60 },
+      type: 'Forest Protector',
+      rarity: 'Legendary',
+    });
+    expect(parseSubmission({ ...body, config: { card: { stats: { power: 'x' } } } }).config.card).toBeUndefined();
+  });
+
   it('refuses a missing name, a bad thumbnail and a bad picture', () => {
     expect(message(() => parseSubmission({ ...body, name: '  ' }))).toBe('A name is needed');
     expect(message(() => parseSubmission({ ...body, thumbnail: 'http://x' }))).toBe('Invalid thumbnail');

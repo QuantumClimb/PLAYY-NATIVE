@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import type { GeneratedCard } from '../../lib/playys/cardTypes';
 import type { Selection } from '../../lib/assets/library';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import type { PlayyConfiguration } from '../../lib/playys/types';
@@ -9,6 +10,7 @@ import type { ShareSheetsHandle } from '../components/ShareSheets';
 interface Options {
   config: PlayyConfiguration;
   selection: Selection;
+  card: GeneratedCard | null;
   /** Called when the visitor does anything, so the idle timer starts again */
   touch: () => void;
   /** Called when sharing is over (it worked or not): opens the print dialog and moves on */
@@ -19,7 +21,7 @@ interface Options {
  * SHARE: photographs the finished pages, logs the visitor and emails the PDFs, then lets the print dialog open.
  * A failure never stops the visitor from getting their printout.
  */
-export function useShare({ config, selection, touch, onDone }: Options) {
+export function useShare({ config, selection, card, touch, onDone }: Options) {
   const sheets = useRef<ShareSheetsHandle>(null);
   const [sharing, setSharing] = useState(false);
 
@@ -39,7 +41,7 @@ export function useShare({ config, selection, touch, onDone }: Options) {
           background: selection.background.slug,
           symbol: selection.symbol?.slug ?? config.symbol,
         };
-        await sendShare(used, await captureShare(nodes));
+        await sendShare(used, await captureShare(nodes), card);
       }
     } catch (e) {
       console.error('Sharing failed', e);
