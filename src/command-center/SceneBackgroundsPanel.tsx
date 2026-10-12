@@ -9,7 +9,6 @@ import {
   IntroBadgeGap,
   IntroButtonSize,
   IntroFloatAnimation,
-  SceneBackgroundSetting,
   SceneId,
   StartButtonPlacement,
 } from '../lib/backgrounds/types';

@@ -140,10 +140,6 @@ export const PowerQuizPanel: React.FC = () => {
 
   if (loading) return <div className="text-gray-500">Loading quiz questions…</div>;
 
-  const symbolSlugs = Object.keys(SYMBOL_MAP).filter(
-    (s, idx, arr) => arr.indexOf(s) === idx && SYMBOL_MAP[s].name
-  );
-
   return (
     <div className="space-y-6">
       {/* Header */}

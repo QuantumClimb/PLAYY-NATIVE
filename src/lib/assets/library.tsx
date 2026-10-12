@@ -144,7 +144,9 @@ export interface Selection {
   secondary?: string;
 }
 
-export function resolveSelection(lib: AssetLibrary, config: PlayyConfiguration): Selection {
+type SelectionKeys = Pick<PlayyConfiguration, 'head' | 'pose' | 'symbol' | 'background'>;
+
+export function resolveSelection(lib: AssetLibrary, config: SelectionKeys): Selection {
   const pick = (list: Asset[], slug: string) => list.find((a) => a.slug === slug) ?? list[0];
   const head = pick(lib.heads, config.head);
   const headMain = normalizeColor(head.meta.main) ?? '#3b82f6';
@@ -162,5 +164,6 @@ export function resolveSelection(lib: AssetLibrary, config: PlayyConfiguration):
 
 export function useSelection(config: PlayyConfiguration): Selection {
   const lib = useAssetLibrary();
-  return useMemo(() => resolveSelection(lib, config), [lib, config.head, config.pose, config.symbol, config.background]);
+  const { head, pose, symbol, background } = config;
+  return useMemo(() => resolveSelection(lib, { head, pose, symbol, background }), [lib, head, pose, symbol, background]);
 }

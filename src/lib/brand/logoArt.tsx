@@ -68,10 +68,11 @@ export const LogoArt: React.FC<LogoArtProps> = ({ mode, stroke, className = '', 
   const brand = useBrand();
   const svg = useLogoSvg();
   const s = stroke ?? brand.stroke;
+  const { enabled, color, width } = s;
   const markup = useMemo(() => {
     if (!svg) return null;
-    try { return renderLogoArt(svg, { mode, stroke: s }); } catch { return null; }
-  }, [svg, mode, s.enabled, s.color, s.width]);
+    try { return renderLogoArt(svg, { mode, stroke: { enabled, color, width } }); } catch { return null; }
+  }, [svg, mode, enabled, color, width]);
   if (!markup) return null;
   return <div className={`[&>svg]:w-full [&>svg]:h-full [&>svg]:block ${className}`} style={style} dangerouslySetInnerHTML={{ __html: markup }} />;
 };

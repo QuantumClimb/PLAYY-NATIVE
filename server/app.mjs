@@ -10,12 +10,10 @@ import { buildPdfs, sendShareEmail, smtpConfigured } from './share.mjs';
 import {
   ASSET_TYPES,
   listAssets,
-  getAsset,
   createAsset,
   updateAsset,
   deleteAsset,
   listSceneBackgrounds,
-  getSceneBackground,
   upsertSceneBackground,
   resetSceneBackground,
   createMediaFile,
@@ -173,7 +171,8 @@ app.put('/api/cc/assets/:id', requireAdmin, wrap(async (req, res) => {
   if (enabled !== undefined) patch.enabled = !!enabled;
   if (Number.isFinite(sort)) patch.sort = sort;
   const asset = await updateAsset(Number(req.params.id), patch);
-  asset ? res.json({ asset }) : res.status(404).json({ error: 'Not found' });
+  if (!asset) return res.status(404).json({ error: 'Not found' });
+  res.json({ asset });
 }));
 
 app.delete('/api/cc/assets/:id', requireAdmin, wrap(async (req, res) =>

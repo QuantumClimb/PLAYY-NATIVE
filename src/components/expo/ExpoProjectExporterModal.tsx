@@ -7,10 +7,6 @@ import {
   FileCode,
   FolderGit2,
   Terminal,
-  ExternalLink,
-  Sparkles,
-  Layers,
-  Smartphone,
   CheckCircle2,
 } from 'lucide-react';
 import { EXPO_PROJECT_FILES, ExpoProjectFile } from '../../lib/playys/expoProjectFiles';

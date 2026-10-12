@@ -5,10 +5,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { PlayyConfiguration } from './lib/playys/types';
-import {
-  DEFAULT_CONFIGURATION,
-  generateRandomConfiguration,
-} from './lib/playys/configuration';
+import { DEFAULT_CONFIGURATION } from './lib/playys/configuration';
 
 import { PrintableCardSheet } from './components/card/PrintableCardSheet';
 import { GeneratedCard } from './lib/playys/cardTypes';

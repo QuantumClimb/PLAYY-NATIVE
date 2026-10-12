@@ -1,0 +1,10 @@
+dist
+node_modules
+expo-app
+public
+data
+coverage
+package-lock.json
+*.css
+*.md
+*.docx

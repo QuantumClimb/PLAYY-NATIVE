@@ -6,13 +6,8 @@ import {
   CheckCircle2,
   Copy,
   Check,
-  Server,
-  Zap,
-  ShieldCheck,
   ChevronRight,
-  Code2,
   Terminal,
-  Cpu,
   Usb,
 } from 'lucide-react';
 import {
@@ -333,7 +328,7 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                     </label>
                     <select
                       value={config.provider}
-                      onChange={(e) => setConfig({ ...config, provider: e.target.value as any })}
+                      onChange={(e) => setConfig({ ...config, provider: e.target.value as CloudPrinterConfig['provider'] })}
                       className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs font-semibold focus:outline-hidden focus:border-indigo-500"
                     >
                       <option value="canon_usb">Direct USB (Silent Kiosk Printing)</option>
@@ -360,7 +355,7 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                     </label>
                     <select
                       value={config.paperSize}
-                      onChange={(e) => setConfig({ ...config, paperSize: e.target.value as any })}
+                      onChange={(e) => setConfig({ ...config, paperSize: e.target.value as CloudPrinterConfig['paperSize'] })}
                       className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs font-semibold focus:outline-hidden focus:border-indigo-500"
                     >
                       <option value="A4">A4 (Canon G2430 standard)</option>

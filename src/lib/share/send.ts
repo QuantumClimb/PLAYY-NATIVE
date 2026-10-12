@@ -44,9 +44,16 @@ export async function sendShare(config: PlayyConfiguration, capture: ShareCaptur
 }
 
 /** Called when the kiosk starts: sends a Playyy that could not be sent last time. */
+function readPending(): Pending | null {
+  try {
+    return JSON.parse(localStorage.getItem(PENDING_KEY) || 'null');
+  } catch {
+    return null;
+  }
+}
+
 export async function retryPendingShare(): Promise<void> {
-  let body: Pending | null = null;
-  try { body = JSON.parse(localStorage.getItem(PENDING_KEY) || 'null'); } catch { body = null; }
+  const body = readPending();
   if (!body) return;
   try {
     await post(body);

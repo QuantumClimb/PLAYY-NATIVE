@@ -17,6 +17,7 @@ import { PickCarousel } from './PickCarousel';
 import { ColorModeToggle, ColorPanel } from './ColorPanel';
 import { DetailField, DetailsKeyboard } from './DetailsKeyboard';
 import { StageTabsRow } from './StageTabs';
+import { useIdleReset } from './useIdleReset';
 import { ShareSheets, ShareSheetsHandle } from './ShareSheets';
 import { captureShare } from '../../lib/share/capture';
 import { sendShare } from '../../lib/share/send';
@@ -46,6 +47,9 @@ interface MagicalColoringMachineProps {
   onAutoReset: () => void;
 }
 
+/** Seconds without a touch before the kiosk goes back to the intro screen */
+const IDLE_SECONDS = 45;
+
 const STEPS_LIST: MachineStep[] = ['head', 'pose', 'colors', 'quiz', 'power', 'world', 'details', 'preview', 'card', 'complete'];
 
 const DEFAULT_COLOR_PALETTE = COLOR_SWATCHES;
@@ -59,11 +63,6 @@ const DETAIL_SUBTITLES = [
 const DETAIL_PLACEHOLDERS = ['Type your name', 'Type a phone number', 'Type an email address'];
 const FUN_NAMES = ['Sparky', 'Bubbles', 'Zippy', 'Giggles', 'Twinkle', 'Pip', 'Biscuit', 'Jellybean', 'Waffles', 'Doodle', 'Sunny', 'Pickles'];
 
-const KEYBOARD_LETTERS = [
-  ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-  ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-  ['Z', 'X', 'C', 'V', 'B', 'N', 'M'],
-];
 
 const rectStyle = (r: { x: number; y: number; w: number; h: number }): React.CSSProperties => ({
   position: 'absolute',
@@ -327,28 +326,12 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   const [detailsStep, setDetailsStep] = useState<1 | 2 | 3>(1);
   const [detailsError, setDetailsError] = useState('');
   const detailField: 'name' | 'phone' | 'email' = detailsStep === 1 ? 'name' : detailsStep === 2 ? 'phone' : 'email';
-  const [idleSeconds, setIdleSeconds] = useState(45);
   const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
 
   const stepIndex = STEPS_LIST.indexOf(currentStep);
 
-  // Inactivity auto-reset: 45 seconds of no touches returns to idle movie
-  const resetIdleTimer = () => {
-    setIdleSeconds(45);
-  };
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setIdleSeconds((prev) => {
-        if (prev <= 1) {
-          onAutoReset();
-          return 45;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [onAutoReset]);
+  // 45 seconds without a touch returns to the intro screen
+  const resetIdleTimer = useIdleReset(onAutoReset, IDLE_SECONDS);
 
   // Navigation handlers
   const goNext = () => {
@@ -516,11 +499,11 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
     nativeFeedback.impactLight();
     const field = detailField;
     const current = detailValue(field);
-    let next = current;
+    let next: string;
     if (key === 'BACKSPACE') {
       next = current.slice(0, -1);
     } else if (field === 'name') {
-      if (!/^[A-Za-z0-9 '\-]$/.test(key)) return;
+      if (!/^[A-Za-z0-9 '-]$/.test(key)) return;
       if (key === ' ' && (current === '' || current.endsWith(' '))) return;
       // Capital letter at the start of each word, the rest lowercase
       const startOfWord = current === '' || current.endsWith(' ') || current.endsWith('-');
