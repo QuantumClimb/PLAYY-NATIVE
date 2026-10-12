@@ -526,8 +526,11 @@
 }
 .pick-page > *:not(.absolute) { z-index: 2; }
 .pick-page .head-content,
-.pick-page .head-header,
-.pick-page .machine-navigation { display: contents; }
+.pick-page .head-header { display: contents; }
+.pick-page .machine-navigation.machine-navigation {
+  position: absolute; z-index: 6; left: 2.9%; right: 2.7%; bottom: 3.6%; width: auto; height: 9.6%; padding: 0; gap: 0;
+  display: flex; align-items: center; justify-content: space-between !important;
+}
 
 /* Logo */
 .pick-page .head-page-logo { position: absolute; z-index: 6; left: 1.2%; top: 1.4%; height: 12%; width: auto; pointer-events: auto; }
@@ -688,7 +691,7 @@
 
 /* Back (bottom left) and Next (bottom right), at the design's size */
 .pick-page .head-nav-button {
-  position: absolute; z-index: 6; bottom: 3.6%; width: 17.4%; height: 9.6%; min-height: 0; padding: 0;
+  position: relative; flex: none; width: 18.43%; height: 100%; min-height: 0; padding: 0;
   display: inline-flex; align-items: center; justify-content: center; gap: 1.1vw;
   border: .6vh solid #fff; border-radius: 999px; color: #fff; cursor: pointer;
   font-family: 'Fredoka', sans-serif; font-size: min(2.35vw, 4.2vh); font-weight: 700; letter-spacing: .02em;
@@ -697,12 +700,11 @@
 .pick-page .head-nav-button::before { display: none; }
 .pick-page .head-nav-button svg { width: 1.15em; height: 1.15em; flex: none; }
 .pick-page .head-nav-button:not(.head-nav-next) {
-  left: 2.9%;
   background: linear-gradient(#5db4ff 0%, #2f80f3 55%, #2562dc 100%);
   box-shadow: 0 0 0 .35vh rgba(120, 180, 255, .4), 0 .8vh 0 #1b49b0, 0 1.8vh 2.6vh rgba(10, 20, 90, .4), inset 0 .5vh 0 rgba(255, 255, 255, .45);
 }
 .pick-page .head-nav-next {
-  right: 2.7%;
+  margin-left: auto;
   background: linear-gradient(#46f0c4 0%, #1fd3a6 55%, #0fae8a 100%);
   box-shadow: 0 0 0 .35vh rgba(90, 240, 200, .4), 0 .8vh 0 #087a63, 0 1.8vh 2.6vh rgba(10, 60, 70, .4), inset 0 .5vh 0 rgba(255, 255, 255, .45);
 }
@@ -787,6 +789,7 @@
   flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; color: #4b1fb0;
   font-family: 'Sniglet', 'Fredoka', sans-serif; font-weight: 800; font-size: min(4vw, 7vh);
 }
+.detail-field-text.is-email { font-family: 'Fredoka', sans-serif; font-weight: 700; }
 .detail-field-text.is-empty { color: #b8add8; font-weight: 700; }
 .detail-caret { display: inline-block; width: .35vh; min-width: 3px; height: 1em; margin-left: .5vw; vertical-align: -.12em; border-radius: 2px; background: #7b3fe0; animation: detailCaret 1s steps(1) infinite; }
 @keyframes detailCaret { 50% { opacity: 0; } }

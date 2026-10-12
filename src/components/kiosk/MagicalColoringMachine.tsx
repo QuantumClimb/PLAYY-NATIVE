@@ -1010,11 +1010,11 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
       {/* 4. Bottom Navigation: BACK on left, ONE DOMINANT NEXT ON RIGHT */}
       {!['card', 'complete'].includes(currentStep) && (
-        <div className={`machine-navigation w-full flex items-center justify-between px-2 pt-2 shrink-0 z-20 ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'world' ? 'head-navigation' : ''}`}>
+        <div className={`machine-navigation w-full flex items-center justify-between px-2 pt-2 shrink-0 z-20 ${isPick || currentStep === 'quiz' || currentStep === 'power' ? 'head-navigation' : ''}`}>
           <button
             type="button"
             onClick={goBack}
-            className={`btn-3d btn-3d-blue py-4 px-8 font-bold text-lg ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'world' ? 'head-nav-button' : ''}`}
+            className={`btn-3d btn-3d-blue py-4 px-8 font-bold text-lg ${isPick || currentStep === 'quiz' || currentStep === 'power' ? 'head-nav-button' : ''}`}
           >
             <ArrowLeft strokeWidth={3.4} aria-hidden="true" />
             <span>BACK</span>
@@ -1024,7 +1024,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <button
             type="button"
             onClick={goNext}
-            className={`btn-3d py-5 px-10 font-bold text-xl sm:text-2xl flex items-center gap-3 ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'world' ? 'head-nav-button head-nav-next' : ''}`}
+            className={`btn-3d py-5 px-10 font-bold text-xl sm:text-2xl flex items-center gap-3 ${isPick || currentStep === 'quiz' || currentStep === 'power' ? 'head-nav-button head-nav-next' : ''}`}
           >
             <span>NEXT</span>
             <ArrowRight strokeWidth={3.4} aria-hidden="true" />
