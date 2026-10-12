@@ -1,135 +1,117 @@
-# PLAYYS Native: Status Report
+# PLAYYS Kiosk: Status Report
 
-Last updated: 2026-10-10. Active app: the **Vite web kiosk**. The Expo app is paused until later.
+Last updated: 2026-10-12. Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
 
-## How to run (kiosk PC)
+## 1. Summary
+
+The whole visitor journey works end to end: intro, build a character (face, pose, colours), power-up questions, power awarded, background, name, phone and email, preview, trump card, share (print dialog, email, log) and a success screen that returns to the intro. Everything the client edits lives in the command center. What is still open is outside the code: the **SMTP password** (so emails go out) and the **WhatsApp token**, both waiting on the client's system administrator.
+
+## 2. How to run
+
 | What | Command |
 |---|---|
-| **Everything in one command** | `npm start` builds the site and serves it with the API at http://localhost:3001 |
-| Development (both servers, hot reload) | `npm run dev:all` (site on :3000, server on :3001) |
+| Everything in one command | `npm start` builds the site and serves it with the API at http://localhost:3001 |
+| Development (hot reload) | `npm run dev:all` (site on :3000, server on :3001) |
 | Server only / site only | `npm run server` / `npm run dev` |
-| Command center | `/command-center` on either address (password in `.env`: `COMMAND_CENTER_PASSWORD`) |
-| Printer dialog | `Alt+Shift+P` on any screen (needs the server running) |
-| Silent printing | Launch Chrome with `--kiosk --kiosk-printing` and set the default printer in the dialog |
+| Command center | `/command-center` (password in `.env`: `COMMAND_CENTER_PASSWORD`) |
+| Printer dialog | `Alt+Shift+P` on any screen (needs the local server) |
+| Operator dialog | hold the logo on the intro screen for 4.5 seconds |
+| Kiosk Chrome | `--kiosk --kiosk-printing --autoplay-policy=no-user-gesture-required` (silent printing, music from the start) |
 
-Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_URL` (the Neon connection string). The database is **Neon Postgres**, shared by local runs and Vercel, so assets uploaded anywhere are the same everywhere. The old local `data/kiosk.db` was copied into Neon with `scripts/migrate-sqlite-to-neon.mjs` and is no longer used (kept as a backup, not in git).
+`.env` needs `DATABASE_URL` (Neon Postgres, shared by local runs and Vercel), `COMMAND_CENTER_PASSWORD`, and, for email, `SMTP_USER` and `SMTP_PASS` (optional `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`). See `.env.example`. Pushing to `main` deploys to Vercel; its environment variables must match.
 
-## Done
-**Kiosk look and flow**
-- Start page: looping video background, logo, a single 3D START button. Footer on every inner page.
-- Fonts: Sniglet ExtraBold for titles, Fredoka Bold for body text and buttons. Fredoka has no 800 weight.
-- Faux-3D glossy buttons (reusable `.btn-3d` class).
-- Flow: Head, Body, Power, World, Name, then a 3-question quiz, then the trump card (flip front/back), then print.
-- Printing sends two pages: the coloring sheet and the trump card front and back.
+## 3. The visitor journey
 
-**Kiosk now runs on the command-center assets.** Heads, poses, symbols and backgrounds are loaded from the server at start (`/api/assets`); the old hardcoded drawings are no longer used by the kiosk. The preview is an A4-shaped scene (background stretched to the printable area, character standing on it) and fills the whole height of the left side (704 px tall at 1280x800, 984 px at 1920x1080; it was 450 px). The coloring page, celebration screen and trump card all use the same scene. Choosing a head also decides the outfit and secondary colors.
+Every page after the intro shares one layout: logo, progress tabs, title and subtitle, "Pick for Me!" where it applies, and Back / Next in one bottom container. No page scrolls vertically; option lists swipe sideways.
 
-**Intro screen** (2026-10-12): one centered column (logo, "Let's Make Something Awesome!" sign, pill Tap to Start button, badges) sitting 5% in from the right edge, styled from the design reference. The four badges under the button are static labels, editable in the command center under **Intro Badges**: label, icon (built-in set, uploaded PNG/JPG/WebP, or emoji), color, order, up to 5. Stored in the `intro_badges` table; the original four are used until saved. Placement, size and float animation still come from Scene Backgrounds, and holding the logo for 4.5 s still opens the operator dialog.
+| Step | What happens |
+|---|---|
+| Intro | Looping video, logo, sign, Tap to Start, four badges. |
+| 1 Face | Swipeable cards of heads. The head also sets the outfit and secondary colours. |
+| 2 Pose | Swipeable pose cards; the character preview recolours with the chosen head. |
+| 3 Colours | Simple (main + secondary colour) or Advanced (each part), 15 glossy hexagon swatches. Gloves stay white. |
+| 4 You | Power-up questions: a centred row of pastel cards, no preview. An answer moves straight on. |
+| 5 Power | Power awarded: the character holds the symbol, award panel on the right. |
+| 6 Background | Portrait preview card; world cards with the artwork edge to edge. |
+| 7 Name | Three screens with a colourful touch keyboard: name, phone, email. Nothing can be skipped; each is validated. The preview shows the finished page as it is typed. |
+| 8 Preview | Black-and-white page and full-colour page side by side. Back and Continue. |
+| Trump card | One large card, tap to flip: front is the finished artwork in a thick outline, back has the power, stats and abilities. Back and Continue, no footer. |
+| Share | The two pages and the card in a row. **SHARE** photographs them, logs the visitor, emails two PDFs, opens the print dialog and moves on. |
+| Success | Confetti and what happens next; returns to the intro after 20 seconds or on FINISH. |
 
-**Logo** (command center, **Logo** tab). The built-in logo is now `public/assets/SVG/logo/logo.svg` (nine named layers: faceeyebrows, white_sockets, black_boxes, VGP, kingdom, y1, y2, noesemouth, black_dots). Uploading an SVG replaces it everywhere; one click goes back. Uploads get the same safety checks as the character SVGs. Two looks, both set in the tab and stored in the `brand` table:
-- **In the app** (intro screen, creation-screen header): a tight CSS drop shadow (blur, distance, strength).
-- **On the finished artwork** (for the later composite onto the final page): a real SVG stroke, width as a % of the logo's height. Color artwork gets a rounded edge around the whole silhouette in a chosen color; the black-and-white coloring page gets white fills (dark layers stay black) with a black line around every shape. Built in `src/lib/brand/logoArt.tsx` (`LogoArt` / `renderLogoArt`); not yet placed on the printed page.
+The finished page (preview, print, PDF) has the logo top-left, the name big under the character, and "Notes: email - phone" along the bottom. Colour choices go through one resolver, `src/lib/playys/colors.ts`. The black-and-white page ignores colour choices.
 
-**Kiosk sounds** (command center, **Sounds** tab): every kiosk button plays a sound. 14 actions (any button, Start, Next, Back, choosing a card, Surprise Me, keyboard key, backspace, flip card, quiz answer, Print, Change, All Done, trump card revealed), each with a chosen sound and volume, plus a master volume and an on/off switch. Sounds can be uploaded (MP3/WAV/OGG/M4A, up to 2 MB) and assigned. The engine (`src/lib/sfx/`) listens for button taps and picks the sound from `data-sfx` tags where set and otherwise from the button's wording. The built-in sounds are **synthesized in the browser** (Web Audio), so there are no audio files. Stored in the `sound_settings` table. **The Google Assistant cartoon sound library was not used:** its terms limit the sounds to Actions on Google, forbid use on non-Google platforms and forbid distributing the files separately. The operator dialogs stay silent (`data-sfx="none"`).
+Printing sends the black-and-white page, the colour page and the card front and back. The browser's print dialog still appears for now; with `--kiosk-printing` it prints silently.
 
-**Command center theme**: white, neutral and Inter (indigo accent), scoped to `.cc-root`; shared classes `cc-card`, `cc-btn`, `cc-input` etc. in `src/index.css`. The kiosk keeps its playful look.
+## 4. Command center (`/command-center`)
 
-**Head, pose and background pages** (2026-10-12): rebuilt as one shared layout from the design reference. Every piece is positioned as a percentage of the screen (logo, centered stepper with a connecting line, "Pick for Me!" pill, title and subtitle, cream preview card with gold border, Back bottom-left and Next bottom-right at 17.4% x 9.6%), so it scales from 1366x768 to 1920x1080. The options are a **swipeable carousel** of 3 x 2 pages with pastel cards (touch scroll-snap, mouse drag, arrows and page dots appear only with more than 6 items, and the selected item's page opens automatically). No vertical scrolling. The pose page crops the character to fill the preview and the cards; the background page centers the A4 scene. Components: `PickCarousel.tsx`, `.pick-page` styles in `src/index.css` (the old page-specific head/pose/world CSS was removed). Uploaded media is now cached by the browser (`Cache-Control: immutable`) because the scene images are about 2 MB each and were re-downloaded on every view. The stepper, "Pick for Me!" wording and Back/Next arrows are shared with the other steps; the colors, quiz, power and details pages keep their own layouts.
+Password protected. Tabs:
 
-**Colours page** (2026-10-12): rebuilt from the design reference on the shared pick-page layout, with a **Simple / Advanced** switch centered between Back and Next.
-- **Simple:** two panels of 15 glossy hexagon swatches. MAIN COLOUR sets the head, hoodie, trousers and shoes; SECONDARY COLOUR sets only the cuffs, trim, soles and hoodie strings. Gloves are always white.
-- **Advanced:** one panel per part (head, hoodie, trousers, shoes, sleeve cuffs, clothing trim, shoe soles, hoodie strings), two per page, swiped left and right with page dots (no vertical scrolling). Parts left alone follow the simple choices.
-- **Final artwork:** all colors go through one resolver (`src/lib/playys/colors.ts`), used by the preview, the pose cards, the final scene and the trump card. The black-and-white coloring page ignores the choices. The saved model is `config.colors = { mode, main, highlight, parts }`.
-- Untouched, a character keeps its default colors from the command center (no swatch is marked until a color is chosen).
+| Tab | Controls |
+|---|---|
+| Characters | Heads, face, poses, symbols, backgrounds: SVG upload with checks (no scripts or external links), named layers become parts (main, derived, fixed, line), anchors, per-head colours (head, outfit, secondary), A4 scene preview, stand point and size, and the **name shown on the kiosk** for each asset. |
+| Scene backgrounds | Page backgrounds (image or video) per screen, plus intro layout options. |
+| Intro badges | The badges under the start button: label, icon (built in, upload or emoji), colour, order. |
+| Progress tabs | Rename the eight top tabs, change their icons, or hide the labels. |
+| Trump card | Outline colour and thickness, corner roundness, back background and highlight colour, with live preview. Power symbols and stat icons are fixed. |
+| Users | Everyone who made a Playyy: name, email, phone, date and time, a card thumbnail, the character choices and the email status. Search, CSV download, Resend. |
+| Share & email | Two recipient slots (currently qcquantumclimb@gmail.com and aum.janakiram@gmail.com), on/off, a greyed-out WhatsApp slot. |
+| Power quiz | The questions, answers and the symbol each answer leans toward. |
+| Logo | Replace the logo SVG; in-app drop shadow and an artwork stroke. |
+| Sounds | A sound and volume for 14 kiosk actions, uploads, and the **background music playlist** (order, volume, preview, add songs). |
 
-**Printer dialog** (Alt+Shift+P): lists installed printers with status, sets the default, test print. Detection runs in the local kiosk server because a browser cannot list printers.
+The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps its playful look.
 
-**Trump card and questionnaire** merged from `PLAYY_CARD` into the web app. Fixed the corrupted archetype emoji and added the missing courage stat to the printed card. Also ported to `expo-app` (paused; uses the simpler Expo artwork).
+## 5. Sharing, email and the users log
 
-**Command center** (`/command-center`, password protected)
-- Asset library in SQLite: heads, faces, bodies (poses), symbols, backgrounds. Uploaded SVGs are checked and rejected if they contain scripts or external links.
-- SVG parts engine: named layers from Illustrator become parts with modes: main color, derived (HSL lightness offset), fixed, line art. Black-and-white version generated from the same SVG.
-- Anchors (neck, chest) placed by clicking the preview.
-- Head on body preview with a per-head size slider, in color and black-and-white.
-- Character colors, set per head: **head color**, **outfit color** (hoodie, trousers, shoes; follows the head color unless set) and a **fixed secondary color** (trim, soles, cuffs, tassles; auto-derived from the outfit unless set). Previewed live on the body.
+- `POST /api/submissions` receives the name, email, phone, a thumbnail, the character choices and four JPEGs (about 1.5 MB). It stores the row, builds two PDFs with `pdf-lib` (coloring pages; trump card) and emails them with `nodemailer` to the recipients in the command center.
+- If the email fails, the images are kept in `submission_files` so **Resend** works later. If the kiosk cannot reach the server, the Playyy is kept in the browser and sent on the next start.
+- Pictures are taken in the browser with `html-to-image` (the fonts are read once and embedded; this needed `crossorigin` on the Google Fonts link).
+- **Waiting on the client:** SMTP login (a Gmail app password or the company mail server's details) and the WhatsApp token. Until then every row shows "Not sent".
 
-- Scene preview (head, body, symbol and background together) shown as an **A4 sheet**: 5 mm printable margin, background stretched (non-uniform) to fill it, color and black-and-white print preview side by side. The kiosk print page is now A4 portrait with a 5 mm margin.
-- Per-background **stand point** and character height; per-symbol **size on the chest**; chest anchor on bodies.
+## 6. Data and architecture
 
-**Assets loaded:** heads Playy, Sparkyy, Dreamyy; shared face; body pose1; 7 symbols (moon, fire, crown, cloud, paw, zap, heart); Backgrounds 01, 02 and 03 (test).
+- **Neon Postgres** through the serverless driver, plain SQL in `server/db.mjs`. Tables: `assets`, `media_files`, `scene_backgrounds`, `power_quiz_questions`, `intro_badges`, `progress_tabs`, `trump_card`, `brand`, `sound_settings`, `share_settings`, `submissions`, `submission_files`, `app_migrations`.
+- **One Express app** (`server/app.mjs`) with two launchers: `server/kiosk-server.mjs` (local, also serves the built site) and `api/index.mjs` (Vercel function, routed by `vercel.json`). Printer routes are off on Vercel.
+- **Frontend:** React 19, Vite 6, Tailwind 4 for utilities, plain CSS in `src/index.css` for the page layouts. Layouts use percentages of the screen so they scale from 1366x768 to 1920x1080.
+- **SVG engine** (`src/lib/assets/svgParts.ts`): named Illustrator layers become parts; one source SVG gives the colour and black-and-white versions. `scene.ts` lays out the A4 scene (5 mm margin, background stretched, character on the stand point).
+- **Sounds** are synthesized in the browser (no audio files, no licensing); background music files are in `public/assets/audio/music`.
 
-## Decisions
-- Neon Postgres via Neon's serverless driver (plain SQL in `server/db.mjs`). Prisma was considered and left out: one table, and it adds a generate step and an adapter on Vercel. Add it later if the schema grows a lot.
-- The API is one Express app (`server/app.mjs`) with two launchers: `server/kiosk-server.mjs` (local, also serves the built site) and `api/index.mjs` (Vercel function, routed by `vercel.json`).
-- The face is a shared asset; its colors are fixed and editable in the command center.
-- Each head has a head color, an outfit color (defaults to the head color) and an optional fixed secondary color (defaults to a lighter shade of the outfit). Decided 2026-10-10 so characters like Dreamyy can have a white head with a colored outfit.
+## 7. Decisions
 
-## Next, in order
-1. Set the real outfit and secondary colors for Dreamyy (and Playy and Sparkyy if they need them) in the command center.
-2. Tune the placement in the scene preview: body neck and chest anchors on pose1, head sizes, symbol sizes, and the background stand point and character height.
-3. More backgrounds and poses. Symbols star and gear are missing (the old app had 9, 7 delivered).
-5. Remove the old hardcoded drawings and unused legacy screens (`src/components/playys`, `creator`, `expo`, `lib/playys/heads|poses|symbols|backgrounds`).
-5b. Deploy to Vercel: set `COMMAND_CENTER_PASSWORD` (and optionally `COMMAND_CENTER_SECRET`) in the Vercel project settings; `DATABASE_URL` comes from the Neon integration. The Vercel function entry has not been tested on Vercel yet.
-6. Phone number step after Name, with a consent line.
-7. Results screen showing the black-and-white and color versions.
-8. Email via SMTP: black-and-white PDF and color image to qcquantumclimb@gmail.com with the child's name and parent's phone. Retry queue so the kiosk never blocks.
-9. WhatsApp sending when the client provides the API (sender interface so email is the first implementation).
+- Neon Postgres; Prisma left out (plain SQL is enough; revisit if the schema grows a lot).
+- One API app with two launchers (local and Vercel).
+- Characters: a head colour, an outfit colour (defaults to the head colour) and an optional fixed secondary colour. The face is a shared asset.
+- PDFs and thumbnails are made in the browser, not on the server (the server stays small enough for Vercel).
+- Google's cartoon sound library was not used (its terms limit it to Actions on Google); sounds are synthesized instead.
+- Email first; WhatsApp behind the same share step when the token arrives. Eventually SHARE sends straight to the printer, the email and WhatsApp with no print dialog.
 
-## Details screens and finished page
-- Name, phone number and email are three separate screens (in that order) with a colourful on-screen keyboard (QWERTY with a 123 layer, big keypad for phone). Nothing can be skipped: each screen is validated (name not empty, phone at least 7 digits, email format).
-- Pick for Me on the name screen gives a fun name. The preview card on the left shows the finished page as it is typed.
-- The finished page (colour and black-and-white, preview and print) has the logo top left, the name big under the character, and "Notes: email - phone" as a small line at the bottom.
+## 8. Open items
 
-## Progress tabs, names and background page
-- Command center has a Progress tabs tab (table `progress_tabs`): rename the eight top tabs, change their icons (original, built-in icon, uploaded image or emoji) and switch the labels off. The numbers ("1.") are gone from the labels.
-- Pose, background (and every asset) names are edited in Characters, using the "Name shown on the kiosk" field at the top of the asset, then Save.
-- Background page: portrait (A4) preview on the left; the world cards are portrait with the artwork edge to edge and the name laid over the bottom.
-- Poses whose layers have no roles in the CMS follow the head's colour (see AssetArt).
+**Needs the client**
+1. SMTP details and password, and the WhatsApp token (questions sent to you for the system administrator).
+2. The kiosk PC's printer, and silent printing with `--kiosk-printing`.
+3. Confirm the Vercel deploy with all environment variables once SMTP is set.
 
-## Power-up questions and power awarded
-- Both screens use the shared pick-page chrome (progress tabs, Pick for Me, Back and Next in the shared bottom container).
-- Questions: no character preview; the answers are a centred row of pastel cards (icon panel on top, label below) with a "Question x of y" badge. Tapping an answer moves on at once, so there is no Next button on the questions.
-- Power awarded: the character stands on the left (no card) holding the symbol; the award panel is on the right.
-- The old quiz-selection-page and power-selection-page styles were removed.
-
-## Preview and trump card
-- Preview page: the black-and-white and full-colour A4 pages side by side, with Back and Continue only.
-- Trump card page: one large card, tap to flip. Front = only the finished coloured artwork inside a thick outline; back = the power (symbol and name from the power-up page), the stats and abilities. Back and Continue only, no footer.
-- Command center has a Trump card tab (table `trump_card`): outline colour and thickness, corner roundness, back background and highlight colour, with a live preview. The power icons and stat icons are fixed (not editable there).
-- Continue on the card goes on to the print and complete screen (still the old layout).
-
-## Share, users log and email
-- Final screen: the black-and-white page, the colour page and the trump card in a row, with Back and SHARE.
-- SHARE: photographs the pages (html-to-image), POSTs them to `/api/submissions`, then opens the print dialog and goes on to the celebration screen. The print is the black-and-white page, the colour page and the card (front and back).
-- Server: logs every Playyy in `submissions` (name, email, phone, date and time, a small card thumbnail, the character choices), builds two PDFs with pdf-lib (coloring pages; trump card) and emails them with nodemailer to the recipients in `share_settings`. If the email fails the four JPEGs are kept in `submission_files` so Resend works from the command center; if the kiosk cannot reach the server the Playyy is kept in the browser and sent on the next start.
-- Command center: Users tab (table, search, Download CSV, Resend) and Share & email tab (two recipient slots, on/off switch, WhatsApp placeholder).
-- Needs `SMTP_USER` and `SMTP_PASS` (Gmail app password) in `.env` and in Vercel. Until then emails show as "Not sent".
-- WhatsApp is not built yet (waiting for the client's token).
-
-## Cleanup and last screen
-- Last screen (success) redesigned on the shared chrome; it returns to the intro screen by itself after 20 seconds (or FINISH).
-- Back/Next container no longer swallows taps in the middle of the page (this had broken the Advanced colour toggle).
-- Removed unused old pages and components (the old creator, wizard and Expo-simulator screens, the SVG-component heads, poses, symbols and backgrounds, old questions list) and the unused mascot image.
-
-## Background music
-- A playlist plays on every kiosk screen: the songs one after another, then it starts again. Shipped songs live in `public/assets/audio/music` (playy_tune_01.mp3, Toylike Groove.mp3).
-- Command center, Sounds tab, Background music: on/off, volume, reorder, rename, remove, preview, add a song (upload) or re-add a shipped one. Stored with the sound settings. Uploads over about 3 MB do not fit through Vercel; put big files in the music folder instead.
-- The browser only allows sound after a tap, so music starts at the first tap on the intro screen (immediately if Chrome is started with `--autoplay-policy=no-user-gesture-required`, which is worth adding to the kiosk launch command).
-
-## Open questions
-- Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
-- Should the hoodie be split so the head sits inside the hood?
-- Background 01 artwork looks cropped at the left and right edges in the preview; confirm that is intended.
-- Where the trump card sits relative to the new black-and-white and color results screen.
-- Should submissions (name, phone, artwork) be stored in the database as a log?
-
-## Known issues and notes
-- Colors page: the region names (Body, Clothing Trim...) are white on cream cards and hard to read (predates the pick-page work).
-- The head, pose and background pages are laid out for a landscape screen (about 16:9); a portrait screen would need its own layout.
-- The trump card quiz is unbalanced: every stat starts at 50 and the highest wins, so most answers give "Cosmic Explorer".
-- Hosting: the server reads `PORT` and `HOST` (hosted = all interfaces) and turns the printer routes off unless `ENABLE_PRINTERS=1`. SQLite data does not survive redeploys on most hosts, hence Neon.
-- The kiosk now needs a connection to Neon to load its assets. For an offline-capable kiosk, cache the asset library on the PC (not built yet).
-- On Vercel the login rate limit is per function instance, so it is weaker than on the kiosk PC. Use a long password.
-- With `npm run dev` listening on all interfaces, the `/api` routes are reachable from the LAN. The command center is password protected, but the printer routes are not.
-- Expo app: Expo expects slightly different `react-native-svg` and `safe-area-context` versions (run `npx expo install --fix`), and `app.json` references icon and splash images that do not exist.
+**Known issues**
+- **Every trump card has the same stats** (all 50) and the same archetype, because the quiz answers do not change the stats yet. Planned in Phase 6 of the refactor plan.
+- The submissions log does not yet record the quiz answers.
+- Colours page: region names are white on cream and hard to read.
+- The pages are laid out for a landscape screen (about 16:9).
+- The kiosk needs a connection to load its assets (no offline cache).
+- On Vercel the login rate limit is per function instance. Use a long password.
+- With `npm run dev` the `/api` routes are reachable from the LAN (printer routes are not password protected).
+- Uploads through Vercel are limited to about 4.5 MB per request, so large songs go in `public/assets/audio/music`.
 - `docs/PKD_Create_Your_Play_Functional_Document_v7.docx` is a local file, not committed.
+- Expo app: wants slightly different `react-native-svg` and `safe-area-context` versions and its `app.json` points at missing icon and splash images.
+
+**Open design questions**
+- The cyan trim on the blue character is not a pure lightness shift. Keep it fixed or derive it?
+- Should the hoodie be split so the head sits inside the hood?
+- Background 01 artwork looks cropped at the left and right edges in the preview. Intended?
+
+## 9. Next
+
+1. Get SMTP and WhatsApp details; test a real email end to end.
+2. Approve the refactor plan and answer the decisions in section 6 of [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
+3. Phase 0 of the plan (tests, types, lint, screenshot baselines), then the rest in order.
