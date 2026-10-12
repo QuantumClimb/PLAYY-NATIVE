@@ -1,6 +1,6 @@
 # PLAYYS Kiosk: Status Report
 
-Last updated: 2026-10-12. Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
+Last updated: 2026-10-12 (refactor phases 0 to 6 done). Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
 
 ## 1. Summary
 
@@ -71,9 +71,9 @@ The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps 
 
 ## 6. Data and architecture
 
-- **Neon Postgres** through the serverless driver, plain SQL in `server/db.mjs`. Tables: `assets`, `media_files`, `scene_backgrounds`, `power_quiz_questions`, `intro_badges`, `progress_tabs`, `trump_card`, `brand`, `sound_settings`, `share_settings`, `submissions`, `submission_files`, `app_migrations`.
+- **Neon Postgres** through the serverless driver, plain SQL in `server/db/`. Tables: `assets`, `media_files`, `scene_backgrounds`, `power_quiz_questions`, `intro_badges`, `progress_tabs`, `trump_card`, `brand`, `sound_settings`, `share_settings`, `submissions`, `submission_files`, `app_migrations`.
 - **One Express app** (`server/app.mjs`) with two launchers: `server/kiosk-server.mjs` (local, also serves the built site) and `api/index.mjs` (Vercel function, routed by `vercel.json`). Printer routes are off on Vercel.
-- **Frontend:** React 19, Vite 6, Tailwind 4 for utilities, plain CSS in `src/index.css` for the page layouts. Layouts use percentages of the screen so they scale from 1366x768 to 1920x1080.
+- **Frontend:** React 19, Vite 6, Tailwind 4 for utilities, plain CSS in `src/styles/` (one file per feature) for the page layouts. Layouts use percentages of the screen so they scale from 1366x768 to 1920x1080.
 - **SVG engine** (`src/lib/assets/svgParts.ts`): named Illustrator layers become parts; one source SVG gives the colour and black-and-white versions. `scene.ts` lays out the A4 scene (5 mm margin, background stretched, character on the stand point).
 - **Sounds** are synthesized in the browser (no audio files, no licensing); background music files are in `public/assets/audio/music`.
 
@@ -94,8 +94,12 @@ The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps 
 3. Confirm the Vercel deploy with all environment variables once SMTP is set.
 
 **Known issues**
-- **Every trump card has the same stats** (all 50) and the same archetype, because the quiz answers do not change the stats yet. Planned in Phase 6 of the refactor plan.
-- The submissions log does not yet record the quiz answers.
+- The Users tab does not yet show each visitor's card stats (they are saved with every submission in its `config`).
+- Page class names still use the old `head-*` / `pick-*` prefixes, and some headers use `display: contents`; renaming them is cosmetic and was left out to keep the screenshots identical.
+- `ExpoProjectExporterModal` is not reachable from any screen.
+- Local fallback assets can hide a database error in the kiosk; decide whether the kiosk should show an error instead.
+- The saved quiz in the database may still hold older wording; re-save it in the Power quiz tab.
+- The CI workflow is in `docs/ci.yml.example` because the push token lacks the `workflow` scope.
 - Colours page: region names are white on cream and hard to read.
 - The pages are laid out for a landscape screen (about 16:9).
 - The kiosk needs a connection to load its assets (no offline cache).
@@ -113,5 +117,6 @@ The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps 
 ## 9. Next
 
 1. Get SMTP and WhatsApp details; test a real email end to end.
-2. Approve the refactor plan and answer the decisions in section 6 of [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
-3. Phase 0 of the plan (tests, types, lint, screenshot baselines), then the rest in order.
+2. Check a Vercel deploy of the restructured server.
+3. Add a balance table (how often each power and character type comes up) to the Power quiz tab.
+4. Show the card stats in the Users tab.
