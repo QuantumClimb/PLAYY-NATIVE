@@ -1,6 +1,4 @@
 import express from 'express';
-import fs from 'node:fs';
-import path from 'node:path';
 import { requireAdmin } from '../auth.mjs';
 import { createMediaFile, getMediaFile } from '../db/index.mjs';
 import { badRequest, notFound, wrap } from '../http.mjs';
@@ -30,8 +28,8 @@ const KINDS = {
 
 const kindOf = (mimeType) => Object.values(KINDS).find((kind) => kind.types.includes(mimeType));
 
-/** The first scene background is seeded with a picture that ships in public/assets rather than in the database. */
-const SEEDED_MEDIA = { 'cheerful-castle-initial': 'public/assets/Cheerful-Mascot-Castle-Adventure.png' };
+/** The first scene background is seeded with a picture that ships with the site (public/assets), not in the database. */
+const SEEDED_MEDIA = { 'cheerful-castle-initial': '/assets/Cheerful-Mascot-Castle-Adventure.png' };
 
 /** Sends a stored file, honouring byte-range requests so video and audio can seek. */
 function sendFile(req, res, media) {
@@ -62,10 +60,8 @@ mediaRouter.get(
   '/media/:id',
   wrap(async (req, res) => {
     const seeded = SEEDED_MEDIA[req.params.id];
-    if (seeded && fs.existsSync(path.resolve(seeded))) {
-      res.setHeader('Content-Type', 'image/png');
-      return fs.createReadStream(path.resolve(seeded)).pipe(res);
-    }
+    // A static file: Vercel serves public/ from its network, where the function cannot read it, so send the browser there
+    if (seeded) return res.redirect(302, seeded);
     const media = await getMediaFile(req.params.id);
     if (!media) throw notFound('Media not found');
     sendFile(req, res, media);

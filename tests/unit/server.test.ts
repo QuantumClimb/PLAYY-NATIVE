@@ -75,6 +75,12 @@ describe('public routes', () => {
     expect(await (await call('/progress-tabs')).json()).toEqual({ tabs: null });
   });
 
+  it('send the built-in intro picture to the static file, which works on Vercel too', async () => {
+    const res = await fetch(base + '/media/cheerful-castle-initial', { redirect: 'manual' });
+    expect(res.status).toBe(302);
+    expect(res.headers.get('location')).toBe('/assets/Cheerful-Mascot-Castle-Adventure.png');
+  });
+
   it('answer 404 as JSON for an unknown API path', async () => {
     const res = await call('/nothing-here');
     expect(res.status).toBe(404);
