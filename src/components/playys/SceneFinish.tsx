@@ -14,7 +14,11 @@ const NameBanner: React.FC<{ name: string; mode: 'color' | 'line' }> = ({ name, 
       ))}
       <span className="scene-name-text">
         {[...text].map((ch, i) => (
-          <span key={i} style={mode === 'color' ? { color: LETTER_COLORS[i % LETTER_COLORS.length] } : undefined}>
+          <span
+            key={i}
+            data-ch={ch}
+            style={mode === 'color' ? { color: LETTER_COLORS[i % LETTER_COLORS.length] } : undefined}
+          >
             {ch === ' ' ? ' ' : ch}
           </span>
         ))}

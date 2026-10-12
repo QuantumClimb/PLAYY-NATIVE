@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { api } from '../../data/api';
+import { preloadSceneMedia } from './preload';
 import { SceneBackgroundSetting, SceneId } from './types';
 
 interface SceneBackgroundsContextType {
@@ -22,6 +23,7 @@ export const SceneBackgroundsProvider: React.FC<{ children: React.ReactNode }> =
       setLoading(true);
       const data = await api.get<{ scenes?: Record<string, SceneBackgroundSetting> }>('/api/scene-backgrounds');
       setScenes(data.scenes || {});
+      preloadSceneMedia(data.scenes || {});
       setError(null);
     } catch (e) {
       setError((e as Error).message);

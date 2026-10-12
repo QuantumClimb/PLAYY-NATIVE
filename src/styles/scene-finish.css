@@ -18,7 +18,13 @@
 
 .scene-name[data-mode='color'] .scene-name-text > span { -webkit-text-stroke: calc(var(--fs) * .17cqw) #fff; paint-order: stroke fill; }
 
-.scene-name[data-mode='line'] .scene-name-text > span { color: #fff; -webkit-text-stroke: calc(var(--fs) * .13cqw) #111; paint-order: stroke fill; }
+/* Coloring page: pure white letters on a black outline. The outline is a second copy of the letter underneath,
+   so the fill stays white even where a renderer ignores paint-order. */
+.scene-name[data-mode='line'] .scene-name-text > span { position: relative; color: #fff; isolation: isolate; }
+.scene-name[data-mode='line'] .scene-name-text > span::before {
+  content: attr(data-ch); position: absolute; left: 0; top: 0; z-index: -1; color: #111;
+  -webkit-text-stroke: calc(var(--fs) * .26cqw) #111;
+}
 
 .scene-dash { position: absolute; z-index: 1; width: 4cqw; height: 1cqw; border-radius: 999px; background: #111; }
 
