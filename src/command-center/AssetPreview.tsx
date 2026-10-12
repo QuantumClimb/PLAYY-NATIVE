@@ -68,7 +68,7 @@ export const AssetPreview: React.FC<AssetPreviewProps> = ({
     onPlaceAnchor(activeAnchor, { x: Math.round(pt.x * 10) / 10, y: Math.round(pt.y * 10) / 10 });
   };
 
-  if (!body) return <div className="text-red-300 text-sm p-4">Could not render this SVG</div>;
+  if (!body) return <div className="text-red-700 text-sm p-4">Could not render this SVG</div>;
 
   return (
     <div className={`${style ? '' : 'relative'} ${className}`} style={{ aspectRatio: `${body.vb.w} / ${body.vb.h}`, ...style }}>

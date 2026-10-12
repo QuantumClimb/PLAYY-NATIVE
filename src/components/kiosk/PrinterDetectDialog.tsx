@@ -72,6 +72,7 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({
 
   return (
     <div
+      data-sfx="none"
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 print:hidden"
       onClick={onClose}
     >

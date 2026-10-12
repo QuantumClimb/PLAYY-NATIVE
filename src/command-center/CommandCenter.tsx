@@ -5,6 +5,7 @@ import { SceneBackgroundsPanel } from './SceneBackgroundsPanel';
 import { PowerQuizPanel } from './PowerQuizPanel';
 import { IntroBadgesPanel } from './IntroBadgesPanel';
 import { LogoPanel } from './LogoPanel';
+import { SoundsPanel } from './SoundsPanel';
 import { defaultParts, parseSvgAsset } from '../lib/assets/svgParts';
 
 const TYPE_LABEL: Record<AssetType, string> = {
@@ -30,32 +31,35 @@ const Login: React.FC<{ enabled: boolean; onDone: () => void }> = ({ enabled, on
   };
 
   return (
-    <form onSubmit={submit} className="max-w-sm mx-auto mt-32 space-y-4">
-      <h1 className="text-2xl font-bold">Command Center</h1>
-      {!enabled && (
-        <p className="text-amber-300 text-sm">
-          Disabled. Set COMMAND_CENTER_PASSWORD in .env and restart the server.
-        </p>
-      )}
-      <input
-        type="password"
-        autoFocus
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2"
-      />
-      {error && <p className="text-red-300 text-sm">{error}</p>}
-      <button type="submit" className="w-full py-2 rounded-lg bg-teal-500 font-bold text-slate-950">
-        Sign in
-      </button>
-    </form>
+    <div className="min-h-[70vh] flex items-center justify-center px-4">
+      <form onSubmit={submit} className="cc-card cc-card-pad w-full max-w-sm space-y-4">
+        <div>
+          <h1 className="text-xl">Command Center</h1>
+          <p className="text-sm cc-muted">Sign in to manage the kiosk content.</p>
+        </div>
+        {!enabled && (
+          <div className="cc-alert cc-alert-warn">Disabled. Set COMMAND_CENTER_PASSWORD in .env and restart the server.</div>
+        )}
+        <label className="block text-sm font-medium text-gray-700">
+          Password
+          <input
+            type="password"
+            autoFocus
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="cc-input w-full mt-1"
+          />
+        </label>
+        {error && <div className="cc-alert cc-alert-error">{error}</div>}
+        <button type="submit" className="cc-btn cc-btn-primary w-full">Sign in</button>
+      </form>
+    </div>
   );
 };
 
 export const CommandCenter: React.FC = () => {
   const [state, setState] = useState<'loading' | 'out' | 'in' | 'offline'>('loading');
-  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz' | 'intro-badges' | 'logo'>('assets');
+  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz' | 'intro-badges' | 'logo' | 'sounds'>('assets');
   const [enabled, setEnabled] = useState(true);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
@@ -106,106 +110,60 @@ export const CommandCenter: React.FC = () => {
     assets.find((a) => a.type === 'face');
   const current = assets.find((a) => a.id === selected);
 
+  const TABS = [
+    { id: 'assets', label: 'Characters' },
+    { id: 'scene-backgrounds', label: 'Scene backgrounds' },
+    { id: 'intro-badges', label: 'Intro badges' },
+    { id: 'power-quiz', label: 'Power quiz' },
+    { id: 'logo', label: 'Logo' },
+    { id: 'sounds', label: 'Sounds' },
+  ] as const;
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-6 overflow-y-auto h-screen">
-      {state === 'loading' && <p>Loading…</p>}
+    <div className="cc-root min-h-screen h-screen overflow-y-auto">
+      {state === 'loading' && <p className="p-8 cc-muted">Loading…</p>}
       {state === 'offline' && (
-        <p className="text-amber-300">
-          The kiosk server is not running. Start it with: npm run server
-        </p>
+        <div className="p-8"><div className="cc-alert cc-alert-warn max-w-xl">The kiosk server is not running. Start it with: npm run server</div></div>
       )}
       {state === 'out' && <Login enabled={enabled} onDone={load} />}
 
       {state === 'in' && (
-        <div className="max-w-7xl mx-auto space-y-6">
-          {/* Header & Main Navigation Tabs */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
-            <div className="flex items-center gap-6">
-              <h1 className="text-2xl font-bold tracking-tight">Command Center</h1>
-
-              {/* Panel Tabs Switcher */}
-              <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-xl">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('assets')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                    activeTab === 'assets'
-                      ? 'bg-slate-800 text-white shadow-sm border border-slate-700'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <span>🎨</span>
-                  <span>Character SVG Assets</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('scene-backgrounds')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                    activeTab === 'scene-backgrounds'
-                      ? 'bg-teal-900/60 border border-teal-500 text-teal-200 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <span>🖼️</span>
-                  <span>Scene Backgrounds</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('power-quiz')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                    activeTab === 'power-quiz'
-                      ? 'bg-amber-900/60 border border-amber-500 text-amber-200 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <span>⚡</span>
-                  <span>Power Quiz Questions</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('intro-badges')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                    activeTab === 'intro-badges'
-                      ? 'bg-pink-900/60 border border-pink-500 text-pink-200 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <span>🏷️</span>
-                  <span>Intro Badges</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('logo')}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-bold transition-all cursor-pointer flex items-center gap-2 ${
-                    activeTab === 'logo'
-                      ? 'bg-sky-900/60 border border-sky-500 text-sky-200 shadow-sm'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  <span>✨</span>
-                  <span>Logo</span>
-                </button>
-              </div>
+        <>
+          <header className="bg-white border-b border-gray-200">
+            <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
+              <h1 className="text-base">Command Center</h1>
+              <button
+                type="button"
+                className="cc-btn cc-btn-sm"
+                onClick={async () => {
+                  await api.logout();
+                  setState('out');
+                }}
+              >
+                Sign out
+              </button>
             </div>
+            <nav className="max-w-7xl mx-auto px-6 flex gap-6 overflow-x-auto" aria-label="Sections">
+              {TABS.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() => setActiveTab(t.id)}
+                  className={`py-3 text-sm font-medium border-b-2 -mb-px whitespace-nowrap transition-colors ${
+                    activeTab === t.id
+                      ? 'border-indigo-600 text-indigo-700'
+                      : 'border-transparent text-gray-500 hover:text-gray-900 hover:border-gray-300'
+                  }`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </nav>
+          </header>
 
-            <button
-              type="button"
-              className="text-sm underline text-slate-400 hover:text-white shrink-0"
-              onClick={async () => {
-                await api.logout();
-                setState('out');
-              }}
-            >
-              Sign out
-            </button>
-          </div>
-
+        <div className="max-w-7xl mx-auto p-6 space-y-6">
           {error && (
-            <div className="rounded-lg bg-red-950 border border-red-800 p-2 text-sm text-red-200">
+            <div className="rounded-lg bg-red-50 border border-red-200 p-2 text-sm text-red-800">
               {error}
             </div>
           )}
@@ -218,7 +176,7 @@ export const CommandCenter: React.FC = () => {
                   <select
                     value={uploadType}
                     onChange={(e) => setUploadType(e.target.value as AssetType)}
-                    className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-sm flex-1"
+                    className="bg-gray-50 border border-gray-300 rounded-lg px-2 py-1 text-sm flex-1"
                   >
                     {ASSET_TYPES.map((t) => (
                       <option key={t} value={t}>
@@ -226,7 +184,7 @@ export const CommandCenter: React.FC = () => {
                       </option>
                     ))}
                   </select>
-                  <label className="px-3 py-1.5 rounded-lg bg-teal-500 font-bold text-slate-950 text-sm cursor-pointer hover:bg-teal-400">
+                  <label className="px-3 py-1.5 rounded-lg bg-indigo-600 font-semibold text-white text-sm cursor-pointer hover:bg-indigo-700">
                     Upload SVG
                     <input
                       type="file"
@@ -245,11 +203,11 @@ export const CommandCenter: React.FC = () => {
                   const items = assets.filter((a) => a.type === t);
                   return (
                     <div key={t}>
-                      <div className="text-xs uppercase tracking-wider text-slate-400 mb-1">
+                      <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">
                         {TYPE_LABEL[t]} ({items.length})
                       </div>
                       {items.length === 0 && (
-                        <div className="text-xs text-slate-600">None yet</div>
+                        <div className="text-xs text-gray-400">None yet</div>
                       )}
                       {items.map((a) => (
                         <button
@@ -257,11 +215,11 @@ export const CommandCenter: React.FC = () => {
                           type="button"
                           onClick={() => setSelected(a.id)}
                           className={`w-full text-left px-3 py-1.5 rounded-lg text-sm flex justify-between ${
-                            a.id === selected ? 'bg-slate-700' : 'hover:bg-slate-800'
+                            a.id === selected ? 'bg-gray-100' : 'hover:bg-gray-50'
                           }`}
                         >
                           <span>{a.name}</span>
-                          {!a.enabled && <span className="text-xs text-slate-500">hidden</span>}
+                          {!a.enabled && <span className="text-xs text-gray-500">hidden</span>}
                         </button>
                       ))}
                     </div>
@@ -283,7 +241,7 @@ export const CommandCenter: React.FC = () => {
                     }}
                   />
                 ) : (
-                  <p className="text-slate-400">Upload an SVG or pick an asset to edit it.</p>
+                  <p className="text-gray-500">Upload an SVG or pick an asset to edit it.</p>
                 )}
               </main>
             </div>
@@ -296,7 +254,9 @@ export const CommandCenter: React.FC = () => {
           {activeTab === 'power-quiz' && <PowerQuizPanel />}
           {activeTab === 'intro-badges' && <IntroBadgesPanel />}
           {activeTab === 'logo' && <LogoPanel />}
+          {activeTab === 'sounds' && <SoundsPanel />}
         </div>
+        </>
       )}
     </div>
   );

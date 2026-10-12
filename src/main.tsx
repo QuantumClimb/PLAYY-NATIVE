@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import { CommandCenter } from './command-center/CommandCenter.tsx';
 import { AssetLibraryProvider } from './lib/assets/library.tsx';
+import { SfxProvider } from './lib/sfx/engine.tsx';
 import { SceneBackgroundsProvider } from './lib/backgrounds/context.tsx';
 import './index.css';
 
@@ -15,9 +16,11 @@ createRoot(document.getElementById('root')!).render(
       {isCommandCenter ? (
         <CommandCenter />
       ) : (
-        <AssetLibraryProvider>
-          <App />
-        </AssetLibraryProvider>
+        <SfxProvider>
+          <AssetLibraryProvider>
+            <App />
+          </AssetLibraryProvider>
+        </SfxProvider>
       )}
     </SceneBackgroundsProvider>
   </StrictMode>

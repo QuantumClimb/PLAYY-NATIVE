@@ -11,6 +11,7 @@ import { SCENE_H, SCENE_W, layoutScene } from '../../lib/assets/scene';
 import { AssetArt } from '../playys/AssetArt';
 import { PlayyScene } from '../playys/PlayyScene';
 import { BrandLogo } from '../../lib/brand/brand';
+import { playSfx } from '../../lib/sfx/engine';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { calculateArchetype } from '../../lib/playys/archetypes';
 import { BASE_STATS, CharacterStats, GeneratedCard } from '../../lib/playys/cardTypes';
@@ -251,6 +252,7 @@ const ChoiceCard: React.FC<{
 }> = ({ selected, onClick, label, selectionCard = false, children }) => (
   <button
     type="button"
+    data-sfx="select"
     onClick={onClick}
     className={`${selectionCard ? 'group relative flex h-full min-h-[238px] w-full flex-col items-center p-3 text-left focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-300/80' : 'flex flex-col items-center justify-between gap-2 p-3'} rounded-[28px] border-[5px] transition-all cursor-pointer ${
       selected
@@ -525,6 +527,9 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       : 'PRINT & COMPLETE';
 
   const isReview = currentStep === 'card';
+  useEffect(() => {
+    if (currentStep === 'card') playSfx('reveal');
+  }, [currentStep]);
   const palette = config.colors?.palette?.length ? config.colors.palette : DEFAULT_COLOR_PALETTE;
   const editableRegions = Object.keys(sel.body.parts).filter((key) => !/(outline|line)/i.test(key));
 
@@ -667,6 +672,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                               type="button"
                               aria-label={`${region.label} ${color}`}
                               aria-pressed={selected}
+                              data-sfx="select"
                               onClick={() => handleColorChange(region.key, color)}
                               className={`relative h-11 w-11 cursor-pointer transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/80 ${selected ? 'scale-110' : ''}`}
                               style={{
@@ -698,6 +704,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                       <button
                         key={opt.id || i}
                         type="button"
+                        data-sfx="answer"
                         onClick={() => handlePowerAnswer(i)}
                         className="min-h-[115px] p-4 rounded-[28px] flex flex-col items-center justify-center text-center cursor-pointer border-[5px] bg-slate-900/90 hover:bg-indigo-950 text-slate-200 border-slate-800 hover:border-amber-400 active:scale-95 transition-all shadow-xl"
                       >

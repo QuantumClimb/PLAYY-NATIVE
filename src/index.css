@@ -788,3 +788,55 @@
   .world-selection-page .world-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .world-selection-page .head-arched-heading { white-space: normal; }
 }
+
+/* =====================================================================
+   Command center: a neutral, professional light theme (white, Inter).
+   The kiosk keeps its playful look; everything under .cc-root is separate.
+   ===================================================================== */
+@layer base {
+  .cc-root {
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-weight: 400;
+    color: #111827;
+    background: #f9fafb;
+    letter-spacing: 0;
+  }
+  .cc-root h1, .cc-root h2, .cc-root h3, .cc-root h4,
+  .cc-root button, .cc-root button *, .cc-root input, .cc-root select, .cc-root textarea {
+    font-family: inherit;
+  }
+  .cc-root button, .cc-root button * { font-weight: inherit; }
+  .cc-root input[type='range'], .cc-root input[type='checkbox'], .cc-root input[type='radio'] { accent-color: #4f46e5; }
+  .cc-root h1, .cc-root h2, .cc-root h3, .cc-root h4 { font-weight: 600; letter-spacing: -0.01em; color: #111827; }
+}
+
+@layer components {
+  .cc-card { background: #fff; border: 1px solid #e5e7eb; border-radius: .75rem; box-shadow: 0 1px 2px rgba(16, 24, 40, .04); }
+  .cc-card-pad { padding: 1.25rem; }
+  .cc-muted { color: #6b7280; }
+  .cc-input, .cc-select {
+    background: #fff; border: 1px solid #d1d5db; border-radius: .5rem; padding: .45rem .7rem;
+    font-size: .875rem; line-height: 1.25rem; color: #111827;
+  }
+  .cc-input:focus, .cc-select:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, .15); }
+  .cc-input:disabled, .cc-select:disabled { background: #f3f4f6; color: #9ca3af; }
+  .cc-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+    background: #fff; color: #374151; border: 1px solid #d1d5db; border-radius: .5rem;
+    padding: .45rem .9rem; font-size: .875rem; line-height: 1.25rem; font-weight: 500; cursor: pointer;
+    transition: background .12s ease, border-color .12s ease;
+  }
+  .cc-btn:hover:not(:disabled) { background: #f9fafb; border-color: #9ca3af; }
+  .cc-btn:disabled { opacity: .5; cursor: not-allowed; }
+  .cc-btn-primary { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  .cc-btn-primary:hover:not(:disabled) { background: #4338ca; border-color: #4338ca; }
+  .cc-btn-danger { color: #b91c1c; border-color: #fecaca; }
+  .cc-btn-danger:hover:not(:disabled) { background: #fef2f2; border-color: #fca5a5; }
+  .cc-btn-sm { padding: .25rem .6rem; font-size: .8125rem; }
+  .cc-alert { border-radius: .5rem; padding: .6rem .85rem; font-size: .875rem; border: 1px solid; }
+  .cc-alert-error { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+  .cc-alert-ok { background: #f0fdf4; border-color: #bbf7d0; color: #166534; }
+  .cc-alert-warn { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+  .cc-table th { text-align: left; font-size: .75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; padding: .6rem .75rem; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+  .cc-table td { padding: .65rem .75rem; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+}

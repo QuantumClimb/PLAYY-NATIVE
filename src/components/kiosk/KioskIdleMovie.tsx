@@ -71,6 +71,7 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({ onStart, onAdmin
   return (
     <div
       onClick={onStart}
+      data-sfx="start"
       className="playys-intro-screen w-full h-full min-h-screen bg-slate-950 text-white select-none relative overflow-hidden cursor-pointer"
     >
       <SceneBackground sceneId="intro" />

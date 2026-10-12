@@ -83,6 +83,13 @@ export function ensureSchema() {
         updated  TIMESTAMPTZ NOT NULL DEFAULT now()
       )`);
 
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS sound_settings (
+        id      INTEGER PRIMARY KEY DEFAULT 1,
+        data    JSONB NOT NULL DEFAULT '{}',
+        updated TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
     // Seed initial intro background setting if not present
     await sql.query(`
       INSERT INTO scene_backgrounds (scene_id, bg_type, media_id, fit, position, overlay_color, overlay_opacity, badge_placement, start_button_placement, start_button_size, badge_gap, float_animation)
@@ -314,4 +321,24 @@ export async function saveBrandSettings(settings) {
     [JSON.stringify(settings)],
   );
   return rows[0];
+}
+
+// ---------- Kiosk sounds: which sound each button plays ----------
+export async function getSoundSettings() {
+  const rows = await query('SELECT data FROM sound_settings WHERE id = 1');
+  return rows[0]?.data ?? null;
+}
+
+export async function saveSoundSettings(data) {
+  const rows = await query(
+    `INSERT INTO sound_settings (id, data, updated) VALUES (1, $1, now())
+     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated = now()
+     RETURNING data`,
+    [JSON.stringify(data)],
+  );
+  return rows[0]?.data;
+}
+
+export async function resetSoundSettings() {
+  await query('DELETE FROM sound_settings WHERE id = 1');
 }

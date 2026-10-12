@@ -30,6 +30,10 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 - **In the app** (intro screen, creation-screen header): a tight CSS drop shadow (blur, distance, strength).
 - **On the finished artwork** (for the later composite onto the final page): a real SVG stroke, width as a % of the logo's height. Color artwork gets a rounded edge around the whole silhouette in a chosen color; the black-and-white coloring page gets white fills (dark layers stay black) with a black line around every shape. Built in `src/lib/brand/logoArt.tsx` (`LogoArt` / `renderLogoArt`); not yet placed on the printed page.
 
+**Kiosk sounds** (command center, **Sounds** tab): every kiosk button plays a sound. 14 actions (any button, Start, Next, Back, choosing a card, Surprise Me, keyboard key, backspace, flip card, quiz answer, Print, Change, All Done, trump card revealed), each with a chosen sound and volume, plus a master volume and an on/off switch. Sounds can be uploaded (MP3/WAV/OGG/M4A, up to 2 MB) and assigned. The engine (`src/lib/sfx/`) listens for button taps and picks the sound from `data-sfx` tags where set and otherwise from the button's wording. The built-in sounds are **synthesized in the browser** (Web Audio), so there are no audio files. Stored in the `sound_settings` table. **The Google Assistant cartoon sound library was not used:** its terms limit the sounds to Actions on Google, forbid use on non-Google platforms and forbid distributing the files separately. The operator dialogs stay silent (`data-sfx="none"`).
+
+**Command center theme**: white, neutral and Inter (indigo accent), scoped to `.cc-root`; shared classes `cc-card`, `cc-btn`, `cc-input` etc. in `src/index.css`. The kiosk keeps its playful look.
+
 **Printer dialog** (Alt+Shift+P): lists installed printers with status, sets the default, test print. Detection runs in the local kiosk server because a browser cannot list printers.
 
 **Trump card and questionnaire** merged from `PLAYY_CARD` into the web app. Fixed the corrupted archetype emoji and added the missing courage stat to the printed card. Also ported to `expo-app` (paused; uses the simpler Expo artwork).

@@ -301,39 +301,39 @@ export const SceneBackgroundsPanel: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* 1. Header & Storage Information */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-4 rounded-xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 p-4 rounded-xl">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span>🖼️</span> Scene Backgrounds CMS
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            Scene backgrounds
           </h2>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-gray-500 mt-0.5">
             Customize background images, videos, and overlays for each kiosk scene.
           </p>
         </div>
-        <div className="text-xs bg-slate-800 text-slate-300 border border-slate-700 px-3 py-2 rounded-lg space-y-1 shrink-0">
-          <div><span className="font-bold text-teal-400">Supported Formats:</span> Images (PNG, JPG, WebP) | Videos (MP4, WebM)</div>
-          <div><span className="font-bold text-teal-400">Upload Limits:</span> Max 10MB per Image | Max 30MB per Video</div>
+        <div className="text-xs bg-gray-50 text-gray-600 border border-gray-300 px-3 py-2 rounded-lg space-y-1 shrink-0">
+          <div><span className="font-semibold text-indigo-600">Supported Formats:</span> Images (PNG, JPG, WebP) | Videos (MP4, WebM)</div>
+          <div><span className="font-semibold text-indigo-600">Upload Limits:</span> Max 10MB per Image | Max 30MB per Video</div>
         </div>
       </div>
 
       {/* Notifications Banner */}
       {error && (
-        <div className="rounded-xl bg-red-950/80 border border-red-800 p-4 text-sm text-red-200 flex items-center justify-between">
-          <span>⚠️ {error}</span>
-          <button type="button" onClick={() => setError(null)} className="text-xs text-red-400 hover:text-white">✕</button>
+        <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-800 flex items-center justify-between">
+          <span>{error}</span>
+          <button type="button" onClick={() => setError(null)} className="text-xs text-red-600 hover:text-gray-900">✕</button>
         </div>
       )}
 
       {successMsg && (
-        <div className="rounded-xl bg-emerald-950/80 border border-emerald-800 p-4 text-sm text-emerald-200 flex items-center justify-between">
-          <span>✅ {successMsg}</span>
-          <button type="button" onClick={() => setSuccessMsg(null)} className="text-xs text-emerald-400 hover:text-white">✕</button>
+        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800 flex items-center justify-between">
+          <span>{successMsg}</span>
+          <button type="button" onClick={() => setSuccessMsg(null)} className="text-xs text-emerald-600 hover:text-gray-900">✕</button>
         </div>
       )}
 
       {/* 2. Scene Selector Cards Grid */}
       <div>
-        <div className="text-xs uppercase tracking-wider text-slate-400 mb-2 font-bold">
+        <div className="text-xs uppercase tracking-wider text-gray-500 mb-2 font-semibold">
           Select Scene ({ALL_SCENES.length})
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -349,28 +349,28 @@ export const SceneBackgroundsPanel: React.FC = () => {
                 onClick={() => setSelectedSceneId(scene.id)}
                 className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
                   isSelected
-                    ? 'bg-teal-950/60 border-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
-                    : 'bg-slate-900 border-slate-800 hover:border-slate-700'
+                    ? 'bg-indigo-50 border-indigo-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
+                    : 'bg-white border-gray-200 hover:border-slate-700'
                 }`}
               >
                 <div>
-                  <div className="font-bold text-sm text-white line-clamp-1">{scene.label}</div>
-                  <div className="text-xs text-slate-400 line-clamp-1">{scene.description}</div>
+                  <div className="font-semibold text-sm text-gray-900 line-clamp-1">{scene.label}</div>
+                  <div className="text-xs text-gray-500 line-clamp-1">{scene.description}</div>
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                  <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-gray-50 text-gray-600">
                     ID: {scene.id}
                   </span>
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded ${
+                    className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
                       currentType === 'video'
                         ? 'bg-purple-900 text-purple-200'
                         : currentType === 'image'
                         ? 'bg-blue-900 text-blue-200'
-                        : 'bg-slate-800 text-slate-400'
+                        : 'bg-gray-50 text-gray-500'
                     }`}
                   >
-                    {currentType === 'video' ? '📹 Video' : currentType === 'image' ? '🖼️ Image' : 'Default'}
+                    {currentType === 'video' ? 'Video' : currentType === 'image' ? 'Image' : 'Default'}
                   </span>
                 </div>
               </button>
@@ -380,19 +380,19 @@ export const SceneBackgroundsPanel: React.FC = () => {
       </div>
 
       {/* 3. Scene Background Editor Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 bg-white border border-gray-200 p-6 rounded-2xl">
         {/* LEFT COLUMN: Controls (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           <div>
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <span>⚙️</span> Background Settings for: <span className="text-teal-400">{selectedSceneDef.label}</span>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              Background settings for: <span className="text-indigo-600">{selectedSceneDef.label}</span>
             </h3>
-            <p className="text-xs text-slate-400">{selectedSceneDef.description}</p>
+            <p className="text-xs text-gray-500">{selectedSceneDef.description}</p>
           </div>
 
           {/* Background Type Selection */}
           <div className="space-y-2">
-            <label className="text-xs font-bold uppercase tracking-wider text-slate-300">Background Source</label>
+            <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Background Source</label>
             <div className="grid grid-cols-3 gap-3">
               {[
                 { id: 'default', label: 'Existing Default', desc: 'Default background' },
@@ -405,12 +405,12 @@ export const SceneBackgroundsPanel: React.FC = () => {
                   onClick={() => setBgType(t.id as BackgroundType)}
                   className={`p-3 rounded-xl border text-center transition-all cursor-pointer ${
                     bgType === t.id
-                      ? 'bg-teal-900/50 border-teal-500 text-white font-bold'
-                      : 'bg-slate-800/80 border-slate-700 text-slate-300 hover:bg-slate-800'
+                      ? 'bg-indigo-50 border-indigo-500 text-gray-900 font-semibold'
+                      : 'bg-gray-50 border-gray-300 text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <div className="text-sm">{t.label}</div>
-                  <div className="text-[10px] text-slate-400 mt-0.5">{t.desc}</div>
+                  <div className="text-[10px] text-gray-500 mt-0.5">{t.desc}</div>
                 </button>
               ))}
             </div>
@@ -418,21 +418,20 @@ export const SceneBackgroundsPanel: React.FC = () => {
 
           {/* Media Uploads Section */}
           {bgType !== 'default' && (
-            <div className="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-300">
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">
                   {bgType === 'video' ? 'Video File' : 'Image File'} Upload
                 </label>
                 {mediaUrl && (
-                  <span className="text-xs text-emerald-400 font-mono">
+                  <span className="text-xs text-emerald-600 font-mono">
                     ✓ {mediaId}
                   </span>
                 )}
               </div>
 
               <div className="flex items-center gap-3">
-                <label className="flex-1 px-4 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm text-slate-200 cursor-pointer flex items-center justify-center gap-2 transition-all">
-                  <span>📁</span>
+                <label className="flex-1 px-4 py-3 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-300 text-sm text-gray-800 cursor-pointer flex items-center justify-center gap-2 transition-all">
                   <span>Select & Upload {bgType === 'video' ? 'Video (MP4/WebM)' : 'Image (PNG/JPG/WebP)'}</span>
                   <input
                     type="file"
@@ -450,31 +449,30 @@ export const SceneBackgroundsPanel: React.FC = () => {
               {/* Upload Progress Bar */}
               {uploadingTarget === 'main' && uploadProgress !== null && (
                 <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-teal-400">
+                  <div className="flex justify-between text-xs text-indigo-600">
                     <span>Uploading file...</span>
                     <span>{uploadProgress}%</span>
                   </div>
-                  <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-teal-500 transition-all duration-200" style={{ width: `${uploadProgress}%` }} />
+                  <div className="w-full h-2 bg-gray-50 rounded-full overflow-hidden">
+                    <div className="h-full bg-indigo-600 transition-all duration-200" style={{ width: `${uploadProgress}%` }} />
                   </div>
                 </div>
               )}
 
               {/* Optional Poster / Fallback Image for Video */}
               {bgType === 'video' && (
-                <div className="pt-2 border-t border-slate-800 space-y-2">
+                <div className="pt-2 border-t border-gray-200 space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                    <label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
                       Poster / Fallback Image (Optional)
                     </label>
                     {fallbackMediaUrl && (
-                      <span className="text-xs text-emerald-400 font-mono">
+                      <span className="text-xs text-emerald-600 font-mono">
                         ✓ {fallbackMediaId}
                       </span>
                     )}
                   </div>
-                  <label className="w-full px-4 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 border border-slate-700 text-xs text-slate-300 cursor-pointer flex items-center justify-center gap-2">
-                    <span>🖼️</span>
+                  <label className="w-full px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-50 border border-gray-300 text-xs text-gray-600 cursor-pointer flex items-center justify-center gap-2">
                     <span>Upload Poster Image (PNG, JPG, WebP)</span>
                     <input
                       type="file"
@@ -488,7 +486,7 @@ export const SceneBackgroundsPanel: React.FC = () => {
                     />
                   </label>
                   {uploadingTarget === 'fallback' && uploadProgress !== null && (
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
                       <div className="h-full bg-purple-500 transition-all duration-200" style={{ width: `${uploadProgress}%` }} />
                     </div>
                   )}
@@ -502,15 +500,15 @@ export const SceneBackgroundsPanel: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Fit toggle */}
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-300">Display Fit</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Display Fit</label>
                 <div className="grid grid-cols-2 gap-2">
                   {(['cover', 'contain'] as BackgroundFit[]).map((f) => (
                     <button
                       key={f}
                       type="button"
                       onClick={() => setFit(f)}
-                      className={`py-2 rounded-lg border text-xs font-bold capitalize transition-all cursor-pointer ${
-                        fit === f ? 'bg-teal-900 border-teal-500 text-white' : 'bg-slate-800 border-slate-700 text-slate-400'
+                      className={`py-2 rounded-lg border text-xs font-semibold capitalize transition-all cursor-pointer ${
+                        fit === f ? 'bg-indigo-600 border-indigo-500 text-gray-900' : 'bg-gray-50 border-gray-300 text-gray-500'
                       }`}
                     >
                       {f}
@@ -521,11 +519,11 @@ export const SceneBackgroundsPanel: React.FC = () => {
 
               {/* Focal Position Grid */}
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-slate-300">Focal Point Position</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Focal Point Position</label>
                 <select
                   value={position}
                   onChange={(e) => setPosition(e.target.value as BackgroundPosition)}
-                  className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white"
+                  className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900"
                 >
                   {POSITION_OPTIONS.map((p) => (
                     <option key={p.id} value={p.id}>
@@ -538,8 +536,8 @@ export const SceneBackgroundsPanel: React.FC = () => {
           )}
 
           {/* Overlay Color & Opacity Slider */}
-          <div className="space-y-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
-            <div className="text-xs font-bold uppercase tracking-wider text-slate-300">
+          <div className="space-y-3 bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <div className="text-xs font-semibold uppercase tracking-wider text-gray-600">
               Content Readability Overlay
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
@@ -548,23 +546,23 @@ export const SceneBackgroundsPanel: React.FC = () => {
                   type="color"
                   value={overlayColor}
                   onChange={(e) => setOverlayColor(e.target.value)}
-                  className="w-10 h-10 rounded-lg border border-slate-700 bg-slate-800 cursor-pointer p-1"
+                  className="w-10 h-10 rounded-lg border border-gray-300 bg-gray-50 cursor-pointer p-1"
                 />
                 <div>
-                  <div className="text-xs font-bold text-white">Overlay Color</div>
+                  <div className="text-xs font-semibold text-gray-900">Overlay Color</div>
                   <input
                     type="text"
                     value={overlayColor}
                     onChange={(e) => setOverlayColor(e.target.value)}
-                    className="w-24 bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-mono text-slate-300 mt-0.5"
+                    className="w-24 bg-gray-50 border border-gray-300 rounded px-2 py-0.5 text-xs text-mono text-gray-600 mt-0.5"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-slate-300">
+                <div className="flex justify-between text-xs text-gray-600">
                   <span>Overlay Opacity</span>
-                  <span className="font-mono font-bold text-teal-400">{Math.round(overlayOpacity * 100)}%</span>
+                  <span className="font-mono font-semibold text-indigo-600">{Math.round(overlayOpacity * 100)}%</span>
                 </div>
                 <input
                   type="range"
@@ -573,7 +571,7 @@ export const SceneBackgroundsPanel: React.FC = () => {
                   step="0.05"
                   value={overlayOpacity}
                   onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))}
-                  className="w-full accent-teal-400 cursor-pointer"
+                  className="w-full accent-indigo-600 cursor-pointer"
                 />
               </div>
             </div>
@@ -581,19 +579,19 @@ export const SceneBackgroundsPanel: React.FC = () => {
 
           {/* Intro UI Placement Controls (Only for Intro / Startup page) */}
           {selectedSceneId === 'intro' && (
-            <div className="space-y-4 bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <div className="text-xs font-bold uppercase tracking-wider text-teal-400 flex items-center gap-1.5">
-                <span>🎨</span> Startup Page UI Placement Controls
+            <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+              <div className="text-xs font-semibold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+                Intro screen layout
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Intro Badge Placement */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300">Intro Badge Position</label>
+                  <label className="text-xs font-semibold text-gray-600">Intro Badge Position</label>
                   <select
                     value={badgePlacement}
                     onChange={(e) => setBadgePlacement(e.target.value as BadgePlacement)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white cursor-pointer"
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900 cursor-pointer"
                   >
                     {BADGE_PLACEMENT_OPTIONS.map((opt) => (
                       <option key={opt.id} value={opt.id}>
@@ -605,11 +603,11 @@ export const SceneBackgroundsPanel: React.FC = () => {
 
                 {/* Start Button Placement */}
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300">Start Button Position</label>
+                  <label className="text-xs font-semibold text-gray-600">Start Button Position</label>
                   <select
                     value={startButtonPlacement}
                     onChange={(e) => setStartButtonPlacement(e.target.value as StartButtonPlacement)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white cursor-pointer"
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900 cursor-pointer"
                   >
                     {START_BUTTON_PLACEMENT_OPTIONS.map((opt) => (
                       <option key={opt.id} value={opt.id}>
@@ -620,11 +618,11 @@ export const SceneBackgroundsPanel: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300">Start Button Size</label>
+                  <label className="text-xs font-semibold text-gray-600">Start Button Size</label>
                   <select
                     value={startButtonSize}
                     onChange={(e) => setStartButtonSize(e.target.value as IntroButtonSize)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white cursor-pointer"
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900 cursor-pointer"
                   >
                     {START_BUTTON_SIZE_OPTIONS.map((opt) => (
                       <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -633,11 +631,11 @@ export const SceneBackgroundsPanel: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300">Badge Spacing</label>
+                  <label className="text-xs font-semibold text-gray-600">Badge Spacing</label>
                   <select
                     value={badgeGap}
                     onChange={(e) => setBadgeGap(e.target.value as IntroBadgeGap)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white cursor-pointer"
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900 cursor-pointer"
                   >
                     {BADGE_GAP_OPTIONS.map((opt) => (
                       <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -646,11 +644,11 @@ export const SceneBackgroundsPanel: React.FC = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-300">Button Float Animation</label>
+                  <label className="text-xs font-semibold text-gray-600">Button Float Animation</label>
                   <select
                     value={floatAnimation}
                     onChange={(e) => setFloatAnimation(e.target.value as IntroFloatAnimation)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white cursor-pointer"
+                    className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900 cursor-pointer"
                   >
                     {FLOAT_ANIMATION_OPTIONS.map((opt) => (
                       <option key={opt.id} value={opt.id}>{opt.label}</option>
@@ -667,9 +665,8 @@ export const SceneBackgroundsPanel: React.FC = () => {
               type="button"
               onClick={handleSave}
               disabled={isSaving}
-              className="flex-1 py-3 px-6 rounded-xl bg-teal-500 hover:bg-teal-400 active:bg-teal-600 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer disabled:opacity-50"
+              className="flex-1 py-3 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer disabled:opacity-50"
             >
-              <span>💾</span>
               <span>{isSaving ? 'Saving...' : 'Save Settings'}</span>
             </button>
 
@@ -677,9 +674,8 @@ export const SceneBackgroundsPanel: React.FC = () => {
               type="button"
               onClick={handleReset}
               disabled={isSaving}
-              className="py-3 px-5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-sm flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+              className="py-3 px-5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-600 font-semibold text-sm flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
             >
-              <span>🔄</span>
               <span>Reset Scene</span>
             </button>
           </div>
@@ -687,12 +683,12 @@ export const SceneBackgroundsPanel: React.FC = () => {
 
         {/* RIGHT COLUMN: Live Interactive Preview (5 cols) */}
         <div className="lg:col-span-5 flex flex-col items-center justify-start space-y-3">
-          <div className="w-full text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+          <div className="w-full text-xs font-semibold uppercase tracking-wider text-gray-500 flex items-center justify-between">
             <span>Live Scene Preview</span>
-            <span className="text-[10px] text-teal-400 font-mono">16:9 Viewport</span>
+            <span className="text-[10px] text-indigo-600 font-mono">16:9 Viewport</span>
           </div>
 
-          <div className="w-full aspect-video bg-slate-950 rounded-xl border-2 border-slate-700 overflow-hidden relative shadow-2xl flex flex-col items-center justify-between p-4 select-none">
+          <div className="w-full aspect-video bg-gray-50 rounded-xl border-2 border-gray-300 overflow-hidden relative shadow-2xl flex flex-col items-center justify-between p-4 select-none">
             {/* Background preview layer */}
             {bgType === 'video' && mediaUrl ? (
               <video
@@ -739,7 +735,7 @@ export const SceneBackgroundsPanel: React.FC = () => {
               {/* Badges preview */}
               {selectedSceneId === 'intro' && badgePlacement !== 'hidden' && badgePlacement !== 'below-start-button' && (
                 <div
-                  className={`absolute z-30 transition-all duration-300 flex items-center gap-1 bg-slate-900/80 backdrop-blur border border-slate-700 text-white text-[9px] font-black px-2 py-0.5 rounded-full shadow ${
+                  className={`absolute z-30 transition-all duration-300 flex items-center gap-1 bg-white backdrop-blur border border-gray-300 text-gray-900 text-[9px] font-semibold px-2 py-0.5 rounded-full shadow ${
                     badgePlacement === 'top-center'
                       ? 'top-2 left-1/2 -translate-x-1/2'
                       : badgePlacement === 'top-left'
@@ -784,8 +780,8 @@ export const SceneBackgroundsPanel: React.FC = () => {
                     : 'bottom-3 left-1/2 -translate-x-1/2'
                 }`}
               >
-                <div className={`${previewButtonSizeClass} rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black uppercase tracking-wider shadow-[0_8px_16px_rgba(245,158,11,0.35)] flex items-center justify-center gap-1 border border-yellow-200 ${previewFloatClass}`}>
-                  <span className="w-2 h-2 rounded-full bg-white flex items-center justify-center text-[7px] text-amber-600 font-bold">▶</span>
+                <div className={`${previewButtonSizeClass} rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-semibold uppercase tracking-wider shadow-[0_8px_16px_rgba(245,158,11,0.35)] flex items-center justify-center gap-1 border border-yellow-200 ${previewFloatClass}`}>
+                  <span className="w-2 h-2 rounded-full bg-white flex items-center justify-center text-[7px] text-amber-600 font-semibold">▶</span>
                   <span>Tap to Start!</span>
                 </div>
                 {selectedSceneId === 'intro' && badgePlacement === 'below-start-button' && (
@@ -795,7 +791,7 @@ export const SceneBackgroundsPanel: React.FC = () => {
                         <span className={`mb-0.5 flex h-4 w-4 items-center justify-center rounded-md ${iconClass}`}>
                           <Icon className={`h-3 w-3 ${fillClass}`} />
                         </span>
-                        <span className="text-[7px] sm:text-[8px] font-black uppercase text-slate-800">
+                        <span className="text-[7px] sm:text-[8px] font-semibold uppercase text-gray-800">
                           {label}
                         </span>
                       </div>
@@ -806,8 +802,8 @@ export const SceneBackgroundsPanel: React.FC = () => {
             </div>
           </div>
 
-          <div className="text-[11px] text-slate-400 text-center max-w-xs">
-            Preview shows how <span className="text-slate-200">{selectedSceneDef.label}</span> will look on the kiosk screen.
+          <div className="text-[11px] text-gray-500 text-center max-w-xs">
+            Preview shows how <span className="text-gray-800">{selectedSceneDef.label}</span> will look on the kiosk screen.
           </div>
         </div>
       </div>

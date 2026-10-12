@@ -51,7 +51,7 @@ interface ScenePanelProps {
   setMeta: (meta: AssetMeta) => void;
 }
 
-const field = 'bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-sm';
+const field = 'bg-gray-50 border border-gray-300 rounded-lg px-2 py-1 text-sm';
 
 export const ScenePanel: React.FC<ScenePanelProps> = ({ draft, assets, face, setMeta }) => {
   const [guides, setGuides] = useState(true);
@@ -76,14 +76,14 @@ export const ScenePanel: React.FC<ScenePanelProps> = ({ draft, assets, face, set
   const secondary = normalizeColor(head?.meta.secondary) ?? undefined;
 
   return (
-    <div className="rounded-xl border border-slate-700 p-3 space-y-3">
+    <div className="rounded-xl border border-gray-300 p-3 space-y-3">
       <div className="flex flex-wrap items-center gap-3 text-sm">
         <span>Scene preview (A4)</span>
         {SCENE_TYPES.map((t) => {
           const list = assets.filter((a) => a.type === t && a.enabled);
-          if (draft.type === t) return <span key={t} className="text-xs text-slate-400">{t}: {draft.name} (editing)</span>;
+          if (draft.type === t) return <span key={t} className="text-xs text-gray-500">{t}: {draft.name} (editing)</span>;
           return (
-            <label key={t} className="flex items-center gap-1 text-xs text-slate-300">
+            <label key={t} className="flex items-center gap-1 text-xs text-gray-600">
               {t}
               <select value={choose(t)?.id ?? ''} onChange={(e) => setPicked({ ...picked, [t]: Number(e.target.value) })} className={field}>
                 {t === 'symbol' && <option value="">none</option>}
@@ -97,20 +97,20 @@ export const ScenePanel: React.FC<ScenePanelProps> = ({ draft, assets, face, set
         </label>
       </div>
 
-      {missing.length > 0 && <div className="text-xs text-slate-400">Upload a {missing.join(' and a ')} to see the scene.</div>}
+      {missing.length > 0 && <div className="text-xs text-gray-500">Upload a {missing.join(' and a ')} to see the scene.</div>}
 
       {scene && background && body && head && (
         <>
-          <div className="grid md:grid-cols-2 gap-4 bg-slate-800/60 rounded-2xl p-4">
+          <div className="grid md:grid-cols-2 gap-4 bg-gray-50 rounded-2xl p-4">
             {(['color', 'line'] as const).map((m) => (
               <div key={m} className="space-y-1">
-                <div className="text-xs text-slate-400 text-center">{m === 'color' ? 'Color' : 'Print preview (black & white)'}</div>
+                <div className="text-xs text-gray-500 text-center">{m === 'color' ? 'Color' : 'Print preview (black & white)'}</div>
                 <Sheet layout={scene} background={background} body={body} head={head} symbol={symbol} face={face}
                   mode={m} headMain={headMain} outfit={outfit} secondary={secondary} guides={guides} />
               </div>
             ))}
           </div>
-          <div className="text-xs text-slate-400">
+          <div className="text-xs text-gray-500">
             A4 {A4.w} x {A4.h} mm with a {PRINT_MARGIN_MM} mm margin. The background is stretched to fill the printable area.
           </div>
         </>

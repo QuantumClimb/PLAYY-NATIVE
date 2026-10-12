@@ -56,7 +56,7 @@ export const CompositePreview: React.FC<CompositePreviewProps> = ({
     }
   }, [head, body, headScale]);
 
-  if (!layout) return <div className="text-red-300 text-sm p-4">Could not render this combination</div>;
+  if (!layout) return <div className="text-red-700 text-sm p-4">Could not render this combination</div>;
 
   return (
     <div className={`relative ${className}`} style={{ aspectRatio: `${layout.W} / ${layout.H}` }}>

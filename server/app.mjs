@@ -28,6 +28,9 @@ import {
   getBrand,
   saveBrandLogo,
   saveBrandSettings,
+  getSoundSettings,
+  saveSoundSettings,
+  resetSoundSettings,
 } from './db.mjs';
 
 // Printers belong to the kiosk PC, so they are off on Vercel unless ENABLE_PRINTERS=1
@@ -163,6 +166,7 @@ app.delete('/api/cc/assets/:id', requireAdmin, wrap(async (req, res) =>
 const VALID_SCENE_IDS = ['intro', 'head', 'body', 'symbol', 'world', 'name', 'quiz', 'review', 'celebrate'];
 const ALLOWED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
 const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm'];
+const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/x-wav', 'audio/wave', 'audio/ogg', 'audio/webm', 'audio/mp4', 'audio/aac'];
 
 app.get('/api/scene-backgrounds', wrap(async (_req, res) => {
   const list = await listSceneBackgrounds();
@@ -237,15 +241,16 @@ app.post('/api/cc/scene-backgrounds/upload', requireAdmin, wrap(async (req, res)
 
   const isImage = ALLOWED_IMAGE_TYPES.includes(mimeType);
   const isVideo = ALLOWED_VIDEO_TYPES.includes(mimeType);
-  if (!isImage && !isVideo) {
-    return res.status(400).json({ error: 'Unsupported file type. Allowed: PNG, JPG, WebP, MP4, WebM.' });
+  const isAudio = ALLOWED_AUDIO_TYPES.includes(mimeType);
+  if (!isImage && !isVideo && !isAudio) {
+    return res.status(400).json({ error: 'Unsupported file type. Allowed: PNG, JPG, WebP, MP4, WebM, and MP3, WAV, OGG, M4A audio.' });
   }
 
   const buffer = Buffer.from(base64, 'base64');
-  const maxBytes = isVideo ? 30 * 1024 * 1024 : 10 * 1024 * 1024;
+  const maxBytes = isVideo ? 30 * 1024 * 1024 : isAudio ? 2 * 1024 * 1024 : 10 * 1024 * 1024;
   if (buffer.length > maxBytes) {
     return res.status(400).json({
-      error: `File size (${(buffer.length / (1024 * 1024)).toFixed(1)}MB) exceeds limit of ${isVideo ? '30MB for video' : '10MB for image'}.`,
+      error: `File size (${(buffer.length / (1024 * 1024)).toFixed(1)}MB) exceeds limit of ${isVideo ? '30MB for video' : isAudio ? '2MB for audio' : '10MB for image'}.`,
     });
   }
 
@@ -426,6 +431,45 @@ app.put('/api/cc/brand/settings', requireAdmin, wrap(async (req, res) => {
   if (stroke) settings.stroke = { enabled: stroke.enabled, color: stroke.color, width: stroke.width };
   await saveBrandSettings(settings);
   res.json({ shadow: settings.shadow ?? DEFAULT_SHADOW, stroke: settings.stroke ?? DEFAULT_STROKE });
+}));
+
+// ---------- Kiosk sounds ----------
+const SFX_EVENTS = ['tap', 'start', 'next', 'back', 'select', 'surprise', 'key', 'backspace', 'flip', 'answer', 'print', 'change', 'done', 'reveal'];
+const SOUND_REF = /^(none|synth:[a-z0-9-]{1,30}|custom:[A-Za-z0-9_-]{1,60})$/;
+
+function checkSounds(s) {
+  if (!s || typeof s.enabled !== 'boolean' || !(s.volume >= 0 && s.volume <= 1)) return 'Sounds need enabled and a volume from 0 to 1';
+  if (!Array.isArray(s.custom) || s.custom.length > 40) return 'Too many custom sounds (40 max)';
+  for (const c of s.custom) {
+    if (typeof c?.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(c.id) || typeof c.mediaId !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(c.mediaId)) return 'Invalid custom sound';
+  }
+  for (const e of SFX_EVENTS) {
+    const v = s.events?.[e];
+    if (!v || typeof v.sound !== 'string' || !SOUND_REF.test(v.sound) || !(v.volume >= 0 && v.volume <= 1)) return `Invalid sound for "${e}"`;
+  }
+  return null;
+}
+
+app.get('/api/sounds', wrap(async (_req, res) => {
+  res.json({ settings: (await getSoundSettings()) || null });
+}));
+
+app.put('/api/cc/sounds', requireAdmin, wrap(async (req, res) => {
+  const s = req.body?.settings;
+  const problem = checkSounds(s);
+  if (problem) return res.status(400).json({ error: problem });
+  const clean = {
+    enabled: s.enabled,
+    volume: s.volume,
+    custom: s.custom.map((c) => ({ id: c.id, name: String(c.name ?? 'Sound').slice(0, 40), mediaId: c.mediaId })),
+    events: Object.fromEntries(SFX_EVENTS.map((e) => [e, { sound: s.events[e].sound, volume: s.events[e].volume }])),
+  };
+  res.json({ settings: await saveSoundSettings(clean) });
+}));
+
+app.post('/api/cc/sounds/reset', requireAdmin, wrap(async (_req, res) => {
+  await resetSoundSettings();
+  res.json({ ok: true });
 }));
 
 // ---------- Intro badges ----------

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { playSfx } from '../../lib/sfx/engine';
 import confetti from 'canvas-confetti';
 import { PlayyConfiguration } from '../../lib/playys/types';
 import { PlayyScene } from '../playys/PlayyScene';
@@ -20,6 +21,10 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
   const [isPaperFed, setIsPaperFed] = useState(false);
 
   // Confetti celebration & audio on mount
+  useEffect(() => {
+    playSfx('done');
+  }, []);
+
   useEffect(() => {
     nativeFeedback.notificationSuccess();
 

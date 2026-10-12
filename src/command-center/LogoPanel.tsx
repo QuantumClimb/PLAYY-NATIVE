@@ -55,36 +55,36 @@ export const LogoPanel: React.FC = () => {
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h2 className="text-xl font-bold">Logo</h2>
-        <p className="text-sm text-slate-400">
+        <h2 className="text-xl font-semibold">Logo</h2>
+        <p className="text-sm text-gray-500">
           Used in the app (intro screen and the creation-screen header) and, later, composited onto the finished artwork.
           Currently: <strong>{brand.logoUrl ? 'your uploaded SVG' : 'the built-in SVG'}</strong>.
         </p>
       </div>
 
-      {error && <div className="rounded-lg bg-red-950 border border-red-800 p-2 text-sm text-red-200">{error}</div>}
-      {note && <div className="rounded-lg bg-emerald-950 border border-emerald-800 p-2 text-sm text-emerald-200">{note}</div>}
+      {error && <div className="rounded-lg bg-red-50 border border-red-200 p-2 text-sm text-red-800">{error}</div>}
+      {note && <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-2 text-sm text-emerald-800">{note}</div>}
 
       <div className="flex flex-wrap items-center gap-3">
-        <label className="px-4 py-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold text-sm cursor-pointer">
+        <label className="cc-btn cc-btn-primary cursor-pointer">
           Upload SVG logo
           <input type="file" accept=".svg,image/svg+xml" hidden disabled={busy}
             onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) upload(f); }} />
         </label>
         {brand.logoUrl && (
-          <button type="button" onClick={useBuiltIn} disabled={busy} className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-sm">
+          <button type="button" onClick={useBuiltIn} disabled={busy} className="cc-btn">
             Go back to the built-in logo
           </button>
         )}
       </div>
-      <ul className="text-xs text-slate-400 list-disc pl-5 space-y-0.5">
+      <ul className="text-xs text-gray-500 list-disc pl-5 space-y-0.5">
         <li>Name the layers: the black-and-white version keeps dark layers (eyes, boxes) black and turns the colored ones white.</li>
         <li>Convert text to outlines. Flat vector shapes only: embedded bitmaps, scripts and external links are rejected. Under 2 MB.</li>
       </ul>
 
       {/* ---- In the app: tight drop shadow ---- */}
-      <section className="rounded-xl border border-slate-700 p-4 space-y-3">
-        <div className="font-bold">In the app: tight drop shadow</div>
+      <section className="rounded-xl border border-gray-300 p-4 space-y-3">
+        <div className="font-semibold">In the app: tight drop shadow</div>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="rounded-2xl p-6 flex items-center justify-center h-44" style={{ background: 'linear-gradient(#5db7ee, #9ad86c)' }}>
             <img src={src} alt="Logo on scenery" className="h-28 w-auto max-w-full object-contain" style={{ filter: shadowFilter(shadow) }} />
@@ -107,18 +107,18 @@ export const LogoPanel: React.FC = () => {
       </section>
 
       {/* ---- On the finished artwork: stroke ---- */}
-      <section className="rounded-xl border border-slate-700 p-4 space-y-3">
-        <div className="font-bold">On the finished artwork: stroke</div>
+      <section className="rounded-xl border border-gray-300 p-4 space-y-3">
+        <div className="font-semibold">On the finished artwork: stroke</div>
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <div className="text-xs text-slate-400 mb-1">Color artwork</div>
+            <div className="text-xs text-gray-500 mb-1">Color artwork</div>
             <div className="rounded-2xl p-6 flex items-center justify-center h-44"
               style={{ background: 'repeating-linear-gradient(45deg, #5db7ee 0 24px, #ffd92e 24px 48px, #f49ac1 48px 72px)' }}>
               <LogoArt mode="color" stroke={stroke} className="h-28 w-full" />
             </div>
           </div>
           <div>
-            <div className="text-xs text-slate-400 mb-1">Black-and-white coloring page</div>
+            <div className="text-xs text-gray-500 mb-1">Black-and-white coloring page</div>
             <div className="rounded-2xl p-6 flex items-center justify-center h-44 bg-white">
               <LogoArt mode="line" stroke={stroke} className="h-28 w-full" />
             </div>
@@ -138,13 +138,13 @@ export const LogoPanel: React.FC = () => {
           <input type="color" value={stroke.color} disabled={!stroke.enabled}
             onChange={(e) => setStroke({ ...stroke, color: e.target.value })} className="h-8 w-12 bg-transparent" />
         </label>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-gray-500">
           Color artwork gets a rounded edge around the whole logo. The coloring page gets a black line around every shape (always at least a thin one, so the white shapes show on white paper).
         </p>
       </section>
 
       <button type="button" onClick={save} disabled={busy}
-        className="px-5 py-2 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold disabled:opacity-50">Save logo settings</button>
+        className="cc-btn cc-btn-primary">Save logo settings</button>
     </div>
   );
 };
