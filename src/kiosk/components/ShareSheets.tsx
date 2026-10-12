@@ -1,8 +1,8 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import type { PlayyConfiguration } from '../../lib/playys/types';
 import type { GeneratedCard } from '../../lib/playys/cardTypes';
-import { PlayyScene } from '../playys/PlayyScene';
-import { TrumpCardBack, TrumpCardFront } from '../card/TrumpCard';
+import { PlayyScene } from '../../components/playys/PlayyScene';
+import { TrumpCardBack, TrumpCardFront } from '../../components/card/TrumpCard';
 import { CaptureNodes, prepareFonts } from '../../lib/share/capture';
 import { SCENE_H, SCENE_W } from '../../lib/assets/scene';
 

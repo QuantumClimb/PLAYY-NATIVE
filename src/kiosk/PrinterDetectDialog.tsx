@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { X, Printer, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { api } from '../../data/api';
+import { api } from '../data/api';
 
 interface PrinterInfo {
   name: string;

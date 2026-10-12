@@ -10,10 +10,10 @@ import { DEFAULT_CONFIGURATION } from './lib/playys/configuration';
 import { PrintableCardSheet } from './components/card/PrintableCardSheet';
 import { GeneratedCard } from './lib/playys/cardTypes';
 import { PrintableColoringSheet } from './components/creator/PrintableColoringSheet';
-import { KioskIdleMovie } from './components/kiosk/KioskIdleMovie';
-import { MagicalColoringMachine } from './components/kiosk/MagicalColoringMachine';
-import { KioskCelebrationScreen } from './components/kiosk/KioskCelebrationScreen';
-import { PrinterDetectDialog } from './components/kiosk/PrinterDetectDialog';
+import { KioskIdleMovie } from './kiosk/KioskIdleMovie';
+import { KioskFlow } from './kiosk/KioskFlow';
+import { KioskCelebrationScreen } from './kiosk/KioskCelebrationScreen';
+import { PrinterDetectDialog } from './kiosk/PrinterDetectDialog';
 import { retryPendingShare } from './lib/share/send';
 
 // Operator tools: only loaded when an operator opens them, so the kiosk does not carry their code
@@ -36,7 +36,7 @@ export default function App() {
   const [isExporterOpen, setIsExporterOpen] = useState(false);
   const [isPrinterDetectOpen, setIsPrinterDetectOpen] = useState(false);
 
-  // A Playyy that could not be sent last time (no connection) goes out when the kiosk starts again
+  // A Playy that could not be sent last time (no connection) goes out when the kiosk starts again
   useEffect(() => {
     void retryPendingShare();
   }, []);
@@ -96,15 +96,15 @@ export default function App() {
           <div className="kiosk-create-shell flex-1 min-h-0 flex flex-col overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
               {/* PHASE 2: ONE SCREEN = ONE DECISION CREATION MACHINE
-                  HEAD -> BODY -> POWER -> WORLD -> NAME -> REVIEW */}
+                  the whole journey, from the first choice to SHARE */}
               {phase === 'create' && (
-                <MagicalColoringMachine
+                <KioskFlow
                   config={configuration}
                   onChangeConfig={setConfiguration}
                   card={card}
                   onCardChange={setCard}
-                  onFinishAndPrint={handleFinishAndPrint}
-                  onAutoReset={handleResetToIdle}
+                  onFinish={handleFinishAndPrint}
+                  onExit={handleResetToIdle}
                 />
               )}
 

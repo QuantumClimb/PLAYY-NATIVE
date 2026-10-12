@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Play, Star } from 'lucide-react';
-import { SceneBackground } from '../backgrounds/SceneBackground';
-import { IntroBadges } from '../intro/IntroBadges';
-import { BrandLogo } from '../../lib/brand/brand';
-import { useSceneBackgrounds } from '../../lib/backgrounds/context';
-import { useIntroBadges } from '../../lib/intro/badges';
-import { BadgePlacement, IntroFloatAnimation, StartButtonPlacement } from '../../lib/backgrounds/types';
+import { SceneBackground } from '../components/backgrounds/SceneBackground';
+import { IntroBadges } from '../components/intro/IntroBadges';
+import { BrandLogo } from '../lib/brand/brand';
+import { useSceneBackgrounds } from '../lib/backgrounds/context';
+import { useIntroBadges } from '../lib/intro/badges';
+import { BadgePlacement, IntroFloatAnimation, StartButtonPlacement } from '../lib/backgrounds/types';
 
 interface KioskIdleMovieProps {
   onStart: () => void;

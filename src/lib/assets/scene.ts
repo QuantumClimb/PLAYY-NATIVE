@@ -103,3 +103,12 @@ export function layoutScene(a: {
     symbol: symbolR ? map(symbolR) : null,
   };
 }
+
+/** The smallest rectangle that holds all of the given ones. */
+export function boundsOf(rects: Rect[]): Rect {
+  const left = Math.min(...rects.map((r) => r.x));
+  const top = Math.min(...rects.map((r) => r.y));
+  const right = Math.max(...rects.map((r) => r.x + r.w));
+  const bottom = Math.max(...rects.map((r) => r.y + r.h));
+  return { x: left, y: top, w: right - left, h: bottom - top };
+}

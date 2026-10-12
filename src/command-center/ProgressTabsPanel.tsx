@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { DEFAULT_PROGRESS_TABS, MAX_TAB_LABEL, ProgressTabs, cleanProgressTabs } from '../lib/progress/tabs';
-import { StageTabsRow, TabIcon, DISPLAY_STAGES } from '../components/kiosk/StageTabs';
+import { StageTabsRow, TabIcon, DISPLAY_STAGES } from '../kiosk/components/StageTabs';
 import { CmsPanel, SaveBar } from './CmsPanel';
 import { IconPicker, iconLabel } from './IconPicker';
 import { useCmsSetting } from './useCmsSetting';

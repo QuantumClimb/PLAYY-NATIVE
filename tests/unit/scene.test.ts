@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { A4, PRINT_MARGIN_MM, SCENE_H, SCENE_W, anchorOf, layoutScene } from '../../src/lib/assets/scene';
+import { A4, PRINT_MARGIN_MM, SCENE_H, SCENE_W, anchorOf, boundsOf, layoutScene } from '../../src/lib/assets/scene';
 import type { Asset, AssetMeta, AssetType } from '../../src/lib/assets/types';
 
 const svg = (w: number, h: number, extra = '') =>
@@ -75,5 +75,17 @@ describe('layoutScene', () => {
     const low = asset('background', 1000, 1400, { anchors: { stand: { x: 500, y: 1390 } } });
     const { body: b } = layoutScene({ background: low, body, head, reserveBottom: 0.1 });
     expect(b.y + b.h).toBeLessThanOrEqual(SCENE_H * 0.9 + 1e-6);
+  });
+});
+
+describe('boundsOf', () => {
+  it('holds every rectangle', () => {
+    expect(
+      boundsOf([
+        { x: 10, y: 20, w: 30, h: 40 },
+        { x: 0, y: 50, w: 5, h: 5 },
+        { x: 35, y: 25, w: 10, h: 10 },
+      ]),
+    ).toEqual({ x: 0, y: 20, w: 45, h: 40 });
   });
 });

@@ -24,7 +24,7 @@ async function post(body: Pending): Promise<ShareResult> {
   return { ok: true, email };
 }
 
-/** Logs the Playyy and has the server email the PDFs. If the server cannot be reached it is kept to try again later. */
+/** Logs the Playy and has the server email the PDFs. If the server cannot be reached it is kept to try again later. */
 export async function sendShare(config: PlayyConfiguration, capture: ShareCapture): Promise<ShareResult> {
   const body: Pending = {
     name: config.kidName ?? '',
@@ -52,7 +52,7 @@ export async function sendShare(config: PlayyConfiguration, capture: ShareCaptur
   }
 }
 
-/** Called when the kiosk starts: sends a Playyy that could not be sent last time. */
+/** Called when the kiosk starts: sends a Playy that could not be sent last time. */
 function readPending(): Pending | null {
   try {
     return JSON.parse(localStorage.getItem(PENDING_KEY) || 'null');

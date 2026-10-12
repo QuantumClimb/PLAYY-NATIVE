@@ -96,7 +96,7 @@ export async function runMigrations(sql) {
         updated TIMESTAMPTZ NOT NULL DEFAULT now()
       )`);
 
-  // One row per Playyy made: who made it (for marketing), a small thumbnail of the final card, and how the email went
+  // One row per Playy made: who made it (for marketing), a small thumbnail of the final card, and how the email went
   await sql.query(`
       CREATE TABLE IF NOT EXISTS submissions (
         id           SERIAL PRIMARY KEY,

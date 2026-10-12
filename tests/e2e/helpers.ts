@@ -27,7 +27,7 @@ const HEADINGS: Record<Exclude<KioskPage, 'quiz' | 'power'>, RegExp> = {
   preview: /YOURCOLORINGPAGE/,
   card: /YOURTRUMPCARD/,
   share: /ALLDONE/,
-  success: /YOURPLAYYYISREADY/,
+  success: /YOURPLAYYISREADY/,
 };
 
 /** Opens the kiosk with the print dialog switched off and the share request answered locally. */

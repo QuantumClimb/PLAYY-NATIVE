@@ -1,8 +1,3 @@
-export type HeadId = string; // asset slug from the command center
-export type PoseId = string;
-type SymbolId = string;
-export type BackgroundId = string;
-
 export interface CharacterColorConfiguration {
   /** CMS-compatible palette values used by the coloring stage. */
   palette?: string[];
@@ -17,10 +12,11 @@ export interface CharacterColorConfiguration {
 }
 
 export interface PlayyConfiguration {
-  head: HeadId;
-  pose: PoseId;
-  symbol: SymbolId;
-  background: BackgroundId;
+  /** Which head, pose, power symbol and background: the slug of the asset from the command center (empty = the first one) */
+  head: string;
+  pose: string;
+  symbol: string;
+  background: string;
   kidName?: string;
   phone?: string;
   email?: string;
