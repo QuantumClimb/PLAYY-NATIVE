@@ -330,51 +330,7 @@
 .head-title-star-bottom-left { left: 17%; bottom: 7%; color: #ff9fd2; -webkit-text-stroke: 1px #ff63a8; font-size: 1.2rem; }
 .head-title-star-bottom-right { right: 17%; bottom: 7%; color: #ff9fd2; -webkit-text-stroke: 1px #ff63a8; font-size: 1.2rem; }
 
-
-
-/* Colors-selection page, scoped to the existing CMS region and palette controls. */
-.colors-selection-page { gap: 1.25rem; padding: .5rem 3vw .75rem; overflow-x: hidden; }
-.colors-selection-page::before { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(35,47,190,.62), rgba(70,65,190,.24) 42%, rgba(24,164,178,.06)); }
-.colors-selection-page > .absolute.inset-0.z-0 { opacity: .55; }
-.colors-selection-page > *:not(.absolute) { z-index: 2; }
-.colors-selection-page .head-preview-column { width: 37%; height: 65%; margin-top: 11%; }
-.colors-selection-page .head-preview-panel { width: 100%; height: 100%; aspect-ratio: auto !important; border-width: 7px; border-color: #ffd633; border-radius: 2.5rem; box-shadow: inset 0 0 0 3px rgba(255,255,255,.55), inset 0 -12px 0 rgba(232,139,14,.38), 0 18px 36px rgba(53,37,99,.32); }
-.colors-selection-page .head-preview-panel > .absolute { display: none; }
-.colors-selection-page .head-preview-inner { position: relative; padding: 1.4rem; }
-.colors-selection-page .head-preview-inner .head-preview-shadow { position: absolute; left: 17%; right: 17%; bottom: 9%; height: 7%; border-radius: 50%; background: rgba(91,60,124,.22); filter: blur(10px); }
-.colors-selection-page .head-preview-inner > div:not(.head-preview-shadow) { position: relative; z-index: 1; }
-.colors-selection-page .head-content { width: 63%; position: relative; }
-.colors-selection-page .head-header { min-height: 4.5rem; justify-content: center; position: static; }
-.colors-selection-page .head-page-logo { position: fixed; z-index: 50; left: 1rem; top: .55rem; height: 4.1rem; pointer-events: auto; }
-.colors-selection-page .head-title { position: relative; margin-top: 2.7rem; padding: .15rem 0 .35rem; }
-.colors-selection-page .head-arched-heading { display: flex; align-items: baseline; justify-content: center; color: transparent; background: none; font-family: 'Sniglet','Fredoka',system-ui,sans-serif; font-size: clamp(2.1rem,3.7vw,3.9rem); font-weight: 900; line-height: 1; letter-spacing: 0; white-space: nowrap; -webkit-text-stroke: 0; text-shadow: none; transform: none; filter: drop-shadow(0 7px 4px rgba(48,48,48,.82)) drop-shadow(0 14px 15px rgba(48,48,48,.42)) !important; }
-.colors-selection-page .head-arched-heading > span:not(.head-heading-space) { display: inline-block; background: linear-gradient(180deg,#fff36d,#ffd229 58%,#f3a915); background-clip: text; -webkit-background-clip: text; -webkit-text-stroke: 4px #151515; text-shadow: none; }
-.colors-selection-page .head-arched-heading > span { transform: none !important; }
-.colors-selection-page .head-heading-space { width: .45em; margin: 0; }
-.colors-selection-page .head-title h1.head-arched-heading { color: transparent !important; background: none !important; -webkit-text-stroke: 0 !important; text-shadow: none !important; transform: none !important; }
-.colors-selection-page .head-subtitle { margin-top: .8rem; color: #f2efff; font-family: 'Sniglet','Fredoka',system-ui,sans-serif; font-size: clamp(1.05rem,1.65vw,1.65rem); font-weight: 900; -webkit-text-stroke: 2px #151515; text-shadow: 0 3px 0 #666, 0 5px 8px rgba(40,40,40,.35); }
-.colors-selection-page .colors-options { overflow: hidden; padding: .35rem 0; }
-.colors-selection-page .colors-options > div:first-child { border: 0; border-radius: 1.8rem; background: transparent; padding: 0; box-shadow: none; }
-.colors-selection-page .colors-options h2 { display: none; }
-.colors-selection-page .colors-options > div:first-child > p { display: none; }
-.colors-selection-page .colors-options > div:first-child > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; }
-.colors-selection-page .colors-options > div:first-child > div > div { border: 5px solid #ffd633; border-radius: 1.6rem; background: linear-gradient(180deg,#fffdf4,#fff4c7); padding: .85rem; box-shadow: inset 0 -8px 0 rgba(232,139,14,.18), 0 8px 0 rgba(50,45,133,.26), 0 12px 20px rgba(39,27,100,.2); }
-.colors-selection-page .colors-options .color-region.is-active { border-color: #ffb900; box-shadow: 0 0 0 3px rgba(255,217,65,.5), inset 0 -8px 0 rgba(232,139,14,.18), 0 8px 0 rgba(50,45,133,.26), 0 0 18px rgba(255,203,34,.5); }
-.colors-selection-page .colors-options > div:first-child > div > div > div:first-child { color: #17246f; margin-bottom: .5rem; }
-.colors-selection-page .colors-options > div:first-child > div > div > div:first-child span:last-child { color: #7d5b1b; }
-.colors-selection-page .colors-options button { width: 3.6rem; height: 3.6rem; border: 0 !important; border-radius: .7rem; filter: drop-shadow(0 3px 0 rgba(97,55,28,.22)); }
-.colors-selection-page .colors-options button[aria-pressed="true"] { outline: 4px solid #ffd21f; outline-offset: 3px; filter: drop-shadow(0 0 8px rgba(255,202,33,.95)); }
-.colors-selection-page .colors-options button span { color: white; text-shadow: 0 1px 2px rgba(0,0,0,.7); }
-.colors-selection-page .colors-scroll-area { scrollbar-gutter: stable; padding-right: .8rem; scrollbar-width: thin; scrollbar-color: #f6c928 transparent; }
-.colors-selection-page .colors-scroll-area::-webkit-scrollbar { width: 10px; height: 0; }
-.colors-selection-page .colors-scroll-area::-webkit-scrollbar-track { background: transparent; }
-.colors-selection-page .colors-scroll-area::-webkit-scrollbar-thumb { border: 2px solid transparent; border-radius: 999px; background-clip: padding-box; background-color: #f6c928; box-shadow: inset 2px 2px 0 rgba(255,255,255,.48), 0 2px 6px rgba(113,73,13,.35); }
-.colors-selection-page .colors-scroll-area::-webkit-scrollbar-thumb:hover, .colors-selection-page .colors-scroll-area::-webkit-scrollbar-thumb:active { background-color: #ffe04a; box-shadow: inset 2px 2px 0 rgba(255,255,255,.65), 0 2px 8px rgba(113,73,13,.45); }
-.colors-selection-page .head-navigation { justify-content: center; align-items: center; gap: 24px; padding: 0 0 1rem; }
-.colors-selection-page .head-nav-button { box-sizing: border-box; width: 15rem; height: 4.25rem; min-height: 4.25rem; padding: 0 1.5rem; display: inline-flex; align-items: center; justify-content: center; gap: .7rem; border-radius: 999px; }
-.colors-selection-page .head-nav-button span { display: inline-flex; align-items: center; justify-content: center; }
 .kiosk-create-shell:has(.pick-page) .kiosk-footer { display: none; }
-.kiosk-create-shell:has(.colors-selection-page) .kiosk-footer { display: none; }
 
 /* Questionnaire page: presentation-only treatment around the existing quiz logic. */
 .quiz-selection-page { gap: 1.25rem; padding: .5rem 3vw .75rem; overflow-x: hidden; }
@@ -475,7 +431,6 @@
   .power-selection-page .power-award-description { margin-inline: auto; }
   .power-selection-page .power-award-strip { min-height: 4.5rem; }
 }
-
 
 /* Details page: colourful, touch-first keyboard styling. */
 .kiosk-machine:has(.details-form) .details-form { gap: 1rem; padding: 1rem; }
@@ -837,6 +792,57 @@
 .kiosk-machine.pick-page { background: linear-gradient(#7d70f2 0%, #5368e6 45%, #8a5fe0 100%); }
 /* a vivid sky when no background image is set in the command center */
 .pick-page .bg-gradient-to-b.from-indigo-950 { background-image: linear-gradient(#7d70f2 0%, #5368e6 45%, #8a5fe0 100%); }
+
+/* ===== Colours page: shares the pick-page chrome; two panels of hexagon swatches ===== */
+.pick-page .head-subtitle { font-size: min(2.45vw, 4.2vh, calc(50vw / (var(--sub-chars, 30) * .63))); white-space: nowrap; }
+.pick-page.pick-colors .head-preview-column { left: 4.5%; top: 19.5%; width: 34.5%; height: 65%; }
+.pick-page.pick-colors .pick-options-area { left: 40.4%; top: 28.5%; width: 57.2%; height: 56%; }
+.pick-carousel.is-colors .pick-page-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: calc(100cqh - 5.4vh); gap: 2.6vw; padding: 3.6vh 1.2vh 1.8vh;
+}
+.color-panel {
+  position: relative; box-sizing: border-box; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  border: .8vh solid transparent; border-radius: 2.6vw;
+  background: linear-gradient(#fffdf5, #fff1cf) padding-box, linear-gradient(#ffe88a, #f4b01c) border-box;
+  box-shadow: 0 .9vh 0 #d89a12, 0 2vh 3vh rgba(20, 18, 90, .32);
+}
+.color-panel-label {
+  position: absolute; z-index: 2; top: -3.4vh; left: 50%; transform: translateX(-50%); padding: .7vh 2.6vw;
+  border: .5vh solid #fff; border-radius: 999px; white-space: nowrap; text-transform: uppercase; letter-spacing: .02em;
+  font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(1.75vw, 3.1vh);
+  box-shadow: 0 .5vh 0 rgba(0, 0, 0, .2), 0 1vh 1.6vh rgba(0, 0, 0, .25);
+}
+.color-panel-label.is-yellow { background: linear-gradient(#ffe86a, #ffc21d); color: #1b1464; }
+.color-panel-label.is-purple { background: linear-gradient(#a65cf0, #7a34d6); color: #fff; }
+.color-swatches { display: flex; flex-direction: column; align-items: center; gap: 1.4vh; padding: 3vh 1vw 1vh; }
+.color-row { display: flex; justify-content: center; gap: .8vw; }
+.hex-swatch {
+  position: relative; width: min(5.3vw, 9.4vh); aspect-ratio: 1; padding: 0; border: 0; background: none; cursor: pointer;
+  filter: drop-shadow(0 .5vh .4vh rgba(30, 26, 100, .28)); transition: transform .12s ease;
+}
+.hex-swatch svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.hex-swatch:active { transform: scale(.94); }
+.hex-swatch.is-selected { transform: scale(1.14); z-index: 2; }
+.hex-swatch:focus-visible { outline: .4vh solid #1b1464; outline-offset: .3vh; border-radius: 1vh; }
+.hex-check {
+  position: absolute; top: -.6vh; right: -.5vh; width: 36%; aspect-ratio: 1; display: grid; place-items: center;
+  border: .35vh solid #fff; border-radius: 50%; background: linear-gradient(#45e8a8, #0dbb7d); color: #fff;
+  font-size: min(1.2vw, 2.1vh); font-weight: 900; box-shadow: 0 .4vh 1vh rgba(10, 70, 60, .4);
+}
+
+/* Simple / Advanced switch, centered between Back and Next */
+.pick-page .color-mode-toggle {
+  position: absolute; z-index: 6; left: 50%; bottom: 4.6%; transform: translateX(-50%); display: flex; gap: .4vw; padding: .6vh;
+  border: .5vh solid #fff; border-radius: 999px; background: linear-gradient(#fff, #ece8ff);
+  box-shadow: 0 .7vh 0 rgba(60, 50, 150, .4), 0 1.6vh 2.4vh rgba(0, 0, 0, .3);
+}
+.color-mode-toggle button {
+  min-width: 10vw; padding: 1.1vh 1.6vw; border: 0; border-radius: 999px; background: transparent; color: #4a4a8a; cursor: pointer;
+  font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(1.55vw, 2.8vh); letter-spacing: .04em; text-transform: uppercase;
+}
+.color-mode-toggle button.is-active {
+  background: linear-gradient(#ffe86a, #ffb81c); color: #1b1464; box-shadow: 0 .4vh 0 #d88a00, inset 0 .3vh 0 rgba(255, 255, 255, .6);
+}
 
 /* =====================================================================
    Command center: a neutral, professional light theme (white, Inter).

@@ -8,10 +8,14 @@ export type BackgroundId = string;
 export interface CharacterColorConfiguration {
   /** CMS-compatible palette values used by the coloring stage. */
   palette?: string[];
-  /** Main body color. */
-  body?: string;
-  /** Explicit colors for editable body/clothing SVG regions. */
-  clothing?: Record<string, string>;
+  /** simple: a main and a secondary color. advanced: every part can be set on its own. */
+  mode?: 'simple' | 'advanced';
+  /** Main color: the head, hoodie, trousers and shoes. */
+  main?: string;
+  /** Secondary color: the cuffs, trim and soles only. */
+  highlight?: string;
+  /** Advanced mode: colors for individual parts, keyed by layer name ('head' for the head). */
+  parts?: Record<string, string>;
 }
 
 export interface PlayyConfiguration {

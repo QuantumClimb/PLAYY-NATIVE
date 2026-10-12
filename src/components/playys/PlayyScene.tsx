@@ -3,6 +3,7 @@ import { PlayyConfiguration } from '../../lib/playys/types';
 import { useSelection } from '../../lib/assets/library';
 import { Rect, SCENE_H, SCENE_W, layoutScene } from '../../lib/assets/scene';
 import { AssetArt } from './AssetArt';
+import { resolveColors } from '../../lib/playys/colors';
 
 const rectStyle = (r: Rect): React.CSSProperties => ({
   position: 'absolute',
@@ -30,21 +31,24 @@ export const PlayyScene: React.FC<PlayySceneProps> = ({ config, mode, className 
     [sel],
   );
 
+  // The visitor's color choices. The black-and-white coloring page ignores them (it is for coloring in).
+  const rc = resolveColors(sel, config.colors);
+
   return (
     <div className={`relative overflow-hidden bg-white ${className}`} style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}>
       <AssetArt asset={sel.background} mode={mode} main={sel.headMain} stretch style={rectStyle(layout.background)} />
       <AssetArt
         asset={sel.body}
         mode={mode}
-        main={config.colors?.body ?? sel.outfit}
-        secondary={sel.secondary}
-        partColors={config.colors?.clothing}
+        main={rc.bodyMain}
+        secondary={rc.secondary}
+        partColors={mode === 'color' ? rc.partColors : undefined}
         style={rectStyle(layout.body)}
       />
       {sel.symbol && layout.symbol && (
         <AssetArt asset={sel.symbol} mode={mode} main={sel.headMain} style={rectStyle(layout.symbol)} />
       )}
-      <AssetArt asset={sel.head} face={sel.face} mode={mode} main={sel.headMain} style={rectStyle(layout.head)} />
+      <AssetArt asset={sel.head} face={sel.face} mode={mode} main={rc.headMain} style={rectStyle(layout.head)} />
     </div>
   );
 };

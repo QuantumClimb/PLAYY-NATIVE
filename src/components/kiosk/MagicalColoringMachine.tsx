@@ -14,6 +14,8 @@ import { BrandLogo } from '../../lib/brand/brand';
 import { playSfx } from '../../lib/sfx/engine';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PickCarousel } from './PickCarousel';
+import { ColorModeToggle, ColorPanel } from './ColorPanel';
+import { COLOR_SWATCHES, effectiveRegionColor, regionGroup, resolveColors } from '../../lib/playys/colors';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { calculateArchetype } from '../../lib/playys/archetypes';
 import { BASE_STATS, CharacterStats, GeneratedCard } from '../../lib/playys/cardTypes';
@@ -40,11 +42,7 @@ interface MagicalColoringMachineProps {
 
 const STEPS_LIST: MachineStep[] = ['head', 'pose', 'colors', 'quiz', 'power', 'world', 'details', 'preview', 'card', 'complete'];
 
-const DEFAULT_COLOR_PALETTE = [
-  '#ef4444', '#f97316', '#facc15', '#84cc16', '#14b8a6',
-  '#06b6d4', '#3b82f6', '#6366f1', '#a855f7', '#ec4899',
-  '#f8fafc', '#1e293b',
-];
+const DEFAULT_COLOR_PALETTE = COLOR_SWATCHES;
 
 const KEYBOARD_LETTERS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -146,6 +144,7 @@ const CharacterStagePreview: React.FC<{
   /** Head, pose and background pages only: 'crop' fills the box with the character, 'scene' centers the A4 scene */
   fit?: 'crop' | 'scene';
 }> = ({ selection, config, mode = 'color', headOnly = false, showSymbol = false, showBackground = false, fit }) => {
+  const rc = resolveColors(selection, config.colors);
   if (headOnly) {
     return (
       <div className="head-preview-inner w-full h-full flex items-center justify-center bg-white rounded-2xl p-8">
@@ -154,7 +153,7 @@ const CharacterStagePreview: React.FC<{
           asset={selection.head}
           face={selection.face}
           mode={mode}
-          main={selection.headMain}
+          main={rc.headMain}
           secondary={selection.secondary}
           className="h-[78%] w-auto max-w-[92%]"
         />
@@ -193,9 +192,9 @@ const CharacterStagePreview: React.FC<{
       <AssetArt
         asset={selection.body}
         mode={mode}
-        main={config.colors?.body ?? selection.outfit}
-        secondary={selection.secondary}
-        partColors={config.colors?.clothing}
+        main={rc.bodyMain}
+        secondary={rc.secondary}
+        partColors={mode === 'color' ? rc.partColors : undefined}
         style={rectStyle(layout.body)}
       />
       {showSymbol && selection.symbol && layout.symbol && (
@@ -210,7 +209,7 @@ const CharacterStagePreview: React.FC<{
         asset={selection.head}
         face={selection.face}
         mode={mode}
-        main={selection.headMain}
+        main={rc.headMain}
         secondary={selection.secondary}
         style={rectStyle(layout.head)}
       />
@@ -225,6 +224,7 @@ const CroppedCharacter: React.FC<{
   config: PlayyConfiguration;
   showSymbol?: boolean;
 }> = ({ selection, body, config, showSymbol = false }) => {
+  const rc = resolveColors(selection, config.colors);
   const layout = layoutScene({
     background: selection.background,
     body,
@@ -249,15 +249,15 @@ const CroppedCharacter: React.FC<{
       <AssetArt
         asset={body}
         mode="color"
-        main={config.colors?.body ?? selection.outfit}
-        secondary={selection.secondary}
-        partColors={config.colors?.clothing}
+        main={rc.bodyMain}
+        secondary={rc.secondary}
+        partColors={rc.partColors}
         style={at(layout.body)}
       />
       {showSymbol && selection.symbol && layout.symbol && (
         <AssetArt asset={selection.symbol} mode="color" main={selection.headMain} style={at(layout.symbol)} />
       )}
-      <AssetArt asset={selection.head} face={selection.face} mode="color" main={selection.headMain} secondary={selection.secondary} style={at(layout.head)} />
+      <AssetArt asset={selection.head} face={selection.face} mode="color" main={rc.headMain} secondary={selection.secondary} style={at(layout.head)} />
     </div>
   );
 };
@@ -334,7 +334,6 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   const [detailsError, setDetailsError] = useState('');
   const [idleSeconds, setIdleSeconds] = useState(45);
   const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
-  const [activeColorRegion, setActiveColorRegion] = useState('body');
 
   const stepIndex = STEPS_LIST.indexOf(currentStep);
 
@@ -511,24 +510,19 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
     onChangeConfig({ ...config, email });
   };
 
+  // Color choices: 'main' (head, hoodie, trousers, shoes), 'highlight' (cuffs, trim, soles), or one part in advanced mode
   const handleColorChange = (region: string, color: string) => {
     resetIdleTimer();
     nativeFeedback.selection();
-    setActiveColorRegion(region);
-    if (region === 'body') {
-      onChangeConfig({
-        ...config,
-        colors: { ...config.colors, body: color },
-      });
-      return;
-    }
-    onChangeConfig({
-      ...config,
-      colors: {
-        ...config.colors,
-        clothing: { ...config.colors?.clothing, [region]: color },
-      },
-    });
+    const cur = config.colors ?? {};
+    if (region === 'main') onChangeConfig({ ...config, colors: { ...cur, main: color } });
+    else if (region === 'highlight') onChangeConfig({ ...config, colors: { ...cur, highlight: color } });
+    else onChangeConfig({ ...config, colors: { ...cur, parts: { ...cur.parts, [region]: color } } });
+  };
+
+  const handleColorMode = (mode: 'simple' | 'advanced') => {
+    resetIdleTimer();
+    onChangeConfig({ ...config, colors: { ...config.colors, mode } });
   };
 
   // Surprise Me per step
@@ -552,7 +546,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       : currentStep === 'pose'
       ? 'CHOOSE YOUR POSE'
       : currentStep === 'colors'
-      ? 'CHOOSE YOUR COLORS'
+      ? 'CHOOSE YOUR COLOURS!'
       : currentStep === 'quiz'
       ? powerQuizAnswers.length < powerQuestions.length
         ? (powerQuestions[powerQuestionIdx]?.question.toUpperCase() ?? 'DISCOVER YOUR POWER')
@@ -570,17 +564,28 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       : 'PRINT & COMPLETE';
 
   const isReview = currentStep === 'card';
-  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world';
+  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' || currentStep === 'colors';
+  const colorMode = config.colors?.mode ?? 'simple';
+  // Advanced mode: one panel per part, in a sensible order (gloves are always white, so they are not offered)
+  const REGION_ORDER = ['hoodie', 'trousers', 'shoes', 'cuffs', 'trim', 'soles', 'tassles'];
+  const regionRank = (k: string) => { const i = REGION_ORDER.indexOf(k.toLowerCase()); return i === -1 ? 99 : i; };
+  const bodyRegions = Object.keys(sel.body.parts)
+    .filter((k) => !/(outline|line)/i.test(k) && regionGroup(k) !== 'gloves')
+    .sort((a, b) => regionRank(a) - regionRank(b));
+  const colorPanels = colorMode === 'advanced'
+    ? [{ key: 'head', label: 'Head', value: effectiveRegionColor(config.colors, 'head') },
+       ...bodyRegions.map((k) => ({ key: k, label: regionLabel(k), value: effectiveRegionColor(config.colors, k) }))]
+    : [{ key: 'main', label: 'Main colour', value: config.colors?.main },
+       { key: 'highlight', label: 'Secondary colour', value: config.colors?.highlight }];
   useEffect(() => {
     if (currentStep === 'card') playSfx('reveal');
   }, [currentStep]);
   const palette = config.colors?.palette?.length ? config.colors.palette : DEFAULT_COLOR_PALETTE;
-  const editableRegions = Object.keys(sel.body.parts).filter((key) => !/(outline|line)/i.test(key));
 
   return (
     <div
       onClick={resetIdleTimer}
-      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' ? 'pick-page' : currentStep === 'colors' ? 'colors-selection-page' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : ''}`}
+      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : ''}`}
     >
       {/* Dynamic CMS Scene Background */}
       <SceneBackground sceneId={CMS_SCENE_BY_STEP[currentStep]} />
@@ -597,7 +602,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               headOnly={currentStep === 'head'}
               showSymbol={['power', 'world', 'details', 'preview'].includes(currentStep)}
               showBackground={['world', 'details', 'preview'].includes(currentStep)}
-              fit={currentStep === 'pose' ? 'crop' : currentStep === 'world' ? 'scene' : undefined}
+              fit={currentStep === 'pose' || currentStep === 'colors' ? 'crop' : currentStep === 'world' ? 'scene' : undefined}
             />
             {currentStep === 'head' && [1, 2, 3, 4, 5, 6].map((n) => <i key={n} className={`pick-spark pick-spark-${n}`} aria-hidden="true" />)}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 font-black text-xs px-4 py-1 rounded-full shadow-md uppercase tracking-wider whitespace-nowrap">
@@ -654,8 +659,8 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
         {currentStep === 'quiz' ? (
           <h1 className="head-arched-heading quiz-question-heading" aria-label={questionTitle}>{questionTitle}</h1>
         ) : currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' ? (
-          <h1 className="head-arched-heading" style={{ ['--title-chars' as string]: (currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : 'CHOOSE YOUR BACKGROUND').length } as React.CSSProperties} aria-label={currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : questionTitle}>
-            {(currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : 'CHOOSE YOUR BACKGROUND').split('').map((letter, index) => (
+          <h1 className="head-arched-heading" style={{ ['--title-chars' as string]: (currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : 'CHOOSE YOUR BACKGROUND').length } as React.CSSProperties} aria-label={currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : questionTitle}>
+            {(currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : 'CHOOSE YOUR BACKGROUND').split('').map((letter, index) => (
               letter === ' '
                 ? <span className="head-heading-space" key={`space-${index}`} aria-hidden="true" />
                 : <span key={`${letter}-${index}`}>{letter}</span>
@@ -664,10 +669,15 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
         ) : (
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">{questionTitle}</h1>
         )}
-        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'card') && <p className="head-subtitle">{currentStep === 'head' ? 'Pick a face for your Playy!' : currentStep === 'pose' ? 'Pick a pose for your Playy!' : currentStep === 'colors' ? 'Make your Playy colourful!' : currentStep === 'world' ? 'Pick a world for your Playyy!' : currentStep === 'card' ? 'A special card just for you!' : (powerQuestions[powerQuestionIdx]?.subtitle || 'Choose the answer that feels most like you!')}</p>}
+        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'card') && (() => {
+          const subtitleText: string = currentStep === 'head' ? 'Pick a face for your Playy!' : currentStep === 'pose' ? 'Pick a pose for your Playy!' : currentStep === 'colors' ? (colorMode === 'advanced' ? 'Pick a colour for each part of your Playyy!' : 'Pick a main colour and a secondary colour for your Playyy!') : currentStep === 'world' ? 'Pick a world for your Playyy!' : currentStep === 'card' ? 'A special card just for you!' : (powerQuestions[powerQuestionIdx]?.subtitle || 'Choose the answer that feels most like you!');
+          return <p className="head-subtitle" style={{ ['--sub-chars' as string]: subtitleText.length } as React.CSSProperties}>{subtitleText}</p>;
+        })()}
       </div>
 
-      <div className={`flex-1 min-h-0 overflow-y-auto py-2 z-10 ${currentStep === 'colors' ? 'colors-scroll-area' : ''} ${isPick ? 'pick-options-area' : ''}`}>
+      {currentStep === 'colors' && <ColorModeToggle mode={colorMode} onChange={handleColorMode} />}
+
+      <div className={`flex-1 min-h-0 overflow-y-auto py-2 z-10 ${isPick ? 'pick-options-area' : ''}`}>
           {/* STEP 1: CHOOSE YOUR HEAD */}
           {currentStep === 'head' && (
             <PickCarousel
@@ -698,53 +708,26 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             />
           )}
 
-          {/* STEP 3: CHOOSE YOUR COLORS */}
+          {/* STEP 3: CHOOSE YOUR COLOURS: simple (main + secondary) or advanced (every part), swiped left and right */}
           {currentStep === 'colors' && (
-            <div className="colors-options flex flex-col gap-4 p-2 min-h-full justify-center">
-              <div className="rounded-[28px] border-4 border-indigo-800/70 bg-slate-950/85 p-5 shadow-xl">
-                <div className="mb-4 text-center">
-                  <h2 className="text-2xl font-black text-amber-300">Color Your Playy</h2>
-                  <p className="mt-1 text-sm text-slate-300">Choose a color for the body and each editable clothing part.</p>
-                </div>
-                <div className="space-y-4">
-                  {[{ key: 'body', label: 'Body', value: config.colors?.body ?? sel.outfit }, ...editableRegions.map((key) => ({
-                    key,
-                    label: regionLabel(key),
-                    value: config.colors?.clothing?.[key] ?? '',
-                  }))].map((region) => (
-                    <div key={region.key} className={`color-region rounded-2xl border border-slate-800 bg-slate-900/80 p-3 ${activeColorRegion === region.key ? 'is-active' : ''}`}>
-                      <div className="mb-2 flex items-center justify-between gap-3">
-                        <span className="text-sm font-black uppercase tracking-wide text-white">{region.label}</span>
-                        <span className="font-mono text-xs font-bold uppercase text-slate-400">{region.value || 'AUTO'}</span>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        {palette.map((color) => {
-                          const selected = region.value.toLowerCase() === color.toLowerCase();
-                          return (
-                            <button
-                              key={`${region.key}-${color}`}
-                              type="button"
-                              aria-label={`${region.label} ${color}`}
-                              aria-pressed={selected}
-                              data-sfx="select"
-                              onClick={() => handleColorChange(region.key, color)}
-                              className={`relative h-11 w-11 cursor-pointer transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white/80 ${selected ? 'scale-110' : ''}`}
-                              style={{
-                                backgroundColor: color,
-                                clipPath: 'polygon(25% 6%, 75% 6%, 100% 50%, 75% 94%, 25% 94%, 0 50%)',
-                                border: selected ? '3px solid #fbbf24' : '2px solid rgba(255,255,255,0.45)',
-                              }}
-                            >
-                              {selected && <span className="absolute inset-0 flex items-center justify-center text-sm font-black text-slate-950">✓</span>}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <React.Fragment key={colorMode}>
+            <PickCarousel
+              variant="colors"
+              items={colorPanels}
+              keyOf={(p) => p.key}
+              perPage={2}
+              onInteract={resetIdleTimer}
+              renderItem={(panel, i) => (
+                <ColorPanel
+                  label={panel.label}
+                  accent={i % 2 === 0 ? 'yellow' : 'purple'}
+                  value={panel.value}
+                  swatches={palette}
+                  onPick={(c) => handleColorChange(panel.key, c)}
+                />
+              )}
+            />
+            </React.Fragment>
           )}
 
           {/* STEP 4: POWER QUESTIONNAIRE */}

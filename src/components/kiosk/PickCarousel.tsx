@@ -9,6 +9,8 @@ interface PickCarouselProps<T> {
   renderItem: (item: T, index: number) => React.ReactNode;
   /** Cards per page: 3 columns by 2 rows, like the design */
   perPage?: number;
+  /** 'colors': two large panels per page instead of the 3 x 2 grid of cards */
+  variant?: 'colors';
   /** Called on any touch, drag or scroll, so the kiosk's inactivity timer stays quiet while someone browses */
   onInteract?: () => void;
 }
@@ -17,7 +19,7 @@ interface PickCarouselProps<T> {
  * Pages of cards you swipe left and right (no vertical scrolling). Touch uses native scroll-snap;
  * a mouse can drag, and there are arrow buttons and page dots when there is more than one page.
  */
-export function PickCarousel<T>({ items, keyOf, selectedKey, renderItem, perPage = 6, onInteract }: PickCarouselProps<T>) {
+export function PickCarousel<T>({ items, keyOf, selectedKey, renderItem, perPage = 6, variant, onInteract }: PickCarouselProps<T>) {
   const scroller = useRef<HTMLDivElement>(null);
   const drag = useRef({ active: false, moved: false, startX: 0, startLeft: 0 });
   const [page, setPage] = useState(0);
@@ -82,7 +84,7 @@ export function PickCarousel<T>({ items, keyOf, selectedKey, renderItem, perPage
   const many = pages.length > 1;
 
   return (
-    <div className="pick-carousel">
+    <div className={`pick-carousel ${variant === 'colors' ? 'is-colors' : ''}`}>
       <div
         ref={scroller}
         className="pick-scroller"
