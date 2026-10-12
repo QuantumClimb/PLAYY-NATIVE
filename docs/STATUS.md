@@ -106,6 +106,11 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 - Needs `SMTP_USER` and `SMTP_PASS` (Gmail app password) in `.env` and in Vercel. Until then emails show as "Not sent".
 - WhatsApp is not built yet (waiting for the client's token).
 
+## Cleanup and last screen
+- Last screen (success) redesigned on the shared chrome; it returns to the intro screen by itself after 20 seconds (or FINISH).
+- Back/Next container no longer swallows taps in the middle of the page (this had broken the Advanced colour toggle).
+- Removed unused old pages and components (the old creator, wizard and Expo-simulator screens, the SVG-component heads, poses, symbols and backgrounds, old questions list) and the unused mascot image.
+
 ## Open questions
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?

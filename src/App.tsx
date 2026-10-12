@@ -112,6 +112,7 @@ export default function App() {
               {phase === 'celebrate' && (
                 <KioskCelebrationScreen
                   config={configuration}
+                  card={card}
                   onAllDone={handleResetToIdle}
                   onPrintAnother={handlePrint}
                 />
