@@ -210,6 +210,8 @@ app.get('/api/media/:id', wrap(async (req, res) => {
   const buffer = Buffer.from(media.data_base64, 'base64');
   const mimeType = media.mime_type;
 
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+
   const range = req.headers.range;
   if (range) {
     const parts = range.replace(/bytes=/, '').split('-');

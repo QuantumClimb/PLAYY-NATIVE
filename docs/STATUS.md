@@ -34,6 +34,8 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 
 **Command center theme**: white, neutral and Inter (indigo accent), scoped to `.cc-root`; shared classes `cc-card`, `cc-btn`, `cc-input` etc. in `src/index.css`. The kiosk keeps its playful look.
 
+**Head, pose and background pages** (2026-10-12): rebuilt as one shared layout from the design reference. Every piece is positioned as a percentage of the screen (logo, centered stepper with a connecting line, "Pick for Me!" pill, title and subtitle, cream preview card with gold border, Back bottom-left and Next bottom-right at 17.4% x 9.6%), so it scales from 1366x768 to 1920x1080. The options are a **swipeable carousel** of 3 x 2 pages with pastel cards (touch scroll-snap, mouse drag, arrows and page dots appear only with more than 6 items, and the selected item's page opens automatically). No vertical scrolling. The pose page crops the character to fill the preview and the cards; the background page centers the A4 scene. Components: `PickCarousel.tsx`, `.pick-page` styles in `src/index.css` (the old page-specific head/pose/world CSS was removed). Uploaded media is now cached by the browser (`Cache-Control: immutable`) because the scene images are about 2 MB each and were re-downloaded on every view. The stepper, "Pick for Me!" wording and Back/Next arrows are shared with the other steps; the colors, quiz, power and details pages keep their own layouts.
+
 **Printer dialog** (Alt+Shift+P): lists installed printers with status, sets the default, test print. Detection runs in the local kiosk server because a browser cannot list printers.
 
 **Trump card and questionnaire** merged from `PLAYY_CARD` into the web app. Fixed the corrupted archetype emoji and added the missing courage stat to the printed card. Also ported to `expo-app` (paused; uses the simpler Expo artwork).
@@ -75,6 +77,8 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 - Should submissions (name, phone, artwork) be stored in the database as a log?
 
 ## Known issues and notes
+- Colors page: the region names (Body, Clothing Trim...) are white on cream cards and hard to read (predates the pick-page work).
+- The head, pose and background pages are laid out for a landscape screen (about 16:9); a portrait screen would need its own layout.
 - The trump card quiz is unbalanced: every stat starts at 50 and the highest wins, so most answers give "Cosmic Explorer".
 - Hosting: the server reads `PORT` and `HOST` (hosted = all interfaces) and turns the printer routes off unless `ENABLE_PRINTERS=1`. SQLite data does not survive redeploys on most hosts, hence Neon.
 - The kiosk now needs a connection to Neon to load its assets. For an offline-capable kiosk, cache the asset library on the PC (not built yet).

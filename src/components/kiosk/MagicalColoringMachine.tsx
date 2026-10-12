@@ -12,6 +12,8 @@ import { AssetArt } from '../playys/AssetArt';
 import { PlayyScene } from '../playys/PlayyScene';
 import { BrandLogo } from '../../lib/brand/brand';
 import { playSfx } from '../../lib/sfx/engine';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { PickCarousel } from './PickCarousel';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { calculateArchetype } from '../../lib/playys/archetypes';
 import { BASE_STATS, CharacterStats, GeneratedCard } from '../../lib/playys/cardTypes';
@@ -141,7 +143,9 @@ const CharacterStagePreview: React.FC<{
   headOnly?: boolean;
   showSymbol?: boolean;
   showBackground?: boolean;
-}> = ({ selection, config, mode = 'color', headOnly = false, showSymbol = false, showBackground = false }) => {
+  /** Head, pose and background pages only: 'crop' fills the box with the character, 'scene' centers the A4 scene */
+  fit?: 'crop' | 'scene';
+}> = ({ selection, config, mode = 'color', headOnly = false, showSymbol = false, showBackground = false, fit }) => {
   if (headOnly) {
     return (
       <div className="head-preview-inner w-full h-full flex items-center justify-center bg-white rounded-2xl p-8">
@@ -158,6 +162,14 @@ const CharacterStagePreview: React.FC<{
     );
   }
 
+  if (fit === 'crop') {
+    return (
+      <div className="flex h-full w-full items-center justify-center p-[3vh]">
+        <CroppedCharacter selection={selection} body={selection.body} config={config} showSymbol={showSymbol} />
+      </div>
+    );
+  }
+
   const layout = layoutScene({
     background: selection.background,
     body: selection.body,
@@ -166,7 +178,7 @@ const CharacterStagePreview: React.FC<{
   });
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-2xl bg-white" style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}>
+    <div className={fit === 'scene' ? 'relative mx-auto h-full overflow-hidden rounded-[2vw] bg-white' : 'relative w-full h-full overflow-hidden rounded-2xl bg-white'} style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}>
       {/* The visitor-selected world background belongs inside the character
           preview card; SceneBackground above is only the kiosk chrome. */}
       {showBackground && (
@@ -206,42 +218,68 @@ const CharacterStagePreview: React.FC<{
   );
 };
 
-const PoseCardPreview: React.FC<{
+/** The body and head cropped to their own bounds, so the character fills whatever box it is put in. */
+const CroppedCharacter: React.FC<{
   selection: Selection;
   body: Selection['body'];
   config: PlayyConfiguration;
-}> = ({ selection, body, config }) => {
+  showSymbol?: boolean;
+}> = ({ selection, body, config, showSymbol = false }) => {
   const layout = layoutScene({
     background: selection.background,
     body,
     head: selection.head,
-    symbol: null,
+    symbol: showSymbol ? selection.symbol : null,
+  });
+  const rects = [layout.body, layout.head, ...(showSymbol && layout.symbol ? [layout.symbol] : [])];
+  const x0 = Math.min(...rects.map((r) => r.x));
+  const y0 = Math.min(...rects.map((r) => r.y));
+  const W = Math.max(...rects.map((r) => r.x + r.w)) - x0;
+  const H = Math.max(...rects.map((r) => r.y + r.h)) - y0;
+  const at = (r: { x: number; y: number; w: number; h: number }): React.CSSProperties => ({
+    position: 'absolute',
+    left: `${((r.x - x0) / W) * 100}%`,
+    top: `${((r.y - y0) / H) * 100}%`,
+    width: `${(r.w / W) * 100}%`,
+    height: `${(r.h / H) * 100}%`,
   });
 
   return (
-    <div
-      className="relative h-full w-full overflow-hidden rounded-2xl bg-white"
-      style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}
-    >
+    <div className="relative h-full max-w-full" style={{ aspectRatio: `${W} / ${H}` }}>
       <AssetArt
         asset={body}
         mode="color"
         main={config.colors?.body ?? selection.outfit}
         secondary={selection.secondary}
         partColors={config.colors?.clothing}
-        style={rectStyle(layout.body)}
+        style={at(layout.body)}
       />
-      <AssetArt
-        asset={selection.head}
-        face={selection.face}
-        mode="color"
-        main={selection.headMain}
-        secondary={selection.secondary}
-        style={rectStyle(layout.head)}
-      />
+      {showSymbol && selection.symbol && layout.symbol && (
+        <AssetArt asset={selection.symbol} mode="color" main={selection.headMain} style={at(layout.symbol)} />
+      )}
+      <AssetArt asset={selection.head} face={selection.face} mode="color" main={selection.headMain} secondary={selection.secondary} style={at(layout.head)} />
     </div>
   );
 };
+
+const PoseCardPreview: React.FC<{
+  selection: Selection;
+  body: Selection['body'];
+  config: PlayyConfiguration;
+}> = ({ selection, body, config }) => <CroppedCharacter selection={selection} body={body} config={config} />;
+
+/** The small blue die on the "Pick for Me!" button. */
+const DiceIcon: React.FC = () => (
+  <svg className="pick-me-dice" viewBox="0 0 48 48" aria-hidden="true">
+    <defs>
+      <linearGradient id="pick-die" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#6aa8ff" /><stop offset="1" stopColor="#2755d8" /></linearGradient>
+    </defs>
+    <rect x="5" y="5" width="38" height="38" rx="9" fill="url(#pick-die)" stroke="#173a9e" strokeWidth="2.5" />
+    <circle cx="16" cy="16" r="3.4" fill="#fff" /><circle cx="32" cy="16" r="3.4" fill="#fff" />
+    <circle cx="24" cy="24" r="3.4" fill="#fff" />
+    <circle cx="16" cy="32" r="3.4" fill="#fff" /><circle cx="32" cy="32" r="3.4" fill="#fff" />
+  </svg>
+);
 
 const ChoiceCard: React.FC<{
   selected: boolean;
@@ -249,30 +287,35 @@ const ChoiceCard: React.FC<{
   label: string;
   selectionCard?: boolean;
   children: React.ReactNode;
-}> = ({ selected, onClick, label, selectionCard = false, children }) => (
-  <button
-    type="button"
-    data-sfx="select"
-    onClick={onClick}
-    className={`${selectionCard ? 'group relative flex h-full min-h-[238px] w-full flex-col items-center p-3 text-left focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-300/80' : 'flex flex-col items-center justify-between gap-2 p-3'} rounded-[28px] border-[5px] transition-all cursor-pointer ${
-      selected
-        ? 'bg-gradient-to-b from-indigo-700 to-indigo-900 text-white border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.6)]'
-        : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-slate-700'
-    } ${!selectionCard && selected ? 'scale-[1.03]' : ''}`}
-  >
-    {selectionCard && selected && <span className="head-selected-check" aria-label="Selected">✓</span>}
-    {selectionCard ? (
-      <div className="flex h-44 min-h-0 w-full items-center justify-center overflow-hidden rounded-2xl bg-white/95 p-3 sm:h-52">
-        <div className="flex h-full w-full min-h-0 items-center justify-center">{children}</div>
-      </div>
-    ) : (
+}> = ({ selected, onClick, label, selectionCard = false, children }) =>
+  selectionCard ? (
+    <button
+      type="button"
+      data-sfx="select"
+      aria-pressed={selected}
+      onClick={onClick}
+      className={`pick-card ${selected ? 'is-selected' : ''}`}
+    >
+      {selected && <span className="pick-selected-check" aria-label="Selected">✓</span>}
+      <div className="pick-card-art"><div>{children}</div></div>
+      <div className="pick-card-label">{label}</div>
+    </button>
+  ) : (
+    <button
+      type="button"
+      data-sfx="select"
+      onClick={onClick}
+      className={`flex flex-col items-center justify-between gap-2 p-3 rounded-[28px] border-[5px] transition-all cursor-pointer ${
+        selected
+          ? 'bg-gradient-to-b from-indigo-700 to-indigo-900 text-white border-amber-400 shadow-[0_0_35px_rgba(251,191,36,0.6)] scale-[1.03]'
+          : 'bg-slate-900/90 hover:bg-slate-800 text-slate-200 border-slate-800 hover:border-slate-700'
+      }`}
+    >
       <div className="flex h-32 w-full items-center justify-center sm:h-44">{children}</div>
-    )}
-    <div className={`${selectionCard ? 'mt-3 min-h-[2.5rem] sm:text-base' : ''} text-center text-sm font-black uppercase leading-tight`}>{label}</div>
-    {selectionCard && !selected && <div className="min-h-4" aria-hidden="true" />}
-    {selected && <div className="text-amber-300 font-black text-xs">✔ SELECTED</div>}
-  </button>
-);
+      <div className="text-center text-sm font-black uppercase leading-tight">{label}</div>
+      {selected && <div className="text-amber-300 font-black text-xs">✔ SELECTED</div>}
+    </button>
+  );
 
 export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   config,
@@ -527,6 +570,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       : 'PRINT & COMPLETE';
 
   const isReview = currentStep === 'card';
+  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world';
   useEffect(() => {
     if (currentStep === 'card') playSfx('reveal');
   }, [currentStep]);
@@ -536,7 +580,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   return (
     <div
       onClick={resetIdleTimer}
-      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' ? 'head-selection-page' : currentStep === 'pose' ? 'pose-selection-page' : currentStep === 'colors' ? 'colors-selection-page' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : currentStep === 'world' ? 'world-selection-page' : ''}`}
+      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' ? 'pick-page' : currentStep === 'colors' ? 'colors-selection-page' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : ''}`}
     >
       {/* Dynamic CMS Scene Background */}
       <SceneBackground sceneId={CMS_SCENE_BY_STEP[currentStep]} />
@@ -553,7 +597,9 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               headOnly={currentStep === 'head'}
               showSymbol={['power', 'world', 'details', 'preview'].includes(currentStep)}
               showBackground={['world', 'details', 'preview'].includes(currentStep)}
+              fit={currentStep === 'pose' ? 'crop' : currentStep === 'world' ? 'scene' : undefined}
             />
+            {currentStep === 'head' && [1, 2, 3, 4, 5, 6].map((n) => <i key={n} className={`pick-spark pick-spark-${n}`} aria-hidden="true" />)}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 font-black text-xs px-4 py-1 rounded-full shadow-md uppercase tracking-wider whitespace-nowrap">
               ★ MAGIC MIRROR ★
             </div>
@@ -574,10 +620,10 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             <button
               type="button"
               onClick={handleStepSurprise}
-              className="btn-3d btn-3d-amber btn-3d-sm flex items-center gap-1.5 px-4 py-2 text-xs font-bold whitespace-nowrap shrink-0"
+              className="pick-me-btn btn-3d btn-3d-amber btn-3d-sm flex items-center gap-1.5 px-4 py-2 text-xs font-bold whitespace-nowrap shrink-0"
             >
-              <span>✨</span>
-              <span className="hidden sm:inline">SURPRISE ME</span>
+              <DiceIcon />
+              <span>Pick for Me!</span>
             </button>
             <div className="quiz-inline-meta quiz-header-counter" aria-label={`Question ${powerQuestionIdx + 1} of ${powerQuestions.length}`}>
               <div>QUESTION {powerQuestionIdx + 1} OF {powerQuestions.length}</div>
@@ -587,10 +633,10 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
           <button
             type="button"
             onClick={handleStepSurprise}
-            className="btn-3d btn-3d-amber btn-3d-sm flex items-center gap-1.5 px-4 py-2 text-xs font-bold whitespace-nowrap shrink-0"
+            className="pick-me-btn btn-3d btn-3d-amber btn-3d-sm flex items-center gap-1.5 px-4 py-2 text-xs font-bold whitespace-nowrap shrink-0"
           >
-            <span>✨</span>
-            <span className="hidden sm:inline">SURPRISE ME</span>
+            <DiceIcon />
+            <span>Pick for Me!</span>
           </button>
         ) : (
           <div className="w-20" />
@@ -608,7 +654,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
         {currentStep === 'quiz' ? (
           <h1 className="head-arched-heading quiz-question-heading" aria-label={questionTitle}>{questionTitle}</h1>
         ) : currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' ? (
-          <h1 className="head-arched-heading" aria-label={currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : questionTitle}>
+          <h1 className="head-arched-heading" style={{ ['--title-chars' as string]: (currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : 'CHOOSE YOUR BACKGROUND').length } as React.CSSProperties} aria-label={currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : questionTitle}>
             {(currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLORS' : 'CHOOSE YOUR BACKGROUND').split('').map((letter, index) => (
               letter === ' '
                 ? <span className="head-heading-space" key={`space-${index}`} aria-hidden="true" />
@@ -621,27 +667,35 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
         {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'card') && <p className="head-subtitle">{currentStep === 'head' ? 'Pick a face for your Playy!' : currentStep === 'pose' ? 'Pick a pose for your Playy!' : currentStep === 'colors' ? 'Make your Playy colourful!' : currentStep === 'world' ? 'Pick a world for your Playyy!' : currentStep === 'card' ? 'A special card just for you!' : (powerQuestions[powerQuestionIdx]?.subtitle || 'Choose the answer that feels most like you!')}</p>}
       </div>
 
-      <div className={`flex-1 min-h-0 overflow-y-auto py-2 z-10 ${currentStep === 'colors' ? 'colors-scroll-area' : ''}`}>
+      <div className={`flex-1 min-h-0 overflow-y-auto py-2 z-10 ${currentStep === 'colors' ? 'colors-scroll-area' : ''} ${isPick ? 'pick-options-area' : ''}`}>
           {/* STEP 1: CHOOSE YOUR HEAD */}
           {currentStep === 'head' && (
-            <div className="head-options grid grid-cols-2 items-stretch gap-4 p-2 min-h-full content-center xl:grid-cols-3">
-              {lib.heads.map((h) => (
-                <ChoiceCard key={h.id} selected={sel.head.slug === h.slug} onClick={() => handleSelectHead(h.slug)} label={h.name} selectionCard>
+            <PickCarousel
+              items={lib.heads}
+              keyOf={(h) => h.id}
+              selectedKey={sel.head.id}
+              onInteract={resetIdleTimer}
+              renderItem={(h) => (
+                <ChoiceCard selected={sel.head.slug === h.slug} onClick={() => handleSelectHead(h.slug)} label={h.name} selectionCard>
                   <AssetArt asset={h} face={lib.face} mode="color" main={normalizeColor(h.meta.main) ?? '#3b82f6'} className="h-full w-auto max-w-full" />
                 </ChoiceCard>
-              ))}
-            </div>
+              )}
+            />
           )}
 
           {/* STEP 2: CHOOSE YOUR POSE */}
           {currentStep === 'pose' && (
-            <div className="pose-options grid grid-cols-2 items-stretch gap-4 p-2 min-h-full content-center xl:grid-cols-3">
-              {lib.bodies.map((b) => (
-                <ChoiceCard key={b.id} selected={sel.body.slug === b.slug} onClick={() => handleSelectPose(b.slug)} label={b.name} selectionCard>
+            <PickCarousel
+              items={lib.bodies}
+              keyOf={(b) => b.id}
+              selectedKey={sel.body.id}
+              onInteract={resetIdleTimer}
+              renderItem={(b) => (
+                <ChoiceCard selected={sel.body.slug === b.slug} onClick={() => handleSelectPose(b.slug)} label={b.name} selectionCard>
                   <PoseCardPreview selection={sel} body={b} config={config} />
                 </ChoiceCard>
-              ))}
-            </div>
+              )}
+            />
           )}
 
           {/* STEP 3: CHOOSE YOUR COLORS */}
@@ -802,13 +856,17 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
           {/* STEP 6: CHOOSE YOUR BACKGROUND */}
           {currentStep === 'world' && (
-            <div className="world-options grid grid-cols-2 xl:grid-cols-3 gap-4 p-2 min-h-full content-center">
-              {lib.backgrounds.map((bg) => (
-                <ChoiceCard key={bg.id} selected={sel.background.slug === bg.slug} onClick={() => handleSelectBackground(bg.slug)} label={bg.name} selectionCard>
+            <PickCarousel
+              items={lib.backgrounds}
+              keyOf={(bg) => bg.id}
+              selectedKey={sel.background.id}
+              onInteract={resetIdleTimer}
+              renderItem={(bg) => (
+                <ChoiceCard selected={sel.background.slug === bg.slug} onClick={() => handleSelectBackground(bg.slug)} label={bg.name} selectionCard>
                   <AssetArt asset={bg} mode="color" main={sel.headMain} className="h-full max-w-full rounded-xl overflow-hidden" />
                 </ChoiceCard>
-              ))}
-            </div>
+              )}
+            />
           )}
 
           {/* STEP 7: YOUR DETAILS */}
@@ -1034,7 +1092,8 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             onClick={goBack}
             className={`btn-3d btn-3d-blue py-4 px-8 font-bold text-lg ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'world' ? 'head-nav-button' : ''}`}
           >
-            ← BACK
+            <ArrowLeft strokeWidth={3.4} aria-hidden="true" />
+            <span>BACK</span>
           </button>
 
           {currentStep !== 'quiz' && (
@@ -1044,7 +1103,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             className={`btn-3d py-5 px-10 font-bold text-xl sm:text-2xl flex items-center gap-3 ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'power' || currentStep === 'world' ? 'head-nav-button head-nav-next' : ''}`}
           >
             <span>NEXT</span>
-            <span>→</span>
+            <ArrowRight strokeWidth={3.4} aria-hidden="true" />
           </button>
           )}
         </div>

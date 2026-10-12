@@ -84,7 +84,7 @@ export function inferEvent(el: HTMLElement): SfxEvent | 'none' {
   if (cls.includes('intro-start')) return 'start';
   if (/⌫|backspace|delete/i.test(text)) return 'backspace';
   if (/^[←‹<]?\s*back\b/i.test(text)) return 'back';
-  if (/surprise/i.test(text)) return 'surprise';
+  if (/surprise|pick for me/i.test(text)) return 'surprise';
   if (/flip/i.test(text)) return 'flip';
   if (/\bprint/i.test(text)) return 'print';
   if (/change something|retake|try again|create another|start over|new playy/i.test(text)) return 'change';
