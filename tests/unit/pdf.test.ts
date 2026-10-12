@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { PDFDocument } from 'pdf-lib';
-import { buildPdfs } from '../../server/share.mjs';
+import { buildPdfs } from '../../server/pdf.mjs';
 
 const JPEG = readFileSync(resolve('tests/fixtures/sample.jpg')).toString('base64');
 

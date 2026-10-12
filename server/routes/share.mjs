@@ -1,0 +1,73 @@
+import express from 'express';
+import { isEmail } from '../../shared/validation.mjs';
+import { requireAdmin } from '../auth.mjs';
+import { addSubmission, getSubmission, getSubmissionFiles, listSubmissions, settings } from '../db/index.mjs';
+import { HttpError, badRequest, notFound, rateLimiter, wrap } from '../http.mjs';
+import { smtpConfigured } from '../mailer.mjs';
+import { emailSubmission, shareSettings } from '../shareService.mjs';
+import { IMAGE_KEYS, parseSubmission } from '../submission.mjs';
+
+const MAX_RECIPIENTS = 2;
+const SHARES_PER_MINUTE = 20;
+const MAX_LISTED = 500;
+
+/** Who the finished Playys are emailed to, the log of everyone who made one, and the kiosk's SHARE request. */
+export const shareRouter = express.Router();
+
+shareRouter.get(
+  '/cc/share-settings',
+  requireAdmin,
+  wrap(async (_req, res) => {
+    res.json({ settings: await shareSettings(), smtp: smtpConfigured(), whatsapp: false });
+  }),
+);
+
+shareRouter.put(
+  '/cc/share-settings',
+  requireAdmin,
+  wrap(async (req, res) => {
+    const { enabled, recipients } = req.body ?? {};
+    if (typeof enabled !== 'boolean' || !Array.isArray(recipients) || recipients.length > MAX_RECIPIENTS)
+      throw badRequest('Invalid settings');
+    const addresses = recipients.map((r) => String(r ?? '').trim());
+    if (addresses.some((address) => address && !isEmail(address))) throw badRequest('One of the emails is not valid');
+    res.json({
+      settings: await settings.shareSettings.save({ enabled, recipients: addresses.filter(Boolean) }),
+      smtp: smtpConfigured(),
+      whatsapp: false,
+    });
+  }),
+);
+
+// A visitor can only send a few per minute from one place
+const allowShare = rateLimiter(SHARES_PER_MINUTE);
+
+shareRouter.post(
+  '/submissions',
+  wrap(async (req, res) => {
+    if (!allowShare(req.ip)) throw new HttpError(429, 'Too many requests');
+    const { who, thumbnail, config, images } = parseSubmission(req.body);
+    const row = await addSubmission({ ...who, thumbnail, config });
+    const email = await emailSubmission(row.id, { ...who, created: row.created }, images);
+    res.json({ id: row.id, email });
+  }),
+);
+
+shareRouter.get(
+  '/cc/submissions',
+  requireAdmin,
+  wrap(async (_req, res) => res.json({ submissions: await listSubmissions(MAX_LISTED) })),
+);
+
+shareRouter.post(
+  '/cc/submissions/:id/resend',
+  requireAdmin,
+  wrap(async (req, res) => {
+    const id = Number(req.params.id);
+    const who = Number.isInteger(id) ? await getSubmission(id) : null;
+    if (!who) throw notFound();
+    const images = await getSubmissionFiles(id);
+    if (IMAGE_KEYS.some((key) => !images[key])) throw new HttpError(409, 'The files for this one are no longer kept');
+    res.json({ email: await emailSubmission(id, who, images) });
+  }),
+);

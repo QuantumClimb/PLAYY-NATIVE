@@ -1,21 +1,8 @@
 /** Which kiosk action plays which sound. Edited in the command center under Sounds. */
 
-export const SFX_EVENTS = [
-  'tap',
-  'start',
-  'next',
-  'back',
-  'select',
-  'surprise',
-  'key',
-  'backspace',
-  'flip',
-  'answer',
-  'print',
-  'change',
-  'done',
-  'reveal',
-] as const;
+import { SFX_EVENTS } from '../../../shared/sfxEvents.mjs';
+
+export { SFX_EVENTS };
 export type SfxEvent = (typeof SFX_EVENTS)[number];
 
 export const EVENT_DEFS: Record<SfxEvent, { label: string; help: string }> = {
