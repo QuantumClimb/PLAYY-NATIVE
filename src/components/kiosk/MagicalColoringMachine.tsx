@@ -13,6 +13,7 @@ import { ColorModeToggle, ColorPanel } from './ColorPanel';
 import { DetailField, DetailsKeyboard } from './DetailsKeyboard';
 import { StageTabsRow } from './StageTabs';
 import { useIdleReset } from './useIdleReset';
+import { detailProblem } from '../../../shared/validation.mjs';
 import { ShareSheets, ShareSheetsHandle } from './ShareSheets';
 import { captureShare } from '../../lib/share/capture';
 import { sendShare } from '../../lib/share/send';
@@ -24,12 +25,7 @@ import { BASE_STATS, CharacterStats, GeneratedCard } from '../../lib/playys/card
 import { TrumpCardFront, TrumpCardBack, CARD_W, CARD_H } from '../card/TrumpCard';
 import { SceneBackground } from '../backgrounds/SceneBackground';
 import { SceneId } from '../../lib/backgrounds/types';
-import {
-  DEFAULT_POWER_QUIZ_QUESTIONS,
-  PowerQuizQuestion,
-  SYMBOL_MAP,
-  calculatePowerSymbol,
-} from '../../lib/playys/powerQuiz';
+import { SYMBOL_MAP, calculatePowerSymbol, usePowerQuizQuestions } from '../../lib/playys/powerQuiz';
 
 type MachineStep =
   'head' | 'pose' | 'colors' | 'quiz' | 'power' | 'world' | 'details' | 'preview' | 'card' | 'complete';
@@ -382,7 +378,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
     resetIdleTimer();
     nativeFeedback.impactLight();
     if (currentStep === 'details') {
-      const problem = validateDetail(detailField);
+      const problem = detailProblem(detailField, detailValue(detailField));
       if (problem) {
         setDetailsError(problem);
         nativeFeedback.impactMedium();
@@ -400,20 +396,9 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   };
 
   // Power Quiz state
-  const [powerQuestions, setPowerQuestions] = useState<PowerQuizQuestion[]>(DEFAULT_POWER_QUIZ_QUESTIONS);
+  const powerQuestions = usePowerQuizQuestions();
   const [powerQuizAnswers, setPowerQuizAnswers] = useState<number[]>([]);
   const [powerQuestionIdx, setPowerQuestionIdx] = useState<number>(0);
-
-  useEffect(() => {
-    fetch('/api/power-quiz-questions')
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.questions && Array.isArray(d.questions) && d.questions.length > 0) {
-          setPowerQuestions(d.questions);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const handlePowerAnswer = (optionIndex: number) => {
     resetIdleTimer();
@@ -534,13 +519,6 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
     field === 'name' ? config.kidName || '' : config[field] || '';
 
   // Every screen must be filled in: there is no skipping
-  const validateDetail = (field: 'name' | 'phone' | 'email'): string => {
-    const value = detailValue(field).trim();
-    if (field === 'name') return value ? '' : 'Please type your name.';
-    if (field === 'phone')
-      return value.replace(/\D/g, '').length >= 7 ? '' : 'Please type a phone number (at least 7 digits).';
-    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value) ? '' : 'Please type a valid email, like name@example.com.';
-  };
 
   const handleDetailKey = (key: string) => {
     resetIdleTimer();

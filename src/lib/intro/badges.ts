@@ -1,3 +1,5 @@
+import { isHexColor } from '../../../shared/validation.mjs';
+import { useServerSetting } from '../../data/useServerSetting';
 import {
   Brush,
   Camera,
@@ -86,7 +88,17 @@ export function cleanBadges(input: unknown): IntroBadgeData[] | null {
       id: typeof b.id === 'string' && b.id ? b.id : `badge-${i + 1}`,
       label: b.label.slice(0, MAX_BADGE_LABEL),
       icon: b.icon,
-      color: /^#[0-9a-fA-F]{6}$/.test(b.color) ? b.color : COLOR_PRESETS[i % COLOR_PRESETS.length],
+      color: isHexColor(b.color) ? b.color : COLOR_PRESETS[i % COLOR_PRESETS.length],
     }));
   return out;
 }
+
+const INTRO_BADGES_SETTING = {
+  url: '/api/intro-badges',
+  key: 'badges',
+  clean: (raw: unknown): IntroBadgeData[] | null => cleanBadges(raw) ?? DEFAULT_INTRO_BADGES,
+};
+
+/** The badges from the command center. `null` until they have loaded, so the intro screen never flashes the wrong ones. */
+export const useIntroBadges = (): IntroBadgeData[] | null =>
+  useServerSetting<IntroBadgeData[] | null>(INTRO_BADGES_SETTING, null);

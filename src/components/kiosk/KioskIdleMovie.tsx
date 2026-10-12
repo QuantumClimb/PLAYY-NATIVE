@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Play, Star } from 'lucide-react';
 import { SceneBackground } from '../backgrounds/SceneBackground';
 import { IntroBadges } from '../intro/IntroBadges';
 import { BrandLogo } from '../../lib/brand/brand';
 import { useSceneBackgrounds } from '../../lib/backgrounds/context';
-import { DEFAULT_INTRO_BADGES, IntroBadgeData, cleanBadges } from '../../lib/intro/badges';
+import { useIntroBadges } from '../../lib/intro/badges';
 import { BadgePlacement, IntroFloatAnimation, StartButtonPlacement } from '../../lib/backgrounds/types';
 
 interface KioskIdleMovieProps {
@@ -52,17 +52,7 @@ export const KioskIdleMovie: React.FC<KioskIdleMovieProps> = ({ onStart, onAdmin
     floatAnimation === 'gentle' ? 'playys-intro-float' : floatAnimation === 'slow' ? 'playys-intro-float-slow' : '';
 
   // Badges come from the command center (Intro Badges); nothing is shown until they have loaded.
-  const [badges, setBadges] = useState<IntroBadgeData[] | null>(null);
-  useEffect(() => {
-    let live = true;
-    fetch('/api/intro-badges')
-      .then((r) => r.json())
-      .then((d) => live && setBadges(cleanBadges(d.badges) ?? DEFAULT_INTRO_BADGES))
-      .catch(() => live && setBadges(DEFAULT_INTRO_BADGES));
-    return () => {
-      live = false;
-    };
-  }, []);
+  const badges = useIntroBadges();
 
   // Hidden admin gesture: hold the logo for 4.5 seconds
   const [holdTimer, setHoldTimer] = useState<ReturnType<typeof setTimeout> | null>(null);

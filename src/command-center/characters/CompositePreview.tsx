@@ -1,10 +1,8 @@
 import React, { useMemo } from 'react';
-import { parseSvgAsset } from '../lib/assets/svgParts';
-import { anchorOf, DEFAULT_HEAD_SCALE } from '../lib/assets/scene';
-import { Asset } from './api';
+import { parseSvgAsset } from '../../lib/assets/svgParts';
+import { anchorOf } from '../../lib/assets/scene';
+import { Asset } from '../api';
 import { AssetPreview } from './AssetPreview';
-
-export { anchorOf, DEFAULT_HEAD_SCALE };
 
 interface CompositePreviewProps {
   head: Asset;

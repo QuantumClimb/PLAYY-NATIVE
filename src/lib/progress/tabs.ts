@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useServerSetting } from '../../data/useServerSetting';
 
 /** One step in the row along the top of the kiosk pages. */
 interface ProgressTab {
@@ -44,24 +44,11 @@ export function cleanProgressTabs(input: unknown): ProgressTabs | null {
   };
 }
 
-let cached: ProgressTabs | null = null;
+const PROGRESS_TABS_SETTING = {
+  url: '/api/progress-tabs',
+  key: 'tabs',
+  clean: (raw: unknown) => cleanProgressTabs(raw) ?? DEFAULT_PROGRESS_TABS,
+};
 
 /** The tabs from the command center, loaded once per page load. */
-export function useProgressTabs(): ProgressTabs {
-  const [tabs, setTabs] = useState<ProgressTabs>(cached ?? DEFAULT_PROGRESS_TABS);
-  useEffect(() => {
-    if (cached) return;
-    let live = true;
-    fetch('/api/progress-tabs')
-      .then((r) => r.json())
-      .then((d) => {
-        cached = cleanProgressTabs(d.tabs) ?? DEFAULT_PROGRESS_TABS;
-        if (live) setTabs(cached);
-      })
-      .catch(() => {});
-    return () => {
-      live = false;
-    };
-  }, []);
-  return tabs;
-}
+export const useProgressTabs = (): ProgressTabs => useServerSetting(PROGRESS_TABS_SETTING, DEFAULT_PROGRESS_TABS);

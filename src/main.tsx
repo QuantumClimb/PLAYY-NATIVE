@@ -1,7 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
-import { CommandCenter } from './command-center/CommandCenter.tsx';
+import { CommandCenter } from './command-center/shell/CommandCenter.tsx';
 import { AssetLibraryProvider } from './lib/assets/library.tsx';
 import { SfxProvider } from './lib/sfx/engine.tsx';
 import { SceneBackgroundsProvider } from './lib/backgrounds/context.tsx';

@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { normalizeColor } from '../lib/assets/svgParts';
-import { Asset, AssetMeta, AssetType } from './api';
+import { normalizeColor } from '../../lib/assets/svgParts';
+import { Asset, AssetMeta, AssetType } from '../api';
 import { AssetPreview } from './AssetPreview';
 import {
   A4,
@@ -11,7 +11,7 @@ import {
   SCENE_H,
   SCENE_W,
   layoutScene,
-} from './scene';
+} from '../../lib/assets/scene';
 
 const SCENE_TYPES: AssetType[] = ['background', 'body', 'head', 'symbol'];
 

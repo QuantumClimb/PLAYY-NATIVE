@@ -38,12 +38,7 @@ export const SaveBar: React.FC<SaveBarProps> = ({ busy, onSave, onReset, saveLab
         Reset to original
       </button>
     )}
-    <button
-      type="button"
-      onClick={onSave}
-      disabled={busy || saveDisabled}
-      className="cc-btn cc-btn-primary ml-auto"
-    >
+    <button type="button" onClick={onSave} disabled={busy || saveDisabled} className="cc-btn cc-btn-primary ml-auto">
       {saveLabel}
     </button>
   </div>

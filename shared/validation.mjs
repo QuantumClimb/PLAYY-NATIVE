@@ -4,10 +4,16 @@ export const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
 export const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 export const MIN_PHONE_DIGITS = 7;
 
-/** @param {unknown} value */
+/**
+ * @param {unknown} value
+ * @returns {value is string}
+ */
 export const isHexColor = (value) => typeof value === 'string' && HEX_COLOR.test(value);
 
-/** @param {unknown} value */
+/**
+ * @param {unknown} value
+ * @returns {value is string}
+ */
 export const isEmail = (value) => typeof value === 'string' && EMAIL.test(value.trim());
 
 /** @param {unknown} value */
@@ -24,6 +30,7 @@ export const isPhone = (value) => phoneDigits(value).length >= MIN_PHONE_DIGITS;
 export function detailProblem(field, value) {
   const text = value.trim();
   if (field === 'name') return text ? '' : 'Please type your name.';
-  if (field === 'phone') return isPhone(text) ? '' : `Please type a phone number (at least ${MIN_PHONE_DIGITS} digits).`;
+  if (field === 'phone')
+    return isPhone(text) ? '' : `Please type a phone number (at least ${MIN_PHONE_DIGITS} digits).`;
   return isEmail(text) ? '' : 'Please type a valid email, like name@example.com.';
 }

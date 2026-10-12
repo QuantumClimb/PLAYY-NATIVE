@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { isHexColor } from '../../../shared/validation.mjs';
+import { useServerSetting } from '../../data/useServerSetting';
 
 /** How the trump card is formatted. Edited in the command center (Trump card tab). */
 export interface TrumpCardSettings {
@@ -22,8 +23,6 @@ export const DEFAULT_TRUMP_CARD: TrumpCardSettings = {
   backAccent: '#ffd633',
 };
 
-const HEX = /^#[0-9a-fA-F]{6}$/;
-
 /** Checks what the server or the CMS gives; anything unusable falls back to the default for that setting. */
 export function cleanTrumpCard(input: unknown): TrumpCardSettings | null {
   const t = input as Partial<TrumpCardSettings> | null;
@@ -32,33 +31,19 @@ export function cleanTrumpCard(input: unknown): TrumpCardSettings | null {
   const num = (v: unknown, fallback: number, max: number) =>
     typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.min(max, v)) : fallback;
   return {
-    outlineColor: typeof t.outlineColor === 'string' && HEX.test(t.outlineColor) ? t.outlineColor : d.outlineColor,
+    outlineColor: isHexColor(t.outlineColor) ? t.outlineColor : d.outlineColor,
     outlineWidth: num(t.outlineWidth, d.outlineWidth, 40),
     radius: num(t.radius, d.radius, 60),
-    backBackground:
-      typeof t.backBackground === 'string' && HEX.test(t.backBackground) ? t.backBackground : d.backBackground,
-    backAccent: typeof t.backAccent === 'string' && HEX.test(t.backAccent) ? t.backAccent : d.backAccent,
+    backBackground: isHexColor(t.backBackground) ? t.backBackground : d.backBackground,
+    backAccent: isHexColor(t.backAccent) ? t.backAccent : d.backAccent,
   };
 }
 
-let cached: TrumpCardSettings | null = null;
+const TRUMP_CARD_SETTING = {
+  url: '/api/trump-card',
+  key: 'settings',
+  clean: (raw: unknown) => cleanTrumpCard(raw) ?? DEFAULT_TRUMP_CARD,
+};
 
 /** The card formatting from the command center, loaded once per page load. */
-export function useTrumpCardSettings(): TrumpCardSettings {
-  const [settings, setSettings] = useState<TrumpCardSettings>(cached ?? DEFAULT_TRUMP_CARD);
-  useEffect(() => {
-    if (cached) return;
-    let live = true;
-    fetch('/api/trump-card')
-      .then((r) => r.json())
-      .then((d) => {
-        cached = cleanTrumpCard(d.settings) ?? DEFAULT_TRUMP_CARD;
-        if (live) setSettings(cached);
-      })
-      .catch(() => {});
-    return () => {
-      live = false;
-    };
-  }, []);
-  return settings;
-}
+export const useTrumpCardSettings = (): TrumpCardSettings => useServerSetting(TRUMP_CARD_SETTING, DEFAULT_TRUMP_CARD);

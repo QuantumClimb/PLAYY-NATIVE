@@ -1,4 +1,6 @@
-interface PowerQuizOption {
+import { useServerSetting } from '../../data/useServerSetting';
+
+export interface PowerQuizOption {
   id: string;
   label: string;
   icon?: string;
@@ -221,3 +223,25 @@ export function calculatePowerSymbol(
 
   return bestSymbol;
 }
+
+/** The powers an answer can lean toward, in the order the command center lists them. */
+export const POWER_SLUGS = [
+  'shining-star',
+  'puffy-cloud',
+  'fire-spark',
+  'warm-heart',
+  'thunder-zap',
+  'golden-crown',
+  'crescent-moon',
+  'puppy-paw',
+] as const;
+
+/** The questions as saved in the command center; the built-in ones until something valid is saved. */
+export const cleanQuizQuestions = (raw: unknown): PowerQuizQuestion[] =>
+  Array.isArray(raw) && raw.length > 0 ? (raw as PowerQuizQuestion[]) : DEFAULT_POWER_QUIZ_QUESTIONS;
+
+const POWER_QUIZ_SETTING = { url: '/api/power-quiz-questions', key: 'questions', clean: cleanQuizQuestions };
+
+/** The quiz questions, loaded once per page load. */
+export const usePowerQuizQuestions = (): PowerQuizQuestion[] =>
+  useServerSetting(POWER_QUIZ_SETTING, DEFAULT_POWER_QUIZ_QUESTIONS);

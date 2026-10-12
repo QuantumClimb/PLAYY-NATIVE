@@ -6,6 +6,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { listPrinters, setDefault } from './printers.mjs';
+import { isEmail, isHexColor } from '../shared/validation.mjs';
 import { buildPdfs, sendShareEmail, smtpConfigured } from './share.mjs';
 import {
   ASSET_TYPES,
@@ -569,11 +570,7 @@ app.put(
       }
     }
     if (stroke !== undefined) {
-      if (
-        typeof stroke?.enabled !== 'boolean' ||
-        !/^#[0-9a-fA-F]{6}$/.test(stroke.color) ||
-        !inRange(stroke.width, 0, 8)
-      ) {
+      if (typeof stroke?.enabled !== 'boolean' || !isHexColor(stroke.color) || !inRange(stroke.width, 0, 8)) {
         return res.status(400).json({ error: 'Stroke needs enabled, a #rrggbb color and a width from 0 to 8' });
       }
     }
@@ -702,7 +699,7 @@ function checkBadges(list) {
     if (!b || typeof b.label !== 'string' || !b.label.trim() || b.label.length > 14)
       return 'Each badge needs a label of 1 to 14 characters';
     if (typeof b.icon !== 'string' || !BADGE_ICON.test(b.icon)) return 'Invalid badge icon';
-    if (typeof b.color !== 'string' || !/^#[0-9a-fA-F]{6}$/.test(b.color)) return 'Invalid badge color';
+    if (!isHexColor(b.color)) return 'Invalid badge color';
   }
   return null;
 }
@@ -786,12 +783,10 @@ app.post(
 );
 
 // ---------- Trump card formatting ----------
-const HEX = /^#[0-9a-fA-F]{6}$/;
 
 function checkTrumpCard(b) {
   if (!b) return 'Missing settings';
-  for (const k of ['outlineColor', 'backBackground', 'backAccent'])
-    if (typeof b[k] !== 'string' || !HEX.test(b[k])) return `Invalid ${k}`;
+  for (const k of ['outlineColor', 'backBackground', 'backAccent']) if (!isHexColor(b[k])) return `Invalid ${k}`;
   if (!Number.isFinite(b.outlineWidth) || b.outlineWidth < 0 || b.outlineWidth > 40)
     return 'Outline thickness must be between 0 and 40';
   if (!Number.isFinite(b.radius) || b.radius < 0 || b.radius > 60) return 'Corner radius must be between 0 and 60';
@@ -827,7 +822,6 @@ app.post(
 
 // ---------- Share: log every Playyy and email the PDFs ----------
 const DEFAULT_SHARE = { enabled: true, recipients: ['qcquantumclimb@gmail.com', 'aum.janakiram@gmail.com'] };
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 async function shareSettings() {
   const saved = await getShareSettings();
@@ -853,8 +847,7 @@ app.put(
     if (typeof enabled !== 'boolean' || !Array.isArray(recipients) || recipients.length > 2)
       return res.status(400).json({ error: 'Invalid settings' });
     const clean = recipients.map((r) => String(r ?? '').trim());
-    if (clean.some((r) => r && !EMAIL_RE.test(r)))
-      return res.status(400).json({ error: 'One of the emails is not valid' });
+    if (clean.some((r) => r && !isEmail(r))) return res.status(400).json({ error: 'One of the emails is not valid' });
     res.json({
       settings: await saveShareSettings({ enabled, recipients: clean.filter(Boolean) }),
       smtp: smtpConfigured(),

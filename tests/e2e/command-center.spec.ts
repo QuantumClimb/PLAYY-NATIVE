@@ -14,6 +14,11 @@ test.describe('command center', () => {
     await page.locator('input[type="password"]').fill(password!);
     await page.keyboard.press('Enter');
 
+    // Characters: choosing an asset opens its editor
+    await page.locator('aside button').first().click();
+    await expect(page.getByText('Name shown on the kiosk')).toBeVisible();
+    await expect(page.getByText(/Named parts \(\d+\)/)).toBeVisible();
+
     const tabs = [
       'Characters',
       'Scene backgrounds',

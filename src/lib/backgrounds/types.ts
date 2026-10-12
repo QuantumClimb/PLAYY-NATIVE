@@ -46,14 +46,15 @@ export interface SceneDefinition {
   description: string;
 }
 
+/** The kiosk screens whose background can be set. The ids are the database keys; several pages share one scene. */
 export const ALL_SCENES: SceneDefinition[] = [
-  { id: 'intro', label: 'Intro & Start Screen', description: 'Kiosk idle loop and TAP TO START screen' },
-  { id: 'head', label: 'Step 1: Choose Head', description: 'First step in character creation' },
-  { id: 'body', label: 'Step 2: Pose & Movement', description: 'Body pose selection step' },
-  { id: 'symbol', label: 'Step 3: Power Symbol', description: 'Power symbol selection step' },
-  { id: 'world', label: 'Step 4: World & Environment', description: 'Environment selection step' },
-  { id: 'name', label: 'Step 5: Creator Name Input', description: 'Keyboard name entry screen' },
-  { id: 'quiz', label: 'Step 6: Personality Quiz', description: '3-question stats questionnaire' },
-  { id: 'review', label: 'Step 7: Card Review & Print', description: 'Trump card review screen' },
-  { id: 'celebrate', label: 'Celebration & Completion Screen', description: 'Printing complete celebration screen' },
+  { id: 'intro', label: 'Intro and Start screen', description: 'The looping intro and Tap to Start' },
+  { id: 'head', label: 'Face page', description: 'Choose your head' },
+  { id: 'body', label: 'Pose page', description: 'Choose your pose' },
+  { id: 'symbol', label: 'Colours and Power pages', description: 'Choose your colours, and the power awarded' },
+  { id: 'world', label: 'Background page', description: 'Choose your background' },
+  { id: 'name', label: 'Name, phone and email pages', description: 'The touch keyboard screens' },
+  { id: 'quiz', label: 'Power-up questions', description: 'The personality questions' },
+  { id: 'review', label: 'Preview and Trump card pages', description: 'The coloring pages and the card' },
+  { id: 'celebrate', label: 'Share and Success pages', description: 'The last two screens' },
 ];

@@ -1,6 +1,6 @@
 import React, { useMemo, useRef } from 'react';
-import { parseSvgAsset, renderSvgAsset } from '../lib/assets/svgParts';
-import { Asset } from './api';
+import { parseSvgAsset, renderSvgAsset } from '../../lib/assets/svgParts';
+import { Asset } from '../api';
 
 const fill = '[&>svg]:w-full [&>svg]:h-full [&>svg]:block';
 
