@@ -75,6 +75,11 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 8. Email via SMTP: black-and-white PDF and color image to qcquantumclimb@gmail.com with the child's name and parent's phone. Retry queue so the kiosk never blocks.
 9. WhatsApp sending when the client provides the API (sender interface so email is the first implementation).
 
+## Details screens and finished page
+- Name, phone number and email are three separate screens (in that order) with a colourful on-screen keyboard (QWERTY with a 123 layer, big keypad for phone). Nothing can be skipped: each screen is validated (name not empty, phone at least 7 digits, email format).
+- Pick for Me on the name screen gives a fun name. The preview card on the left shows the finished page as it is typed.
+- The finished page (colour and black-and-white, preview and print) has the logo top left, the name big under the character, and "Notes: email - phone" as a small line at the bottom.
+
 ## Open questions
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?

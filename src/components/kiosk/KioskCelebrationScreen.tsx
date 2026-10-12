@@ -101,7 +101,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
           </div>
 
           {/* Clean Vector Preview */}
-          <PlayyScene config={config} mode="line" className="w-full h-full rounded-[18px]" />
+          <PlayyScene config={config} mode="line" finish className="w-full h-full rounded-[18px]" />
         </div>
       </div>
 

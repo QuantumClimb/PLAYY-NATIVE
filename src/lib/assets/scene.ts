@@ -46,7 +46,14 @@ export interface SceneLayout {
  *  - character feet (bottom center of the body) -> the background's stand point
  *  - character height = the background's charHeight x printable height
  */
-export function layoutScene(a: { background: Asset; body: Asset; head: Asset; symbol?: Asset | null }): SceneLayout {
+export function layoutScene(a: {
+  background: Asset;
+  body: Asset;
+  head: Asset;
+  symbol?: Asset | null;
+  /** Fraction of the scene's height kept free at the bottom (for the name and notes on the finished page) */
+  reserveBottom?: number;
+}): SceneLayout {
   const gvb = parseSvgAsset(a.background.svg).viewBox;
   const bvb = parseSvgAsset(a.body.svg).viewBox;
   const hvb = parseSvgAsset(a.head.svg).viewBox;
@@ -75,7 +82,7 @@ export function layoutScene(a: { background: Asset; body: Asset; head: Asset; sy
 
   const stand = anchorOf(a.background, 'stand', { x: gvb.x + gvb.w * 0.5, y: gvb.y + gvb.h * 0.88 }).pt;
   const sx = ((stand.x - gvb.x) / gvb.w) * SCENE_W;
-  const sy = ((stand.y - gvb.y) / gvb.h) * SCENE_H;
+  const sy = Math.min(((stand.y - gvb.y) / gvb.h) * SCENE_H, SCENE_H * (1 - (a.reserveBottom ?? 0)));
   const feet = { x: bvb.w / 2, y: bvb.h };
   const map = (r: Rect): Rect => ({ x: sx + (r.x - feet.x) * s, y: sy + (r.y - feet.y) * s, w: r.w * s, h: r.h * s });
 

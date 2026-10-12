@@ -15,6 +15,7 @@ import { playSfx } from '../../lib/sfx/engine';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PickCarousel } from './PickCarousel';
 import { ColorModeToggle, ColorPanel } from './ColorPanel';
+import { DetailField, DetailsKeyboard } from './DetailsKeyboard';
 import { COLOR_SWATCHES, effectiveRegionColor, regionGroup, resolveColors } from '../../lib/playys/colors';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { calculateArchetype } from '../../lib/playys/archetypes';
@@ -43,6 +44,15 @@ interface MagicalColoringMachineProps {
 const STEPS_LIST: MachineStep[] = ['head', 'pose', 'colors', 'quiz', 'power', 'world', 'details', 'preview', 'card', 'complete'];
 
 const DEFAULT_COLOR_PALETTE = COLOR_SWATCHES;
+
+const DETAIL_TITLES = ["WHAT'S YOUR NAME?", "WHAT'S YOUR PHONE NUMBER?", "WHAT'S YOUR EMAIL?"];
+const DETAIL_SUBTITLES = [
+  'Type your name so we can add it to your Playyy!',
+  'Ask a grown-up for their phone number so we can send your Playyy!',
+  'Ask a grown-up for their email so we can send your Playyy!',
+];
+const DETAIL_PLACEHOLDERS = ['Type your name', 'Type a phone number', 'Type an email address'];
+const FUN_NAMES = ['Sparky', 'Bubbles', 'Zippy', 'Giggles', 'Twinkle', 'Pip', 'Biscuit', 'Jellybean', 'Waffles', 'Doodle', 'Sunny', 'Pickles'];
 
 const KEYBOARD_LETTERS = [
   ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
@@ -329,9 +339,8 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   const sel = useSelection(config);
   const [currentStep, setCurrentStep] = useState<MachineStep>('head');
   const [detailsStep, setDetailsStep] = useState<1 | 2 | 3>(1);
-  const [activeDetailField, setActiveDetailField] = useState<'name' | 'phone' | 'email'>('name');
-  const [nameShift, setNameShift] = useState(true);
   const [detailsError, setDetailsError] = useState('');
+  const detailField: 'name' | 'phone' | 'email' = detailsStep === 1 ? 'name' : detailsStep === 2 ? 'phone' : 'email';
   const [idleSeconds, setIdleSeconds] = useState(45);
   const [cardSide, setCardSide] = useState<'front' | 'back'>('front');
 
@@ -359,19 +368,21 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   const goNext = () => {
     resetIdleTimer();
     nativeFeedback.impactLight();
-    if (currentStep === 'details' && detailsStep < 3) {
-      setDetailsStep((step) => (step + 1) as 1 | 2 | 3);
-      setActiveDetailField(detailsStep === 1 ? 'phone' : 'email');
-      return;
-    }
-    if (currentStep === 'details' && detailsStep === 3) {
-      if (!config.kidName?.trim() || !config.phone?.trim() || !config.email?.trim()) {
-        setDetailsError('Please complete your name, phone number, and email.');
+    if (currentStep === 'details') {
+      const problem = validateDetail(detailField);
+      if (problem) {
+        setDetailsError(problem);
+        nativeFeedback.impactMedium();
         return;
       }
       setDetailsError('');
+      if (detailsStep < 3) {
+        setDetailsStep((step) => (step + 1) as 1 | 2 | 3);
+        return;
+      }
     }
     const nextIdx = Math.min(stepIndex + 1, STEPS_LIST.length - 1);
+    if (STEPS_LIST[nextIdx] === 'details') setDetailsStep(1);
     setCurrentStep(STEPS_LIST[nextIdx]);
   };
 
@@ -429,7 +440,6 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
     nativeFeedback.impactLight();
     if (currentStep === 'details' && detailsStep > 1) {
       setDetailsStep((step) => (step - 1) as 1 | 2 | 3);
-      setActiveDetailField(detailsStep === 3 ? 'phone' : 'name');
       setDetailsError('');
       return;
     }
@@ -449,6 +459,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
     if (stepIndex === 0) {
       onAutoReset();
     } else {
+      if (STEPS_LIST[stepIndex - 1] === 'details') setDetailsStep(3);
       setCurrentStep(STEPS_LIST[stepIndex - 1]);
     }
   };
@@ -473,44 +484,51 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   };
 
   const updateDetailField = (field: 'name' | 'phone' | 'email', value: string) => {
-    if (field === 'name') onChangeConfig({ ...config, kidName: value.slice(0, 30) });
-    else if (field === 'phone') onChangeConfig({ ...config, phone: value.slice(0, 24) });
+    if (field === 'name') onChangeConfig({ ...config, kidName: value.slice(0, 16) });
+    else if (field === 'phone') onChangeConfig({ ...config, phone: value.slice(0, 15) });
     else onChangeConfig({ ...config, email: value.slice(0, 64) });
   };
 
   const detailValue = (field: 'name' | 'phone' | 'email') => field === 'name' ? (config.kidName || '') : (config[field] || '');
 
+  // Every screen must be filled in: there is no skipping
+  const validateDetail = (field: 'name' | 'phone' | 'email'): string => {
+    const value = detailValue(field).trim();
+    if (field === 'name') return value ? '' : 'Please type your name.';
+    if (field === 'phone') return value.replace(/\D/g, '').length >= 7 ? '' : 'Please type a phone number (at least 7 digits).';
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value) ? '' : 'Please type a valid email, like name@example.com.';
+  };
+
   const handleDetailKey = (key: string) => {
     resetIdleTimer();
-    nativeFeedback.impactLight();
-    if (key === 'SHIFT') {
-      setNameShift((shift) => !shift);
+    if (key === 'DONE') {
+      goNext();
       return;
     }
-    const current = detailValue(activeDetailField);
-    const value = key === 'BACKSPACE' ? current.slice(0, -1) : current + (activeDetailField === 'name' && !nameShift ? key.toLowerCase() : key);
-    updateDetailField(activeDetailField, value);
+    nativeFeedback.impactLight();
+    const field = detailField;
+    const current = detailValue(field);
+    let next = current;
+    if (key === 'BACKSPACE') {
+      next = current.slice(0, -1);
+    } else if (field === 'name') {
+      if (!/^[A-Za-z0-9 '\-]$/.test(key)) return;
+      if (key === ' ' && (current === '' || current.endsWith(' '))) return;
+      // Capital letter at the start of each word, the rest lowercase
+      const startOfWord = current === '' || current.endsWith(' ') || current.endsWith('-');
+      next = current + (startOfWord ? key.toUpperCase() : key.toLowerCase());
+    } else if (field === 'phone') {
+      if (!/^[0-9+]$/.test(key)) return;
+      if (key === '+' && current.length > 0) return;
+      next = current + key;
+    } else {
+      if (key === ' ') return;
+      next = current + key.toLowerCase();
+    }
+    setDetailsError('');
+    updateDetailField(field, next);
   };
 
-  const handleSkipName = () => {
-    resetIdleTimer();
-    nativeFeedback.impactMedium();
-    onChangeConfig({ ...config, kidName: '' });
-    setActiveDetailField('phone');
-    goNext();
-  };
-
-  const handlePhone = (phone: string) => {
-    resetIdleTimer();
-    onChangeConfig({ ...config, phone });
-  };
-
-  const handleEmail = (email: string) => {
-    resetIdleTimer();
-    onChangeConfig({ ...config, email });
-  };
-
-  // Color choices: 'main' (head, hoodie, trousers, shoes), 'highlight' (cuffs, trim, soles), or one part in advanced mode
   const handleColorChange = (region: string, color: string) => {
     resetIdleTimer();
     nativeFeedback.selection();
@@ -536,6 +554,9 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       onChangeConfig({ ...config, pose: any(lib.bodies).slug });
     } else if (currentStep === 'world') {
       onChangeConfig({ ...config, background: any(lib.backgrounds).slug });
+    } else if (currentStep === 'details' && detailsStep === 1) {
+      onChangeConfig({ ...config, kidName: any(FUN_NAMES) });
+      setDetailsError('');
     }
   };
 
@@ -564,7 +585,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
       : 'PRINT & COMPLETE';
 
   const isReview = currentStep === 'card';
-  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' || currentStep === 'colors';
+  const isPick = currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' || currentStep === 'colors' || currentStep === 'details';
   const colorMode = config.colors?.mode ?? 'simple';
   // Advanced mode: one panel per part, in a sensible order (gloves are always white, so they are not offered)
   const REGION_ORDER = ['hoodie', 'trousers', 'shoes', 'cuffs', 'trim', 'soles', 'tassles'];
@@ -585,7 +606,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   return (
     <div
       onClick={resetIdleTimer}
-      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : ''}`}
+      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'details' ? 'pick-page pick-details' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : ''}`}
     >
       {/* Dynamic CMS Scene Background */}
       <SceneBackground sceneId={CMS_SCENE_BY_STEP[currentStep]} />
@@ -596,6 +617,11 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             className="head-preview-panel relative h-full max-w-full bg-white rounded-[30px] border-[6px] border-amber-300/90 shadow-[0_25px_80px_rgba(0,0,0,0.7)] overflow-hidden"
             style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}
           >
+            {currentStep === 'details' ? (
+              <div className="flex h-full w-full items-center justify-center p-[1.4vh]">
+                <PlayyScene config={config} mode="color" finish className="h-full rounded-[1.6vw]" />
+              </div>
+            ) : (
             <CharacterStagePreview
               selection={sel}
               config={config}
@@ -604,6 +630,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               showBackground={['world', 'details', 'preview'].includes(currentStep)}
               fit={currentStep === 'pose' || currentStep === 'colors' ? 'crop' : currentStep === 'world' ? 'scene' : undefined}
             />
+            )}
             {currentStep === 'head' && [1, 2, 3, 4, 5, 6].map((n) => <i key={n} className={`pick-spark pick-spark-${n}`} aria-hidden="true" />)}
             <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 font-black text-xs px-4 py-1 rounded-full shadow-md uppercase tracking-wider whitespace-nowrap">
               ★ MAGIC MIRROR ★
@@ -634,7 +661,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               <div>QUESTION {powerQuestionIdx + 1} OF {powerQuestions.length}</div>
             </div>
           </div>
-        ) : !['power'].includes(currentStep) ? (
+        ) : !['power'].includes(currentStep) && !(currentStep === 'details' && detailsStep !== 1) ? (
           <button
             type="button"
             onClick={handleStepSurprise}
@@ -650,7 +677,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
 
       {/* 2. Top Title: ONE BIG QUESTION */}
       <div className="head-title w-full text-center py-2 shrink-0 z-20">
-        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world') && <>
+        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'details') && <>
           <span className="head-title-star head-title-star-left" aria-hidden="true">★</span>
           <span className="head-title-star head-title-star-right" aria-hidden="true">★</span>
           <span className="head-title-star head-title-star-bottom-left" aria-hidden="true">✦</span>
@@ -658,19 +685,22 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
         </>}
         {currentStep === 'quiz' ? (
           <h1 className="head-arched-heading quiz-question-heading" aria-label={questionTitle}>{questionTitle}</h1>
-        ) : currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' ? (
-          <h1 className="head-arched-heading" style={{ ['--title-chars' as string]: (currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : 'CHOOSE YOUR BACKGROUND').length } as React.CSSProperties} aria-label={currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : questionTitle}>
-            {(currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : 'CHOOSE YOUR BACKGROUND').split('').map((letter, index) => (
-              letter === ' '
-                ? <span className="head-heading-space" key={`space-${index}`} aria-hidden="true" />
-                : <span key={`${letter}-${index}`}>{letter}</span>
-            ))}
-          </h1>
-        ) : (
+        ) : currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'world' || currentStep === 'details' ? (() => {
+          const headingText = currentStep === 'head' ? 'CHOOSE YOUR HEAD' : currentStep === 'pose' ? 'CHOOSE YOUR POSE' : currentStep === 'colors' ? 'CHOOSE YOUR COLOURS!' : currentStep === 'details' ? DETAIL_TITLES[detailsStep - 1] : 'CHOOSE YOUR BACKGROUND';
+          return (
+            <h1 className="head-arched-heading" style={{ ['--title-chars' as string]: headingText.length } as React.CSSProperties} aria-label={headingText}>
+              {headingText.split('').map((letter, index) => (
+                letter === ' '
+                  ? <span className="head-heading-space" key={`space-${index}`} aria-hidden="true" />
+                  : <span key={`${letter}-${index}`}>{letter}</span>
+              ))}
+            </h1>
+          );
+        })() : (
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight drop-shadow-md">{questionTitle}</h1>
         )}
-        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'card') && (() => {
-          const subtitleText: string = currentStep === 'head' ? 'Pick a face for your Playy!' : currentStep === 'pose' ? 'Pick a pose for your Playy!' : currentStep === 'colors' ? (colorMode === 'advanced' ? 'Pick a colour for each part of your Playyy!' : 'Pick a main colour and a secondary colour for your Playyy!') : currentStep === 'world' ? 'Pick a world for your Playyy!' : currentStep === 'card' ? 'A special card just for you!' : (powerQuestions[powerQuestionIdx]?.subtitle || 'Choose the answer that feels most like you!');
+        {(currentStep === 'head' || currentStep === 'pose' || currentStep === 'colors' || currentStep === 'quiz' || currentStep === 'world' || currentStep === 'details' || currentStep === 'card') && (() => {
+          const subtitleText: string = currentStep === 'head' ? 'Pick a face for your Playy!' : currentStep === 'pose' ? 'Pick a pose for your Playy!' : currentStep === 'colors' ? (colorMode === 'advanced' ? 'Pick a colour for each part of your Playyy!' : 'Pick a main colour and a secondary colour for your Playyy!') : currentStep === 'world' ? 'Pick a world for your Playyy!' : currentStep === 'details' ? DETAIL_SUBTITLES[detailsStep - 1] : currentStep === 'card' ? 'A special card just for you!' : (powerQuestions[powerQuestionIdx]?.subtitle || 'Choose the answer that feels most like you!');
           return <p className="head-subtitle" style={{ ['--sub-chars' as string]: subtitleText.length } as React.CSSProperties}>{subtitleText}</p>;
         })()}
       </div>
@@ -852,105 +882,16 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
             />
           )}
 
-          {/* STEP 7: YOUR DETAILS */}
+          {/* STEP 7: YOUR DETAILS: name, phone number and email, one screen each (nothing can be skipped) */}
           {currentStep === 'details' && (
-              <div className="details-form flex flex-col items-center justify-center p-2 space-y-4">
-              <div className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Your Details · Step {detailsStep} of 3</div>
-              <div className="details-fields grid w-full max-w-2xl grid-cols-3 gap-2">
-                {([['name', 'Your Name'], ['phone', 'Your Phone Number'], ['email', 'Your Email']] as const).map(([field, label]) => (
-                  <button key={field} type="button" onClick={() => { setActiveDetailField(field); setDetailsStep(field === 'name' ? 1 : field === 'phone' ? 2 : 3); setDetailsError(''); }} className={`details-field rounded-xl border-2 p-2 text-left ${activeDetailField === field ? 'is-active' : ''}`}>
-                    <span className="block text-[10px] font-black uppercase text-sky-200">{label}</span>
-                    <span className="mt-1 block min-h-6 truncate text-sm font-bold text-white">{detailValue(field) || 'Tap to enter'}</span>
-                  </button>
-                ))}
-              </div>
-              {activeDetailField === 'phone' ? (
-                <div className="details-keyboard phone-keyboard grid w-full max-w-2xl grid-cols-4 gap-2 rounded-2xl border-2 border-sky-800/70 bg-slate-900/90 p-3">
-                  {['1','2','3','4','5','6','7','8','9','+','0','BACKSPACE'].map((key) => <button key={key} type="button" onClick={() => handleDetailKey(key)} className="min-h-12 rounded-xl bg-slate-800 text-lg font-black text-white active:bg-amber-400 active:text-slate-950">{key === 'BACKSPACE' ? '⌫' : key}</button>)}
-                </div>
-              ) : (
-                <div className={`details-keyboard w-full max-w-2xl rounded-2xl border-2 border-sky-800/70 bg-slate-900/90 p-3 ${activeDetailField === 'email' ? 'email-keyboard' : ''}`}>
-                  <div className="grid grid-cols-10 gap-1.5">
-                    {(activeDetailField === 'email' ? [...'1234567890', ...'QWERTYUIOP', ...'ASDFGHJKL', ...'ZXCVBNM'] : KEYBOARD_LETTERS.flat()).map((key, index) => <button key={`${key}-${index}`} type="button" onClick={() => handleDetailKey(key)} className="min-h-10 rounded-lg bg-slate-800 text-base font-black text-white active:bg-amber-400 active:text-slate-950">{activeDetailField === 'name' && !nameShift ? key.toLowerCase() : key}</button>)}
-                  </div>
-                  {activeDetailField === 'email' && <div className="mt-2 grid grid-cols-4 gap-2">{['@', '.', '-', '_'].map((key) => <button key={key} type="button" onClick={() => handleDetailKey(key)} className="min-h-11 rounded-xl bg-indigo-700 text-lg font-black text-white">{key}</button>)}</div>}
-                  {activeDetailField === 'name' && <button type="button" onClick={() => handleDetailKey(' ')} className="mt-2 min-h-11 w-full rounded-xl bg-slate-700 text-sm font-black text-white">SPACE</button>}
-                  {activeDetailField === 'name' && <button type="button" onClick={() => handleDetailKey('SHIFT')} className={`mt-2 min-h-11 w-full rounded-xl text-sm font-black text-white ${nameShift ? 'bg-amber-600' : 'bg-slate-700'}`}>SHIFT</button>}
-                  <button type="button" onClick={() => handleDetailKey('BACKSPACE')} className="mt-2 min-h-11 w-full rounded-xl bg-rose-900 text-lg font-black text-white">⌫ BACKSPACE</button>
-                </div>
-              )}
-              <div className="details-actions flex w-full max-w-2xl gap-3">
-                <button type="button" onClick={() => handleDetailKey('BACKSPACE')} className="details-action-backspace">⌫</button>
-                <button type="button" onClick={goNext} className="details-action-done">DONE ✓</button>
-              </div>
-              {detailsError && <div className="text-center text-sm font-bold text-rose-300">{detailsError}</div>}
-              {/* Legacy name keyboard is intentionally replaced by the field-aware touchscreen keyboard above. */}
-              {false && <>
-              <div className="w-full max-w-lg bg-slate-900 border-4 border-amber-400 rounded-[28px] p-4 text-center shadow-xl">
-                <div className="text-xs font-black text-amber-300 uppercase tracking-widest mb-1">
-                  COLORING SHEET BY:
-                </div>
-                <div className="text-4xl sm:text-5xl font-black text-white font-mono tracking-wider min-h-[56px] flex items-center justify-center">
-                  {config.kidName && config.kidName.trim()
-                    ? config.kidName.toUpperCase()
-                    : '__________'}
-                </div>
-              </div>
-
-              {/* Kid-Friendly Giant Touch Keyboard */}
-              <div className="w-full max-w-lg flex flex-col gap-2">
-                {KEYBOARD_LETTERS.map((row, rIdx) => (
-                  <div key={rIdx} className="flex justify-center gap-1.5 sm:gap-2">
-                    {row.map((letter) => (
-                      <button
-                        key={letter}
-                        type="button"
-                        onClick={() => handleDetailKey(letter)}
-                        className="w-10 h-13 sm:w-12 sm:h-14 bg-slate-800 hover:bg-slate-700 active:bg-amber-400 active:text-slate-950 text-white font-black text-xl rounded-2xl shadow-md border-2 border-slate-700 transition-all cursor-pointer flex items-center justify-center"
-                      >
-                        {letter}
-                      </button>
-                    ))}
-                  </div>
-                ))}
-
-                {/* Bottom Backspace and Space Row */}
-                <div className="flex justify-center gap-2 mt-1">
-                  <button
-                    type="button"
-                    onClick={() => handleDetailKey(' ')}
-                    className="flex-1 max-w-xs h-13 bg-slate-800 hover:bg-slate-700 text-slate-300 font-black text-base rounded-2xl border-2 border-slate-700 cursor-pointer flex items-center justify-center"
-                  >
-                    SPACE
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleDetailKey('BACKSPACE')}
-                    className="w-20 h-13 bg-slate-800 hover:bg-slate-700 text-red-300 font-black text-lg rounded-2xl border-2 border-slate-700 cursor-pointer flex items-center justify-center"
-                  >
-                    ⌫
-                  </button>
-                </div>
-              </div>
-
-              {/* Small Secondary Option: SKIP NAME */}
-              <button
-                type="button"
-                onClick={handleSkipName}
-                className="text-sm font-bold text-slate-400 hover:text-white underline cursor-pointer pt-1"
-              >
-                Skip Name &rarr;
-              </button>
-              </>}
-
-              {detailsStep === 2 && <div className="details-native-field details-phone-field w-full max-w-lg rounded-2xl border-2 border-sky-800/70 bg-slate-900/80 p-5">
-                <label htmlFor="phone" className="block text-sm font-black uppercase tracking-wide text-sky-200">Phone Number</label>
-                <input id="phone" type="tel" inputMode="tel" value={config.phone || ''} onChange={(event) => handlePhone(event.target.value)} placeholder="Enter phone number" className="mt-3 w-full rounded-xl border-2 border-slate-700 bg-slate-800 px-4 py-3 text-base font-bold text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" />
-              </div>}
-              {detailsStep === 3 && <div className="details-native-field details-email-field w-full max-w-lg rounded-2xl border-2 border-sky-800/70 bg-slate-900/80 p-5">
-                <label htmlFor="email" className="block text-sm font-black uppercase tracking-wide text-sky-200">Email</label>
-                <input id="email" type="email" inputMode="email" value={config.email || ''} onChange={(event) => handleEmail(event.target.value)} placeholder="Enter email address" className="mt-3 w-full rounded-xl border-2 border-slate-700 bg-slate-800 px-4 py-3 text-base font-bold text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none" />
-              </div>}
+            <div className="details-panel">
+              <DetailField
+                value={detailValue(detailField)}
+                placeholder={DETAIL_PLACEHOLDERS[detailsStep - 1]}
+                onClear={() => { resetIdleTimer(); setDetailsError(''); updateDetailField(detailField, ''); }}
+              />
+              <div className="details-error" role="alert">{detailsError}</div>
+              <DetailsKeyboard key={detailField} layout={detailField} onKey={handleDetailKey} />
             </div>
           )}
 
@@ -964,7 +905,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
                 <div key={preview.label} className={`preview-panel preview-panel-${preview.mode} flex min-h-[360px] flex-col rounded-[28px] border-4 ${preview.border} bg-white p-3 shadow-xl`}>
                   <div className="preview-panel-label mb-2 text-center text-xs font-black tracking-widest text-slate-700">{preview.mode === 'line' ? '✏️ YOUR COLORING PAGE' : '🎨 FULL COLOUR PREVIEW'}</div>
                   <div className="min-h-0 flex-1">
-                    <PlayyScene config={config} mode={preview.mode} className="h-full w-full" />
+                    <PlayyScene config={config} mode={preview.mode} finish className="h-full w-full" />
                   </div>
                 </div>
               ))}
