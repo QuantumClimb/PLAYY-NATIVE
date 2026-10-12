@@ -5,10 +5,15 @@ const STATUS = { 3: 'ready', 4: 'printing', 5: 'warming-up', 6: 'error', 7: 'off
 
 function run(cmd, args, env = {}) {
   return new Promise((resolve, reject) => {
-    execFile(cmd, args, { env: { ...process.env, ...env }, timeout: 15000, windowsHide: true }, (err, stdout, stderr) => {
-      if (err) reject(new Error(stderr?.trim() || err.message));
-      else resolve(stdout);
-    });
+    execFile(
+      cmd,
+      args,
+      { env: { ...process.env, ...env }, timeout: 15000, windowsHide: true },
+      (err, stdout, stderr) => {
+        if (err) reject(new Error(stderr?.trim() || err.message));
+        else resolve(stdout);
+      },
+    );
   });
 }
 
@@ -42,11 +47,15 @@ export async function setDefault(name) {
   if (process.platform === 'win32') {
     await run(
       'powershell.exe',
-      ['-NoProfile', '-NonInteractive', '-Command', '(New-Object -ComObject WScript.Network).SetDefaultPrinter($env:PLAYY_PRINTER)'],
+      [
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
+        '(New-Object -ComObject WScript.Network).SetDefaultPrinter($env:PLAYY_PRINTER)',
+      ],
       { PLAYY_PRINTER: name },
     );
   } else {
     await run('lpoptions', ['-d', name]);
   }
 }
-

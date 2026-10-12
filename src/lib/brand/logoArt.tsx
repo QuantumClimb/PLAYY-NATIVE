@@ -13,9 +13,9 @@ const SHAPES = 'path,circle,ellipse,rect,polygon,polyline';
  */
 export function renderLogoArt(svgText: string, opts: { mode: 'color' | 'line'; stroke: BrandStroke }): string {
   const vb = parseSvgAsset(svgText).viewBox;
-  const w = (opts.stroke.enabled ? opts.stroke.width : 0) * vb.h / 100;
+  const w = ((opts.stroke.enabled ? opts.stroke.width : 0) * vb.h) / 100;
   // line art always needs a stroke; fall back to a sensible one if the setting is off
-  const lineW = Math.max(w, 0.8 * vb.h / 100);
+  const lineW = Math.max(w, (0.8 * vb.h) / 100);
 
   const base = renderSvgAsset(svgText, { main: '#ffffff', mode: opts.mode, parts: {} });
   const doc = new DOMParser().parseFromString(base, 'image/svg+xml');
@@ -71,8 +71,18 @@ export const LogoArt: React.FC<LogoArtProps> = ({ mode, stroke, className = '', 
   const { enabled, color, width } = s;
   const markup = useMemo(() => {
     if (!svg) return null;
-    try { return renderLogoArt(svg, { mode, stroke: { enabled, color, width } }); } catch { return null; }
+    try {
+      return renderLogoArt(svg, { mode, stroke: { enabled, color, width } });
+    } catch {
+      return null;
+    }
   }, [svg, mode, enabled, color, width]);
   if (!markup) return null;
-  return <div className={`[&>svg]:w-full [&>svg]:h-full [&>svg]:block ${className}`} style={style} dangerouslySetInnerHTML={{ __html: markup }} />;
+  return (
+    <div
+      className={`[&>svg]:w-full [&>svg]:h-full [&>svg]:block ${className}`}
+      style={style}
+      dangerouslySetInnerHTML={{ __html: markup }}
+    />
+  );
 };

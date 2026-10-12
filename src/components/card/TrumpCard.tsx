@@ -23,12 +23,12 @@ const exact: React.CSSProperties = {
 };
 
 /** The card with its thick outline; `children` fill the space inside it. */
-const ScaledFrame: React.FC<{ scale: number; settings: TrumpCardSettings; background: string; children: React.ReactNode }> = ({
-  scale,
-  settings,
-  background,
-  children,
-}) => (
+const ScaledFrame: React.FC<{
+  scale: number;
+  settings: TrumpCardSettings;
+  background: string;
+  children: React.ReactNode;
+}> = ({ scale, settings, background, children }) => (
   <div style={{ width: CARD_W * scale, height: CARD_H * scale }}>
     <div
       style={{
@@ -94,18 +94,30 @@ export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1, setti
     <ScaledFrame scale={scale} settings={s} background={s.backBackground}>
       <div className="flex h-full w-full flex-col justify-between p-3 text-white">
         <div className="text-center">
-          <div className="text-[10px] tracking-[0.2em]" style={{ color: s.backAccent }}>{heroName(card)}</div>
-          <div className="text-lg leading-tight" style={{ fontFamily: FONT, fontWeight: 800 }}>{archetype.title.toUpperCase()}</div>
+          <div className="text-[10px] tracking-[0.2em]" style={{ color: s.backAccent }}>
+            {heroName(card)}
+          </div>
+          <div className="text-lg leading-tight" style={{ fontFamily: FONT, fontWeight: 800 }}>
+            {archetype.title.toUpperCase()}
+          </div>
           <div className="text-[11px] text-white/70">{archetype.subTitle}</div>
         </div>
 
         <div className="flex items-center gap-3 rounded-2xl p-2" style={panel}>
           <div className="h-12 w-12 shrink-0 rounded-full bg-white p-1.5 flex items-center justify-center">
-            {sel.symbol ? <AssetArt asset={sel.symbol} mode="color" main={sel.headMain} className="h-full w-auto" /> : <span className="text-2xl">{power.icon}</span>}
+            {sel.symbol ? (
+              <AssetArt asset={sel.symbol} mode="color" main={sel.headMain} className="h-full w-auto" />
+            ) : (
+              <span className="text-2xl">{power.icon}</span>
+            )}
           </div>
           <div className="min-w-0 leading-tight">
-            <div className="text-[9px] tracking-widest" style={{ color: s.backAccent }}>YOUR POWER</div>
-            <div className="truncate text-sm" style={{ fontFamily: FONT, fontWeight: 800 }}>{power.name}</div>
+            <div className="text-[9px] tracking-widest" style={{ color: s.backAccent }}>
+              YOUR POWER
+            </div>
+            <div className="truncate text-sm" style={{ fontFamily: FONT, fontWeight: 800 }}>
+              {power.name}
+            </div>
             <div className="text-[10px] leading-tight text-white/70">{power.attribute}</div>
           </div>
         </div>
@@ -113,17 +125,23 @@ export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1, setti
         <div className="space-y-1.5 rounded-2xl p-2.5" style={panel}>
           {rows.map((r) => (
             <div key={r.label} className="flex items-center gap-2 text-[10px]">
-              <span className="w-28 shrink-0 text-white/85">{r.icon} {r.label}</span>
+              <span className="w-28 shrink-0 text-white/85">
+                {r.icon} {r.label}
+              </span>
               <div className="h-2 flex-1 overflow-hidden rounded-full bg-black/30" style={exact}>
                 <div className="h-full rounded-full" style={{ ...exact, width: `${r.val}%`, background: r.color }} />
               </div>
-              <span className="w-6 text-right" style={{ color: s.backAccent }}>{r.val}</span>
+              <span className="w-6 text-right" style={{ color: s.backAccent }}>
+                {r.val}
+              </span>
             </div>
           ))}
         </div>
 
         <div className="space-y-1.5">
-          <div className="text-[11px] tracking-wider" style={{ color: s.backAccent }}>⚡ SPECIAL ABILITIES</div>
+          <div className="text-[11px] tracking-wider" style={{ color: s.backAccent }}>
+            ⚡ SPECIAL ABILITIES
+          </div>
           {abilities.map((a) => (
             <div key={a.name} className="rounded-xl p-2" style={panel}>
               <div className="flex justify-between gap-2 whitespace-nowrap text-xs">
@@ -139,7 +157,9 @@ export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1, setti
 
         <div className="flex justify-between border-t border-white/20 pt-1 text-[9px]">
           <span className="whitespace-nowrap text-white/60">SERIAL #{id.toUpperCase()}</span>
-          <span className="whitespace-nowrap" style={{ color: s.backAccent }}>AUTHENTIC COLLECTIBLE ★</span>
+          <span className="whitespace-nowrap" style={{ color: s.backAccent }}>
+            AUTHENTIC COLLECTIBLE ★
+          </span>
         </div>
       </div>
     </ScaledFrame>

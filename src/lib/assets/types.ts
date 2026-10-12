@@ -32,7 +32,7 @@ export const ANCHORS_BY_TYPE: Partial<Record<AssetType, { name: string; label: s
     { name: 'chest', label: 'Chest (where the symbol goes)' },
   ],
   symbol: [{ name: 'center', label: 'Center (placed on the chest point)' }],
-  background: [{ name: 'stand', label: 'Stand point (where the character\'s feet go)' }],
+  background: [{ name: 'stand', label: "Stand point (where the character's feet go)" }],
 };
 
 export interface Asset {

@@ -13,7 +13,8 @@ const buffers = new Map<string, Promise<AudioBuffer | null>>();
 export function audio(): { ctx: AudioContext; master: GainNode } | null {
   try {
     if (!ctx) {
-      const Ctor = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const Ctor =
+        window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!Ctor) return null;
       ctx = new Ctor();
       master = ctx.createGain();
@@ -101,8 +102,15 @@ export const SfxProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let live = true;
     fetch('/api/sounds')
       .then((r) => r.json())
-      .then((d) => { if (live) { settings = cleanSettings(d.settings); startMusic(settings.music); } })
-      .catch(() => { if (live) startMusic(settings.music); /* keep the defaults */ });
+      .then((d) => {
+        if (live) {
+          settings = cleanSettings(d.settings);
+          startMusic(settings.music);
+        }
+      })
+      .catch(() => {
+        if (live) startMusic(settings.music); /* keep the defaults */
+      });
 
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;

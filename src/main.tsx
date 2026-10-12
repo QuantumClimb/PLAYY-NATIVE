@@ -23,5 +23,5 @@ createRoot(document.getElementById('root')!).render(
         </SfxProvider>
       )}
     </SceneBackgroundsProvider>
-  </StrictMode>
+  </StrictMode>,
 );

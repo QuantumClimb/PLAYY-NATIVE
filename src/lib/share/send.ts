@@ -19,7 +19,11 @@ interface Pending {
 const PENDING_KEY = 'playys-pending-share';
 
 async function post(body: Pending): Promise<ShareResult> {
-  const res = await fetch('/api/submissions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const res = await fetch('/api/submissions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
   if (!res.ok) throw new Error(`Share failed (${res.status})`);
   const data = await res.json();
   return { ok: true, email: data.email };
@@ -32,13 +36,23 @@ export async function sendShare(config: PlayyConfiguration, capture: ShareCaptur
     email: config.email ?? '',
     phone: config.phone ?? '',
     thumbnail: capture.thumbnail,
-    config: { head: config.head, pose: config.pose, symbol: config.symbol, background: config.background, colors: config.colors },
+    config: {
+      head: config.head,
+      pose: config.pose,
+      symbol: config.symbol,
+      background: config.background,
+      colors: config.colors,
+    },
     images: capture.images,
   };
   try {
     return await post(body);
   } catch {
-    try { localStorage.setItem(PENDING_KEY, JSON.stringify(body)); } catch { /* storage full or blocked: nothing more to do */ }
+    try {
+      localStorage.setItem(PENDING_KEY, JSON.stringify(body));
+    } catch {
+      /* storage full or blocked: nothing more to do */
+    }
     return { ok: false };
   }
 }
@@ -58,5 +72,7 @@ export async function retryPendingShare(): Promise<void> {
   try {
     await post(body);
     localStorage.removeItem(PENDING_KEY);
-  } catch { /* still offline: try again next time */ }
+  } catch {
+    /* still offline: try again next time */
+  }
 }

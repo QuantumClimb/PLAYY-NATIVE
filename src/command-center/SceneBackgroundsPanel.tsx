@@ -62,9 +62,19 @@ const FLOAT_ANIMATION_OPTIONS: { id: IntroFloatAnimation; label: string }[] = [
 ];
 
 const PREVIEW_BADGES = [
-  { label: 'Choose', Icon: Star, iconClass: 'bg-amber-100 text-amber-500', fillClass: 'fill-amber-400 stroke-amber-500' },
+  {
+    label: 'Choose',
+    Icon: Star,
+    iconClass: 'bg-amber-100 text-amber-500',
+    fillClass: 'fill-amber-400 stroke-amber-500',
+  },
   { label: 'Color', Icon: Cloud, iconClass: 'bg-cyan-100 text-cyan-500', fillClass: 'fill-cyan-400 stroke-cyan-500' },
-  { label: 'Play', Icon: Flower2, iconClass: 'bg-purple-100 text-purple-500', fillClass: 'fill-purple-400 stroke-purple-500' },
+  {
+    label: 'Play',
+    Icon: Flower2,
+    iconClass: 'bg-purple-100 text-purple-500',
+    fillClass: 'fill-purple-400 stroke-purple-500',
+  },
   { label: 'Print', Icon: Printer, iconClass: 'bg-sky-100 text-sky-500', fillClass: 'fill-sky-400 stroke-sky-500' },
 ];
 
@@ -96,15 +106,11 @@ export const SceneBackgroundsPanel: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const selectedSceneDef = ALL_SCENES.find((s) => s.id === selectedSceneId)!;
-  const previewButtonSizeClass = startButtonSize === 'extra-large'
-    ? 'w-full px-3 py-3 text-[12px]'
-    : 'w-full px-2.5 py-2 text-[10px]';
+  const previewButtonSizeClass =
+    startButtonSize === 'extra-large' ? 'w-full px-3 py-3 text-[12px]' : 'w-full px-2.5 py-2 text-[10px]';
   const previewBadgeGapClass = badgeGap === 'relaxed' ? 'mt-3' : 'mt-2';
-  const previewFloatClass = floatAnimation === 'gentle'
-    ? 'playys-intro-float'
-    : floatAnimation === 'slow'
-    ? 'playys-intro-float-slow'
-    : '';
+  const previewFloatClass =
+    floatAnimation === 'gentle' ? 'playys-intro-float' : floatAnimation === 'slow' ? 'playys-intro-float-slow' : '';
 
   // Load current scene settings into form state
   useEffect(() => {
@@ -172,8 +178,8 @@ export const SceneBackgroundsPanel: React.FC = () => {
     if (file.size > maxBytes) {
       setError(
         `File "${file.name}" (${(file.size / (1024 * 1024)).toFixed(
-          1
-        )}MB) exceeds maximum limit of ${isVideo ? '30MB for video' : '10MB for image'}.`
+          1,
+        )}MB) exceeds maximum limit of ${isVideo ? '30MB for video' : '10MB for image'}.`,
       );
       setUploadingTarget(null);
       setUploadProgress(null);
@@ -302,16 +308,20 @@ export const SceneBackgroundsPanel: React.FC = () => {
       {/* 1. Header & Storage Information */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 p-4 rounded-xl">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            Scene backgrounds
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">Scene backgrounds</h2>
           <p className="text-sm text-gray-500 mt-0.5">
             Customize background images, videos, and overlays for each kiosk scene.
           </p>
         </div>
         <div className="text-xs bg-gray-50 text-gray-600 border border-gray-300 px-3 py-2 rounded-lg space-y-1 shrink-0">
-          <div><span className="font-semibold text-indigo-600">Supported Formats:</span> Images (PNG, JPG, WebP) | Videos (MP4, WebM)</div>
-          <div><span className="font-semibold text-indigo-600">Upload Limits:</span> Max 10MB per Image | Max 30MB per Video</div>
+          <div>
+            <span className="font-semibold text-indigo-600">Supported Formats:</span> Images (PNG, JPG, WebP) | Videos
+            (MP4, WebM)
+          </div>
+          <div>
+            <span className="font-semibold text-indigo-600">Upload Limits:</span> Max 10MB per Image | Max 30MB per
+            Video
+          </div>
         </div>
       </div>
 
@@ -319,14 +329,22 @@ export const SceneBackgroundsPanel: React.FC = () => {
       {error && (
         <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-800 flex items-center justify-between">
           <span>{error}</span>
-          <button type="button" onClick={() => setError(null)} className="text-xs text-red-600 hover:text-gray-900">✕</button>
+          <button type="button" onClick={() => setError(null)} className="text-xs text-red-600 hover:text-gray-900">
+            ✕
+          </button>
         </div>
       )}
 
       {successMsg && (
         <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800 flex items-center justify-between">
           <span>{successMsg}</span>
-          <button type="button" onClick={() => setSuccessMsg(null)} className="text-xs text-emerald-600 hover:text-gray-900">✕</button>
+          <button
+            type="button"
+            onClick={() => setSuccessMsg(null)}
+            className="text-xs text-emerald-600 hover:text-gray-900"
+          >
+            ✕
+          </button>
         </div>
       )}
 
@@ -365,8 +383,8 @@ export const SceneBackgroundsPanel: React.FC = () => {
                       currentType === 'video'
                         ? 'bg-purple-900 text-purple-200'
                         : currentType === 'image'
-                        ? 'bg-blue-900 text-blue-200'
-                        : 'bg-gray-50 text-gray-500'
+                          ? 'bg-blue-900 text-blue-200'
+                          : 'bg-gray-50 text-gray-500'
                     }`}
                   >
                     {currentType === 'video' ? 'Video' : currentType === 'image' ? 'Image' : 'Default'}
@@ -422,11 +440,7 @@ export const SceneBackgroundsPanel: React.FC = () => {
                 <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">
                   {bgType === 'video' ? 'Video File' : 'Image File'} Upload
                 </label>
-                {mediaUrl && (
-                  <span className="text-xs text-emerald-600 font-mono">
-                    ✓ {mediaId}
-                  </span>
-                )}
+                {mediaUrl && <span className="text-xs text-emerald-600 font-mono">✓ {mediaId}</span>}
               </div>
 
               <div className="flex items-center gap-3">
@@ -453,7 +467,10 @@ export const SceneBackgroundsPanel: React.FC = () => {
                     <span>{uploadProgress}%</span>
                   </div>
                   <div className="w-full h-2 bg-gray-50 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-600 transition-all duration-200" style={{ width: `${uploadProgress}%` }} />
+                    <div
+                      className="h-full bg-indigo-600 transition-all duration-200"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
                   </div>
                 </div>
               )}
@@ -466,9 +483,7 @@ export const SceneBackgroundsPanel: React.FC = () => {
                       Poster / Fallback Image (Optional)
                     </label>
                     {fallbackMediaUrl && (
-                      <span className="text-xs text-emerald-600 font-mono">
-                        ✓ {fallbackMediaId}
-                      </span>
+                      <span className="text-xs text-emerald-600 font-mono">✓ {fallbackMediaId}</span>
                     )}
                   </div>
                   <label className="w-full px-4 py-2.5 rounded-xl bg-gray-50 hover:bg-gray-50 border border-gray-300 text-xs text-gray-600 cursor-pointer flex items-center justify-center gap-2">
@@ -486,7 +501,10 @@ export const SceneBackgroundsPanel: React.FC = () => {
                   </label>
                   {uploadingTarget === 'fallback' && uploadProgress !== null && (
                     <div className="w-full h-1.5 bg-gray-50 rounded-full overflow-hidden">
-                      <div className="h-full bg-purple-500 transition-all duration-200" style={{ width: `${uploadProgress}%` }} />
+                      <div
+                        className="h-full bg-purple-500 transition-all duration-200"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
                     </div>
                   )}
                 </div>
@@ -507,7 +525,9 @@ export const SceneBackgroundsPanel: React.FC = () => {
                       type="button"
                       onClick={() => setFit(f)}
                       className={`py-2 rounded-lg border text-xs font-semibold capitalize transition-all cursor-pointer ${
-                        fit === f ? 'bg-indigo-600 border-indigo-500 text-gray-900' : 'bg-gray-50 border-gray-300 text-gray-500'
+                        fit === f
+                          ? 'bg-indigo-600 border-indigo-500 text-gray-900'
+                          : 'bg-gray-50 border-gray-300 text-gray-500'
                       }`}
                     >
                       {f}
@@ -518,7 +538,9 @@ export const SceneBackgroundsPanel: React.FC = () => {
 
               {/* Focal Position Grid */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">Focal Point Position</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-gray-600">
+                  Focal Point Position
+                </label>
                 <select
                   value={position}
                   onChange={(e) => setPosition(e.target.value as BackgroundPosition)}
@@ -624,7 +646,9 @@ export const SceneBackgroundsPanel: React.FC = () => {
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900 cursor-pointer"
                   >
                     {START_BUTTON_SIZE_OPTIONS.map((opt) => (
-                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -637,7 +661,9 @@ export const SceneBackgroundsPanel: React.FC = () => {
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900 cursor-pointer"
                   >
                     {BADGE_GAP_OPTIONS.map((opt) => (
-                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -650,7 +676,9 @@ export const SceneBackgroundsPanel: React.FC = () => {
                     className="w-full bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-xs text-gray-900 cursor-pointer"
                   >
                     {FLOAT_ANIMATION_OPTIONS.map((opt) => (
-                      <option key={opt.id} value={opt.id}>{opt.label}</option>
+                      <option key={opt.id} value={opt.id}>
+                        {opt.label}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -732,26 +760,28 @@ export const SceneBackgroundsPanel: React.FC = () => {
             {/* UI Mockup Placeholder overlay */}
             <div className="relative z-20 w-full h-full pointer-events-none">
               {/* Badges preview */}
-              {selectedSceneId === 'intro' && badgePlacement !== 'hidden' && badgePlacement !== 'below-start-button' && (
-                <div
-                  className={`absolute z-30 transition-all duration-300 flex items-center gap-1 bg-white backdrop-blur border border-gray-300 text-gray-900 text-[9px] font-semibold px-2 py-0.5 rounded-full shadow ${
-                    badgePlacement === 'top-center'
-                      ? 'top-2 left-1/2 -translate-x-1/2'
-                      : badgePlacement === 'top-left'
-                      ? 'top-2 left-2'
-                      : badgePlacement === 'top-right'
-                      ? 'top-2 right-2'
-                      : badgePlacement === 'bottom-center'
-                      ? 'bottom-2 left-1/2 -translate-x-1/2'
-                      : badgePlacement === 'bottom-left'
-                      ? 'bottom-2 left-2'
-                      : 'bottom-2 right-2'
-                  }`}
-                >
-                  <img src="/assets/logo.png" alt="" className="h-3 w-auto object-contain inline-block" />
-                  <span>PLAYYS STATION</span>
-                </div>
-              )}
+              {selectedSceneId === 'intro' &&
+                badgePlacement !== 'hidden' &&
+                badgePlacement !== 'below-start-button' && (
+                  <div
+                    className={`absolute z-30 transition-all duration-300 flex items-center gap-1 bg-white backdrop-blur border border-gray-300 text-gray-900 text-[9px] font-semibold px-2 py-0.5 rounded-full shadow ${
+                      badgePlacement === 'top-center'
+                        ? 'top-2 left-1/2 -translate-x-1/2'
+                        : badgePlacement === 'top-left'
+                          ? 'top-2 left-2'
+                          : badgePlacement === 'top-right'
+                            ? 'top-2 right-2'
+                            : badgePlacement === 'bottom-center'
+                              ? 'bottom-2 left-1/2 -translate-x-1/2'
+                              : badgePlacement === 'bottom-left'
+                                ? 'bottom-2 left-2'
+                                : 'bottom-2 right-2'
+                    }`}
+                  >
+                    <img src="/assets/logo.png" alt="" className="h-3 w-auto object-contain inline-block" />
+                    <span>PLAYYS STATION</span>
+                  </div>
+                )}
 
               {/* Start Button preview position */}
               <div
@@ -761,38 +791,45 @@ export const SceneBackgroundsPanel: React.FC = () => {
                       ? startButtonPlacement === 'right-center'
                         ? 'right-3 top-1/2 -translate-y-1/2 w-[44%] max-w-[240px] flex flex-col items-center'
                         : startButtonPlacement === 'center'
-                        ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[44%] max-w-[240px] flex flex-col items-center'
-                        : startButtonPlacement === 'bottom-center'
-                        ? 'bottom-3 left-1/2 -translate-x-1/2 w-[44%] max-w-[240px] flex flex-col items-center'
-                        : startButtonPlacement === 'bottom-right'
-                        ? 'bottom-3 right-3 w-[44%] max-w-[240px] flex flex-col items-center'
-                        : 'top-3 right-3 w-[44%] max-w-[240px] flex flex-col items-center'
+                          ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[44%] max-w-[240px] flex flex-col items-center'
+                          : startButtonPlacement === 'bottom-center'
+                            ? 'bottom-3 left-1/2 -translate-x-1/2 w-[44%] max-w-[240px] flex flex-col items-center'
+                            : startButtonPlacement === 'bottom-right'
+                              ? 'bottom-3 right-3 w-[44%] max-w-[240px] flex flex-col items-center'
+                              : 'top-3 right-3 w-[44%] max-w-[240px] flex flex-col items-center'
                       : startButtonPlacement === 'right-center'
-                      ? 'right-3 top-1/2 -translate-y-1/2'
-                      : startButtonPlacement === 'center'
-                      ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
-                      : startButtonPlacement === 'bottom-center'
-                      ? 'bottom-3 left-1/2 -translate-x-1/2'
-                      : startButtonPlacement === 'bottom-right'
-                      ? 'bottom-3 right-3'
-                      : 'top-3 right-3'
+                        ? 'right-3 top-1/2 -translate-y-1/2'
+                        : startButtonPlacement === 'center'
+                          ? 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                          : startButtonPlacement === 'bottom-center'
+                            ? 'bottom-3 left-1/2 -translate-x-1/2'
+                            : startButtonPlacement === 'bottom-right'
+                              ? 'bottom-3 right-3'
+                              : 'top-3 right-3'
                     : 'bottom-3 left-1/2 -translate-x-1/2'
                 }`}
               >
-                <div className={`${previewButtonSizeClass} rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-semibold uppercase tracking-wider shadow-[0_8px_16px_rgba(245,158,11,0.35)] flex items-center justify-center gap-1 border border-yellow-200 ${previewFloatClass}`}>
-                  <span className="w-2 h-2 rounded-full bg-white flex items-center justify-center text-[7px] text-amber-600 font-semibold">▶</span>
+                <div
+                  className={`${previewButtonSizeClass} rounded-full bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-semibold uppercase tracking-wider shadow-[0_8px_16px_rgba(245,158,11,0.35)] flex items-center justify-center gap-1 border border-yellow-200 ${previewFloatClass}`}
+                >
+                  <span className="w-2 h-2 rounded-full bg-white flex items-center justify-center text-[7px] text-amber-600 font-semibold">
+                    ▶
+                  </span>
                   <span>Tap to Start!</span>
                 </div>
                 {selectedSceneId === 'intro' && badgePlacement === 'below-start-button' && (
-                  <div className={`absolute left-1/2 top-full z-10 flex max-w-full -translate-x-1/2 flex-wrap sm:flex-nowrap justify-center gap-1.5 sm:gap-2 ${previewBadgeGapClass}`}>
+                  <div
+                    className={`absolute left-1/2 top-full z-10 flex max-w-full -translate-x-1/2 flex-wrap sm:flex-nowrap justify-center gap-1.5 sm:gap-2 ${previewBadgeGapClass}`}
+                  >
                     {PREVIEW_BADGES.map(({ label, Icon, iconClass, fillClass }) => (
-                      <div key={label} className="flex min-w-[38px] sm:min-w-[48px] flex-col items-center justify-center rounded-lg border border-slate-100 bg-white px-1.5 py-1.5 shadow-sm">
+                      <div
+                        key={label}
+                        className="flex min-w-[38px] sm:min-w-[48px] flex-col items-center justify-center rounded-lg border border-slate-100 bg-white px-1.5 py-1.5 shadow-sm"
+                      >
                         <span className={`mb-0.5 flex h-4 w-4 items-center justify-center rounded-md ${iconClass}`}>
                           <Icon className={`h-3 w-3 ${fillClass}`} />
                         </span>
-                        <span className="text-[7px] sm:text-[8px] font-semibold uppercase text-gray-800">
-                          {label}
-                        </span>
+                        <span className="text-[7px] sm:text-[8px] font-semibold uppercase text-gray-800">{label}</span>
                       </div>
                     ))}
                   </div>
@@ -802,7 +839,8 @@ export const SceneBackgroundsPanel: React.FC = () => {
           </div>
 
           <div className="text-[11px] text-gray-500 text-center max-w-xs">
-            Preview shows how <span className="text-gray-800">{selectedSceneDef.label}</span> will look on the kiosk screen.
+            Preview shows how <span className="text-gray-800">{selectedSceneDef.label}</span> will look on the kiosk
+            screen.
           </div>
         </div>
       </div>

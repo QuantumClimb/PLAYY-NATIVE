@@ -37,7 +37,11 @@ export const HexSwatch: React.FC<HexSwatchProps> = ({ color, selected, label, on
         <path d={HEX} fill={`url(#${id}-g)`} stroke={deriveColor(base, -22)} strokeWidth="3" strokeLinejoin="round" />
         <path d="M30 17H62L48 40H22Z" fill="#fff" opacity=".3" />
       </svg>
-      {selected && <span className="hex-check" aria-hidden="true">✓</span>}
+      {selected && (
+        <span className="hex-check" aria-hidden="true">
+          ✓
+        </span>
+      )}
     </button>
   );
 };
@@ -64,7 +68,13 @@ export const ColorPanel: React.FC<ColorPanelProps> = ({ label, accent, value, sw
         {rows.map((row, r) => (
           <div className="color-row" key={r}>
             {row.map((c) => (
-              <HexSwatch key={c} color={c} label={`${label} ${c}`} selected={current === normalizeColor(c)} onPick={() => onPick(c)} />
+              <HexSwatch
+                key={c}
+                color={c}
+                label={`${label} ${c}`}
+                selected={current === normalizeColor(c)}
+                onPick={() => onPick(c)}
+              />
             ))}
           </div>
         ))}
@@ -74,7 +84,10 @@ export const ColorPanel: React.FC<ColorPanelProps> = ({ label, accent, value, sw
 };
 
 /** Simple / Advanced switch. */
-export const ColorModeToggle: React.FC<{ mode: 'simple' | 'advanced'; onChange: (m: 'simple' | 'advanced') => void }> = ({ mode, onChange }) => (
+export const ColorModeToggle: React.FC<{
+  mode: 'simple' | 'advanced';
+  onChange: (m: 'simple' | 'advanced') => void;
+}> = ({ mode, onChange }) => (
   <div className="color-mode-toggle" role="group" aria-label="Colour mode">
     {(['simple', 'advanced'] as const).map((m) => (
       <button

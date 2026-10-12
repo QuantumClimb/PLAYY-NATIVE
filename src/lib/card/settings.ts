@@ -29,12 +29,14 @@ export function cleanTrumpCard(input: unknown): TrumpCardSettings | null {
   const t = input as Partial<TrumpCardSettings> | null;
   if (!t || typeof t !== 'object') return null;
   const d = DEFAULT_TRUMP_CARD;
-  const num = (v: unknown, fallback: number, max: number) => (typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.min(max, v)) : fallback);
+  const num = (v: unknown, fallback: number, max: number) =>
+    typeof v === 'number' && Number.isFinite(v) ? Math.max(0, Math.min(max, v)) : fallback;
   return {
     outlineColor: typeof t.outlineColor === 'string' && HEX.test(t.outlineColor) ? t.outlineColor : d.outlineColor,
     outlineWidth: num(t.outlineWidth, d.outlineWidth, 40),
     radius: num(t.radius, d.radius, 60),
-    backBackground: typeof t.backBackground === 'string' && HEX.test(t.backBackground) ? t.backBackground : d.backBackground,
+    backBackground:
+      typeof t.backBackground === 'string' && HEX.test(t.backBackground) ? t.backBackground : d.backBackground,
     backAccent: typeof t.backAccent === 'string' && HEX.test(t.backAccent) ? t.backAccent : d.backAccent,
   };
 }
@@ -54,7 +56,9 @@ export function useTrumpCardSettings(): TrumpCardSettings {
         if (live) setSettings(cached);
       })
       .catch(() => {});
-    return () => { live = false; };
+    return () => {
+      live = false;
+    };
   }, []);
   return settings;
 }

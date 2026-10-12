@@ -29,7 +29,12 @@ export const SCENE_H = Math.round((SCENE_W * (A4.h - 2 * PRINT_MARGIN_MM)) / (A4
 export const DEFAULT_CHAR_HEIGHT = 0.55; // character height as a fraction of the printable height
 export const DEFAULT_SYMBOL_WIDTH = 16; // symbol width as a % of the body width
 
-export interface Rect { x: number; y: number; w: number; h: number }
+export interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 
 export interface SceneLayout {
   /** Always the full printable area: the background is stretched (non-uniformly) to fit it */
@@ -65,7 +70,12 @@ export function layoutScene(a: {
 
   // Everything below is in body units until the final mapping
   const bodyR: Rect = { x: 0, y: 0, w: bvb.w, h: bvb.h };
-  const headR: Rect = { x: bn.x - hn.x * headScale, y: bn.y - hn.y * headScale, w: hvb.w * headScale, h: hvb.h * headScale };
+  const headR: Rect = {
+    x: bn.x - hn.x * headScale,
+    y: bn.y - hn.y * headScale,
+    w: hvb.w * headScale,
+    h: hvb.h * headScale,
+  };
 
   let symbolR: Rect | null = null;
   if (a.symbol) {

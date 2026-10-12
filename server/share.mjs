@@ -20,7 +20,12 @@ export async function buildPdfs({ bw, color, cardFront, cardBack }) {
   const pages = await PDFDocument.create();
   for (const b64 of [bw, color]) {
     const page = pages.addPage(A4);
-    drawFit(page, await pages.embedJpg(fromBase64(b64)), { x: MARGIN, y: MARGIN, w: A4[0] - 2 * MARGIN, h: A4[1] - 2 * MARGIN });
+    drawFit(page, await pages.embedJpg(fromBase64(b64)), {
+      x: MARGIN,
+      y: MARGIN,
+      w: A4[0] - 2 * MARGIN,
+      h: A4[1] - 2 * MARGIN,
+    });
   }
 
   const card = await PDFDocument.create();
@@ -47,8 +52,14 @@ function transport() {
   });
 }
 
-const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const slug = (s) => String(s || 'playyy').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 30) || 'playyy';
+const esc = (s) =>
+  String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+const slug = (s) =>
+  String(s || 'playyy')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 30) || 'playyy';
 
 /** Emails the two PDFs to the recipients. Throws when SMTP is not set up or the send fails. */
 export async function sendShareEmail({ recipients, name, email, phone, when, files }) {

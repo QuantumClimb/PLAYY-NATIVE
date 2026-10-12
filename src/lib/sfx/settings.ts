@@ -1,7 +1,20 @@
 /** Which kiosk action plays which sound. Edited in the command center under Sounds. */
 
 export const SFX_EVENTS = [
-  'tap', 'start', 'next', 'back', 'select', 'surprise', 'key', 'backspace', 'flip', 'answer', 'print', 'change', 'done', 'reveal',
+  'tap',
+  'start',
+  'next',
+  'back',
+  'select',
+  'surprise',
+  'key',
+  'backspace',
+  'flip',
+  'answer',
+  'print',
+  'change',
+  'done',
+  'reveal',
 ] as const;
 export type SfxEvent = (typeof SFX_EVENTS)[number];
 
@@ -107,23 +120,26 @@ export function cleanSettings(input: unknown): SoundSettings {
     }
   });
   const m = s.music;
-  const music: MusicSettings = m && typeof m === 'object' && Array.isArray(m.tracks)
-    ? {
-        enabled: typeof m.enabled === 'boolean' ? m.enabled : d.music.enabled,
-        volume: typeof m.volume === 'number' ? Math.min(1, Math.max(0, m.volume)) : d.music.volume,
-        tracks: m.tracks
-          .filter((t) => t && typeof t.id === 'string' && typeof t.src === 'string' && TRACK_SRC.test(t.src))
-          .slice(0, MAX_MUSIC_TRACKS)
-          .map((t) => ({ id: t.id, name: String(t.name ?? 'Track').slice(0, 60), src: t.src })),
-      }
-    : d.music;
+  const music: MusicSettings =
+    m && typeof m === 'object' && Array.isArray(m.tracks)
+      ? {
+          enabled: typeof m.enabled === 'boolean' ? m.enabled : d.music.enabled,
+          volume: typeof m.volume === 'number' ? Math.min(1, Math.max(0, m.volume)) : d.music.volume,
+          tracks: m.tracks
+            .filter((t) => t && typeof t.id === 'string' && typeof t.src === 'string' && TRACK_SRC.test(t.src))
+            .slice(0, MAX_MUSIC_TRACKS)
+            .map((t) => ({ id: t.id, name: String(t.name ?? 'Track').slice(0, 60), src: t.src })),
+        }
+      : d.music;
   return {
     music,
     enabled: typeof s.enabled === 'boolean' ? s.enabled : d.enabled,
     volume: typeof s.volume === 'number' ? Math.min(1, Math.max(0, s.volume)) : d.volume,
     events,
     custom: Array.isArray(s.custom)
-      ? s.custom.filter((c) => c && typeof c.id === 'string' && typeof c.mediaId === 'string').map((c) => ({ id: c.id, name: String(c.name ?? 'Sound').slice(0, 40), mediaId: c.mediaId }))
+      ? s.custom
+          .filter((c) => c && typeof c.id === 'string' && typeof c.mediaId === 'string')
+          .map((c) => ({ id: c.id, name: String(c.name ?? 'Sound').slice(0, 40), mediaId: c.mediaId }))
       : [],
   };
 }

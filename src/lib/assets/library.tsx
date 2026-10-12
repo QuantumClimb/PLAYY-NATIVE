@@ -12,10 +12,7 @@ export interface AssetLibrary {
   face?: Asset;
 }
 
-type State =
-  | { status: 'loading' }
-  | { status: 'error'; message: string }
-  | { status: 'ready'; library: AssetLibrary };
+type State = { status: 'loading' } | { status: 'error'; message: string } | { status: 'ready'; library: AssetLibrary };
 
 const Ctx = createContext<AssetLibrary | null>(null);
 
@@ -48,13 +45,25 @@ async function loadLocalFallbackLibrary(): Promise<AssetLibrary> {
     localAsset(-1, 'face', 'face', 'Face', '/assets/SVG/heads/face.svg'),
     Promise.all([
       localAsset(-2, 'head', 'playy', 'Playy', '/assets/SVG/heads/playy.svg', { main: '#2563eb', headScale: 0.5 }),
-      localAsset(-3, 'head', 'dreamyy', 'Dreamyy', '/assets/SVG/heads/dreamyy.svg', { main: '#f8fafc', headScale: 0.5 }),
-      localAsset(-4, 'head', 'sparkyy', 'Sparkyy', '/assets/SVG/heads/sparkyy.svg', { main: '#ea580c', headScale: 0.5 }),
+      localAsset(-3, 'head', 'dreamyy', 'Dreamyy', '/assets/SVG/heads/dreamyy.svg', {
+        main: '#f8fafc',
+        headScale: 0.5,
+      }),
+      localAsset(-4, 'head', 'sparkyy', 'Sparkyy', '/assets/SVG/heads/sparkyy.svg', {
+        main: '#ea580c',
+        headScale: 0.5,
+      }),
     ]),
     Promise.all([
       localAsset(-5, 'body', 'hero', 'Hero Stance', '/assets/SVG/poses/pose1.svg'),
-      localAsset(-16, 'body', 'playy-3', 'Playy 3', '/assets/SVG/poses/playy-3.svg', { main: '#15489e', anchors: { neck: { x: 612, y: 170 }, chest: { x: 612, y: 390 } } }),
-      localAsset(-17, 'body', 'playy-4', 'Playy 4', '/assets/SVG/poses/playy-4.svg', { main: '#15489e', anchors: { neck: { x: 612, y: 190 }, chest: { x: 612, y: 405 } } }),
+      localAsset(-16, 'body', 'playy-3', 'Playy 3', '/assets/SVG/poses/playy-3.svg', {
+        main: '#15489e',
+        anchors: { neck: { x: 612, y: 170 }, chest: { x: 612, y: 390 } },
+      }),
+      localAsset(-17, 'body', 'playy-4', 'Playy 4', '/assets/SVG/poses/playy-4.svg', {
+        main: '#15489e',
+        anchors: { neck: { x: 612, y: 190 }, chest: { x: 612, y: 405 } },
+      }),
     ]),
     Promise.all([
       localAsset(-6, 'symbol', 'heart', 'Warm Heart', '/assets/SVG/symbols/Warm%20Heart.svg'),
@@ -87,11 +96,17 @@ export const AssetLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const { assets } = (await res.json()) as { assets: Asset[] };
       const of = (type: Asset['type']) => assets.filter((a) => a.type === type);
       const library: AssetLibrary = {
-        heads: of('head'), bodies: of('body'), symbols: of('symbol'), backgrounds: of('background'), face: of('face')[0],
+        heads: of('head'),
+        bodies: of('body'),
+        symbols: of('symbol'),
+        backgrounds: of('background'),
+        face: of('face')[0],
       };
       const missing = (['heads', 'bodies', 'backgrounds'] as const).filter((k) => library[k].length === 0);
       if (missing.length) {
-        throw new Error(`Add at least one ${missing.map((m) => m.replace(/s$/, '').replace('bodie', 'pose')).join(', ')} in the command center.`);
+        throw new Error(
+          `Add at least one ${missing.map((m) => m.replace(/s$/, '').replace('bodie', 'pose')).join(', ')} in the command center.`,
+        );
       }
       setState({ status: 'ready', library });
     } catch (e) {
@@ -101,13 +116,18 @@ export const AssetLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ 
         setState({ status: 'ready', library: await loadLocalFallbackLibrary() });
         return;
       } catch {
-      const msg = (e as Error).message;
-      setState({ status: 'error', message: msg === 'Failed to fetch' || /Unexpected token/.test(msg) ? 'The kiosk server is not running.' : msg });
+        const msg = (e as Error).message;
+        setState({
+          status: 'error',
+          message: msg === 'Failed to fetch' || /Unexpected token/.test(msg) ? 'The kiosk server is not running.' : msg,
+        });
       }
     }
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   if (state.status === 'ready') return <Ctx.Provider value={state.library}>{children}</Ctx.Provider>;
 
@@ -118,7 +138,9 @@ export const AssetLibraryProvider: React.FC<{ children: React.ReactNode }> = ({ 
       ) : (
         <>
           <p className="text-2xl">{state.message}</p>
-          <button type="button" onClick={load} className="btn-3d btn-3d-blue px-8 py-3 text-lg">TRY AGAIN</button>
+          <button type="button" onClick={load} className="btn-3d btn-3d-blue px-8 py-3 text-lg">
+            TRY AGAIN
+          </button>
         </>
       )}
     </div>
@@ -165,5 +187,8 @@ export function resolveSelection(lib: AssetLibrary, config: SelectionKeys): Sele
 export function useSelection(config: PlayyConfiguration): Selection {
   const lib = useAssetLibrary();
   const { head, pose, symbol, background } = config;
-  return useMemo(() => resolveSelection(lib, { head, pose, symbol, background }), [lib, head, pose, symbol, background]);
+  return useMemo(
+    () => resolveSelection(lib, { head, pose, symbol, background }),
+    [lib, head, pose, symbol, background],
+  );
 }

@@ -3,7 +3,8 @@
 import { neon } from '@neondatabase/serverless';
 
 const url = process.env.DATABASE_URL;
-if (!url) throw new Error('DATABASE_URL is not set. Add the Neon connection string to .env (or the Vercel project settings).');
+if (!url)
+  throw new Error('DATABASE_URL is not set. Add the Neon connection string to .env (or the Vercel project settings).');
 const sql = neon(url);
 
 export const ASSET_TYPES = ['head', 'face', 'body', 'symbol', 'background'];
@@ -55,11 +56,21 @@ export function ensureSchema() {
         updated                TIMESTAMPTZ NOT NULL DEFAULT now()
       )`);
 
-    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS badge_placement TEXT NOT NULL DEFAULT 'top-center'`);
-    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS start_button_placement TEXT NOT NULL DEFAULT 'right-center'`);
-    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS start_button_size TEXT NOT NULL DEFAULT 'extra-large'`);
-    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS badge_gap TEXT NOT NULL DEFAULT 'comfortable'`);
-    await sql.query(`ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS float_animation TEXT NOT NULL DEFAULT 'gentle'`);
+    await sql.query(
+      `ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS badge_placement TEXT NOT NULL DEFAULT 'top-center'`,
+    );
+    await sql.query(
+      `ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS start_button_placement TEXT NOT NULL DEFAULT 'right-center'`,
+    );
+    await sql.query(
+      `ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS start_button_size TEXT NOT NULL DEFAULT 'extra-large'`,
+    );
+    await sql.query(
+      `ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS badge_gap TEXT NOT NULL DEFAULT 'comfortable'`,
+    );
+    await sql.query(
+      `ALTER TABLE scene_backgrounds ADD COLUMN IF NOT EXISTS float_animation TEXT NOT NULL DEFAULT 'gentle'`,
+    );
 
     await sql.query(`
       CREATE TABLE IF NOT EXISTS power_quiz_questions (
@@ -177,9 +188,15 @@ async function query(text, params = []) {
 export async function listAssets({ type, enabledOnly = false } = {}) {
   const where = [];
   const args = [];
-  if (type) { args.push(type); where.push(`type = $${args.length}`); }
+  if (type) {
+    args.push(type);
+    where.push(`type = $${args.length}`);
+  }
   if (enabledOnly) where.push('enabled');
-  return query(`SELECT * FROM assets ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY type, sort, id`, args);
+  return query(
+    `SELECT * FROM assets ${where.length ? 'WHERE ' + where.join(' AND ') : ''} ORDER BY type, sort, id`,
+    args,
+  );
 }
 
 export async function getAsset(id) {
@@ -222,7 +239,20 @@ export async function getSceneBackground(sceneId) {
 }
 
 export async function upsertSceneBackground(sceneId, settings) {
-  const { bg_type, media_id, fallback_media_id, fit, position, overlay_color, overlay_opacity, badge_placement, start_button_placement, start_button_size, badge_gap, float_animation } = settings;
+  const {
+    bg_type,
+    media_id,
+    fallback_media_id,
+    fit,
+    position,
+    overlay_color,
+    overlay_opacity,
+    badge_placement,
+    start_button_placement,
+    start_button_size,
+    badge_gap,
+    float_animation,
+  } = settings;
   const rows = await query(
     `INSERT INTO scene_backgrounds (scene_id, bg_type, media_id, fallback_media_id, fit, position, overlay_color, overlay_opacity, badge_placement, start_button_placement, start_button_size, badge_gap, float_animation, updated)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now())
@@ -311,7 +341,7 @@ export async function savePowerQuizQuestions(questions) {
      VALUES (1, $1, now())
      ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated = now()
      RETURNING data`,
-    [JSON.stringify(questions)]
+    [JSON.stringify(questions)],
   );
   return rows[0]?.data;
 }

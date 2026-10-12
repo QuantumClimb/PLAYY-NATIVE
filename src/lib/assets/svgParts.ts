@@ -55,7 +55,14 @@ export function normalizeColor(c: string | null | undefined): string | null {
   if (v === 'none' || v === 'transparent' || v.startsWith('url(')) return null;
   if (NAMED[v]) return NAMED[v];
   let m = /^#([0-9a-f]{3})$/.exec(v);
-  if (m) return '#' + m[1].split('').map((ch) => ch + ch).join('');
+  if (m)
+    return (
+      '#' +
+      m[1]
+        .split('')
+        .map((ch) => ch + ch)
+        .join('')
+    );
   m = /^#([0-9a-f]{6})$/.exec(v);
   if (m) return v;
   m = /^rgb\(\s*(\d+)[ ,]+(\d+)[ ,]+(\d+)\s*\)$/.exec(v);
@@ -65,8 +72,11 @@ export function normalizeColor(c: string | null | undefined): string | null {
 
 export function hexToHsl(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
-  const r = ((n >> 16) & 255) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
-  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  const r = ((n >> 16) & 255) / 255,
+    g = ((n >> 8) & 255) / 255,
+    b = (n & 255) / 255;
+  const max = Math.max(r, g, b),
+    min = Math.min(r, g, b);
   const l = (max + min) / 2;
   const d = max - min;
   if (d === 0) return [0, 0, l * 100];
@@ -77,12 +87,33 @@ export function hexToHsl(hex: string): [number, number, number] {
 }
 
 export function hslToHex(h: number, s: number, l: number): string {
-  s /= 100; l /= 100;
+  s /= 100;
+  l /= 100;
   const c = (1 - Math.abs(2 * l - 1)) * s;
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l - c / 2;
-  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
-  return '#' + [r, g, b].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
+  const [r, g, b] =
+    h < 60
+      ? [c, x, 0]
+      : h < 120
+        ? [x, c, 0]
+        : h < 180
+          ? [0, c, x]
+          : h < 240
+            ? [0, x, c]
+            : h < 300
+              ? [x, 0, c]
+              : [c, 0, x];
+  return (
+    '#' +
+    [r, g, b]
+      .map((v) =>
+        Math.round((v + m) * 255)
+          .toString(16)
+          .padStart(2, '0'),
+      )
+      .join('')
+  );
 }
 
 /** Same hue and saturation as `main`, lightness moved by `dL` points (clamped to 0-100). */
@@ -134,9 +165,17 @@ function parse(svgText: string): SVGSVGElement {
 }
 
 function viewBoxOf(root: SVGSVGElement) {
-  const vb = root.getAttribute('viewBox')?.split(/[\s,]+/).map(Number);
+  const vb = root
+    .getAttribute('viewBox')
+    ?.split(/[\s,]+/)
+    .map(Number);
   if (vb && vb.length === 4 && vb.every(Number.isFinite)) return { x: vb[0], y: vb[1], w: vb[2], h: vb[3] };
-  return { x: 0, y: 0, w: parseFloat(root.getAttribute('width') || '100'), h: parseFloat(root.getAttribute('height') || '100') };
+  return {
+    x: 0,
+    y: 0,
+    w: parseFloat(root.getAttribute('width') || '100'),
+    h: parseFloat(root.getAttribute('height') || '100'),
+  };
 }
 
 /**
@@ -151,7 +190,9 @@ function isWrapper(el: Element, root: Element) {
 }
 
 function partElements(root: SVGSVGElement): Element[] {
-  return Array.from(root.querySelectorAll('[id]')).filter((el) => el !== root && !isAnchor(el.id) && !isWrapper(el, root));
+  return Array.from(root.querySelectorAll('[id]')).filter(
+    (el) => el !== root && !isAnchor(el.id) && !isWrapper(el, root),
+  );
 }
 
 function effectiveFill(el: Element): string | null {
@@ -172,7 +213,8 @@ function anchorCenter(el: Element): { x: number; y: number } | null {
   if (el.nodeName === 'rect') return { x: n('x') + n('width') / 2, y: n('y') + n('height') / 2 };
   const nums = (el.getAttribute('d') ?? el.getAttribute('points') ?? '').match(/-?\d*\.?\d+/g)?.map(Number);
   if (!nums || nums.length < 2) return null;
-  const xs = nums.filter((_, i) => i % 2 === 0), ys = nums.filter((_, i) => i % 2 === 1);
+  const xs = nums.filter((_, i) => i % 2 === 0),
+    ys = nums.filter((_, i) => i % 2 === 1);
   return { x: (Math.min(...xs) + Math.max(...xs)) / 2, y: (Math.min(...ys) + Math.max(...ys)) / 2 };
 }
 
@@ -225,7 +267,9 @@ export function renderSvgAsset(svgText: string, { main, secondary, stretch, mode
   const mainHex = normalizeColor(main) ?? '#3b82f6';
   const secondaryHex = normalizeColor(secondary);
 
-  root.querySelectorAll('[id]').forEach((el) => { if (isAnchor(el.id)) el.remove(); });
+  root.querySelectorAll('[id]').forEach((el) => {
+    if (isAnchor(el.id)) el.remove();
+  });
 
   // Nearest named part (self first, then ancestors) governs each shape
   const governing = (shape: Element): PartConfig | null => {
@@ -243,9 +287,13 @@ export function renderSvgAsset(svgText: string, { main, secondary, stretch, mode
     if (mode === 'color') {
       if (!cfg) continue;
       const next =
-        cfg.mode === 'main' ? mainHex
-        : cfg.mode === 'derived' ? secondaryHex ?? deriveColor(mainHex, cfg.dL ?? 0)
-        : cfg.mode === 'fixed' ? normalizeColor(cfg.color) : null;
+        cfg.mode === 'main'
+          ? mainHex
+          : cfg.mode === 'derived'
+            ? (secondaryHex ?? deriveColor(mainHex, cfg.dL ?? 0))
+            : cfg.mode === 'fixed'
+              ? normalizeColor(cfg.color)
+              : null;
       if (next) shape.setAttribute('fill', next);
       // Some exported Illustrator SVGs use presentation styles. The style
       // declaration wins over the fill attribute, so clear only fill styling
@@ -253,14 +301,19 @@ export function renderSvgAsset(svgText: string, { main, secondary, stretch, mode
       if (next) {
         const style = shape.getAttribute('style');
         if (style && /(?:^|;)\s*fill\s*:/i.test(style)) {
-          shape.setAttribute('style', style.replace(/(?:^|;)\s*fill\s*:[^;]*/ig, '').replace(/^;|;;/g, '').trim());
+          shape.setAttribute(
+            'style',
+            style
+              .replace(/(?:^|;)\s*fill\s*:[^;]*/gi, '')
+              .replace(/^;|;;/g, '')
+              .trim(),
+          );
         }
       }
     } else {
-      const current = cfg?.mode === 'fixed' ? normalizeColor(cfg.color) ?? drawn : drawn;
+      const current = cfg?.mode === 'fixed' ? (normalizeColor(cfg.color) ?? drawn) : drawn;
       const rule: BwRule = cfg?.bw ?? 'auto';
-      const makeWhite =
-        rule === 'white' || (rule === 'auto' && luminance(current) >= 0.25 && cfg?.mode !== 'line');
+      const makeWhite = rule === 'white' || (rule === 'auto' && luminance(current) >= 0.25 && cfg?.mode !== 'line');
       shape.setAttribute('fill', makeWhite ? '#ffffff' : current);
     }
   }

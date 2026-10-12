@@ -9,7 +9,9 @@ const NameBanner: React.FC<{ name: string; mode: 'color' | 'line' }> = ({ name, 
   if (!text) return null;
   return (
     <div className="scene-name" data-mode={mode} style={{ ['--n' as string]: text.length } as React.CSSProperties}>
-      {['l1', 'l2', 'l3', 'r1', 'r2', 'r3'].map((d) => <i key={d} className={`scene-dash scene-dash-${d}`} aria-hidden="true" />)}
+      {['l1', 'l2', 'l3', 'r1', 'r2', 'r3'].map((d) => (
+        <i key={d} className={`scene-dash scene-dash-${d}`} aria-hidden="true" />
+      ))}
       <span className="scene-name-text">
         {[...text].map((ch, i) => (
           <span key={i} style={mode === 'color' ? { color: LETTER_COLORS[i % LETTER_COLORS.length] } : undefined}>

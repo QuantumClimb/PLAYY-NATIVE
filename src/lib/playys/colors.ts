@@ -36,12 +36,14 @@ export interface ResolvedColors {
 
 export function resolveColors(sel: Selection, colors?: CharacterColorConfiguration): ResolvedColors {
   const advanced = colors?.mode === 'advanced';
-  const parts = advanced ? colors?.parts ?? {} : {};
+  const parts = advanced ? (colors?.parts ?? {}) : {};
   const partColors: Record<string, string> = {};
 
   // Simple choices: the secondary color goes to the cuffs, trim, soles and hoodie strings only
   if (colors?.highlight) {
-    ['cuffs', 'trim', 'soles', 'tassles'].forEach((k) => { partColors[k] = colors.highlight!; });
+    ['cuffs', 'trim', 'soles', 'tassles'].forEach((k) => {
+      partColors[k] = colors.highlight!;
+    });
   }
   // Advanced: individual parts win over the simple choices
   Object.entries(parts).forEach(([key, color]) => {
@@ -71,8 +73,19 @@ export function effectiveRegionColor(colors: CharacterColorConfiguration | undef
 
 /** The swatches, laid out as in the design: four per row, the last row centered. */
 export const COLOR_SWATCHES: string[] = [
-  '#ef2b2d', '#f7841f', '#f9d11f', '#38b63b',
-  '#17c3e8', '#1b57e0', '#8a3fe0', '#f45fa0',
-  '#f98ad0', '#a6e22e', '#14d8c0', '#1e7d2d',
-  '#7a4a25', '#9aa0a6', '#1b1b1f',
+  '#ef2b2d',
+  '#f7841f',
+  '#f9d11f',
+  '#38b63b',
+  '#17c3e8',
+  '#1b57e0',
+  '#8a3fe0',
+  '#f45fa0',
+  '#f98ad0',
+  '#a6e22e',
+  '#14d8c0',
+  '#1e7d2d',
+  '#7a4a25',
+  '#9aa0a6',
+  '#1b1b1f',
 ];

@@ -24,7 +24,17 @@ interface AssetPreviewProps {
 
 /** Renders an asset (a head also gets the shared face placed on it, as it will on the kiosk). */
 export const AssetPreview: React.FC<AssetPreviewProps> = ({
-  asset, face, mode, main, secondary, stretch, className = '', style, anchors, activeAnchor, onPlaceAnchor,
+  asset,
+  face,
+  mode,
+  main,
+  secondary,
+  stretch,
+  className = '',
+  style,
+  anchors,
+  activeAnchor,
+  onPlaceAnchor,
 }) => {
   const overlayRef = useRef<SVGSVGElement>(null);
   const dragging = useRef(false);
@@ -71,19 +81,32 @@ export const AssetPreview: React.FC<AssetPreviewProps> = ({
   if (!body) return <div className="text-red-700 text-sm p-4">Could not render this SVG</div>;
 
   return (
-    <div className={`${style ? '' : 'relative'} ${className}`} style={{ aspectRatio: `${body.vb.w} / ${body.vb.h}`, ...style }}>
+    <div
+      className={`${style ? '' : 'relative'} ${className}`}
+      style={{ aspectRatio: `${body.vb.w} / ${body.vb.h}`, ...style }}
+    >
       <div className={`absolute inset-0 ${fill}`} dangerouslySetInnerHTML={{ __html: body.svg }} />
       {faceLayer && (
-        <div className={`absolute ${fill}`} style={faceLayer.style} dangerouslySetInnerHTML={{ __html: faceLayer.svg }} />
+        <div
+          className={`absolute ${fill}`}
+          style={faceLayer.style}
+          dangerouslySetInnerHTML={{ __html: faceLayer.svg }}
+        />
       )}
       {anchors && onPlaceAnchor && (
         <svg
           ref={overlayRef}
           className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
           viewBox={`${body.vb.x} ${body.vb.y} ${body.vb.w} ${body.vb.h}`}
-          onPointerDown={(e) => { dragging.current = true; e.currentTarget.setPointerCapture(e.pointerId); place(e); }}
+          onPointerDown={(e) => {
+            dragging.current = true;
+            e.currentTarget.setPointerCapture(e.pointerId);
+            place(e);
+          }}
           onPointerMove={(e) => dragging.current && place(e)}
-          onPointerUp={() => { dragging.current = false; }}
+          onPointerUp={() => {
+            dragging.current = false;
+          }}
         >
           {(Object.entries(anchors) as [string, { x: number; y: number }][]).map(([name, pt]) => {
             const r = Math.max(body.vb.w, body.vb.h) * 0.018;
@@ -92,7 +115,15 @@ export const AssetPreview: React.FC<AssetPreviewProps> = ({
               <g key={name} stroke={active ? '#ef4444' : '#2563eb'} strokeWidth={r / 3} fill="none">
                 <circle cx={pt.x} cy={pt.y} r={r} />
                 <path d={`M${pt.x - r * 1.8} ${pt.y}H${pt.x + r * 1.8}M${pt.x} ${pt.y - r * 1.8}V${pt.y + r * 1.8}`} />
-                <text x={pt.x + r * 2} y={pt.y - r} fontSize={r * 2.4} fill={active ? '#ef4444' : '#2563eb'} stroke="none">{name}</text>
+                <text
+                  x={pt.x + r * 2}
+                  y={pt.y - r}
+                  fontSize={r * 2.4}
+                  fill={active ? '#ef4444' : '#2563eb'}
+                  stroke="none"
+                >
+                  {name}
+                </text>
               </g>
             );
           })}

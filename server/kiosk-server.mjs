@@ -22,6 +22,8 @@ if (hasSite) {
 }
 
 app.listen(PORT, HOST, () => {
-  console.log(`PLAYYS kiosk server on http://${HOST}:${PORT}${hasSite ? ' (serving the built site)' : ' (API only: run npm run build to serve the site)'}`);
+  console.log(
+    `PLAYYS kiosk server on http://${HOST}:${PORT}${hasSite ? ' (serving the built site)' : ' (API only: run npm run build to serve the site)'}`,
+  );
   if (!process.env.COMMAND_CENTER_PASSWORD) console.log('Command center disabled: set COMMAND_CENTER_PASSWORD in .env');
 });

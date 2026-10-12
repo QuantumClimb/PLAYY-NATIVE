@@ -60,7 +60,9 @@ export function useProgressTabs(): ProgressTabs {
         if (live) setTabs(cached);
       })
       .catch(() => {});
-    return () => { live = false; };
+    return () => {
+      live = false;
+    };
   }, []);
   return tabs;
 }

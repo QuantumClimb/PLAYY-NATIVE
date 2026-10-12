@@ -19,7 +19,15 @@ interface PickCarouselProps<T> {
  * Pages of cards you swipe left and right (no vertical scrolling). Touch uses native scroll-snap;
  * a mouse can drag, and there are arrow buttons and page dots when there is more than one page.
  */
-export function PickCarousel<T>({ items, keyOf, selectedKey, renderItem, perPage = 6, variant, onInteract }: PickCarouselProps<T>) {
+export function PickCarousel<T>({
+  items,
+  keyOf,
+  selectedKey,
+  renderItem,
+  perPage = 6,
+  variant,
+  onInteract,
+}: PickCarouselProps<T>) {
   const scroller = useRef<HTMLDivElement>(null);
   const drag = useRef({ active: false, moved: false, startX: 0, startLeft: 0 });
   const [page, setPage] = useState(0);
@@ -27,12 +35,15 @@ export function PickCarousel<T>({ items, keyOf, selectedKey, renderItem, perPage
   const pages: T[][] = [];
   for (let i = 0; i < items.length; i += perPage) pages.push(items.slice(i, i + perPage));
 
-  const goTo = useCallback((index: number, smooth = true) => {
-    const el = scroller.current;
-    if (!el) return;
-    const clamped = Math.max(0, Math.min(pages.length - 1, index));
-    el.scrollTo({ left: clamped * el.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
-  }, [pages.length]);
+  const goTo = useCallback(
+    (index: number, smooth = true) => {
+      const el = scroller.current;
+      if (!el) return;
+      const clamped = Math.max(0, Math.min(pages.length - 1, index));
+      el.scrollTo({ left: clamped * el.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
+    },
+    [pages.length],
+  );
 
   // Keep the dots in step with the scroll position
   const onScroll = () => {
@@ -89,7 +100,10 @@ export function PickCarousel<T>({ items, keyOf, selectedKey, renderItem, perPage
         ref={scroller}
         className="pick-scroller"
         onScroll={onScroll}
-        onPointerDown={(e) => { onInteract?.(); onPointerDown(e); }}
+        onPointerDown={(e) => {
+          onInteract?.();
+          onPointerDown(e);
+        }}
         onPointerMove={onPointerMove}
         onPointerUp={endDrag}
         onPointerLeave={endDrag}
@@ -106,16 +120,38 @@ export function PickCarousel<T>({ items, keyOf, selectedKey, renderItem, perPage
 
       {many && (
         <>
-          <button type="button" data-sfx="back" className="pick-arrow pick-arrow-left" aria-label="Previous options" disabled={page === 0} onClick={() => goTo(page - 1)}>
+          <button
+            type="button"
+            data-sfx="back"
+            className="pick-arrow pick-arrow-left"
+            aria-label="Previous options"
+            disabled={page === 0}
+            onClick={() => goTo(page - 1)}
+          >
             <ChevronLeft strokeWidth={3.5} />
           </button>
-          <button type="button" data-sfx="next" className="pick-arrow pick-arrow-right" aria-label="More options" disabled={page === pages.length - 1} onClick={() => goTo(page + 1)}>
+          <button
+            type="button"
+            data-sfx="next"
+            className="pick-arrow pick-arrow-right"
+            aria-label="More options"
+            disabled={page === pages.length - 1}
+            onClick={() => goTo(page + 1)}
+          >
             <ChevronRight strokeWidth={3.5} />
           </button>
           <div className="pick-dots" role="tablist" aria-label="Pages">
             {pages.map((_, p) => (
-              <button type="button" data-sfx="tap" key={p} role="tab" aria-selected={p === page} aria-label={`Page ${p + 1}`}
-                className={`pick-dot ${p === page ? 'is-active' : ''}`} onClick={() => goTo(p)} />
+              <button
+                type="button"
+                data-sfx="tap"
+                key={p}
+                role="tab"
+                aria-selected={p === page}
+                aria-label={`Page ${p + 1}`}
+                className={`pick-dot ${p === page ? 'is-active' : ''}`}
+                onClick={() => goTo(p)}
+              />
             ))}
           </div>
         </>

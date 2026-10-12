@@ -80,16 +80,11 @@ export const SceneBackground: React.FC<SceneBackgroundProps> = ({ sceneId }) => 
 
       {/* 3. Image Background */}
       {bgType === 'image' && mediaUrl && (
-        <img
-          src={mediaUrl}
-          alt=""
-          style={objectStyle}
-          className="absolute inset-0 w-full h-full pointer-events-none"
-        />
+        <img src={mediaUrl} alt="" style={objectStyle} className="absolute inset-0 w-full h-full pointer-events-none" />
       )}
 
       {/* 4. Existing Default Background */}
-      {((bgType === 'default') ||
+      {(bgType === 'default' ||
         (bgType === 'image' && !mediaUrl) ||
         (bgType === 'video' && hasVideoError && !fallbackUrl)) && (
         <>

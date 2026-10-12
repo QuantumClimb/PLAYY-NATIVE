@@ -20,13 +20,23 @@ interface KioskCelebrationScreenProps {
 const AUTO_RETURN_SECONDS = 20;
 
 /** The last screen: confetti, what happens next, and an automatic return to the intro screen. */
-export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({ config, card, onAllDone, onPrintAnother }) => {
+export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
+  config,
+  card,
+  onAllDone,
+  onPrintAnother,
+}) => {
   const [secondsLeft, setSecondsLeft] = useState(AUTO_RETURN_SECONDS);
 
   useEffect(() => {
     playSfx('done');
     nativeFeedback.notificationSuccess();
-    confetti({ particleCount: 110, spread: 80, origin: { y: 0.55 }, colors: ['#F59E0B', '#EC4899', '#38BDF8', '#10B981', '#A855F7'] });
+    confetti({
+      particleCount: 110,
+      spread: 80,
+      origin: { y: 0.55 },
+      colors: ['#F59E0B', '#EC4899', '#38BDF8', '#10B981', '#A855F7'],
+    });
     const t = setTimeout(() => confetti({ particleCount: 80, spread: 110, origin: { y: 0.4 } }), 800);
     return () => clearTimeout(t);
   }, []);
@@ -55,9 +65,15 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({ 
 
       <div className="success-title">
         <h1 className="head-arched-heading" aria-label="Your Playyy is ready!">
-          {'YOUR PLAYYY IS READY!'.split('').map((letter, i) => (
-            letter === ' ' ? <span className="head-heading-space" key={i} aria-hidden="true" /> : <span key={i}>{letter}</span>
-          ))}
+          {'YOUR PLAYYY IS READY!'
+            .split('')
+            .map((letter, i) =>
+              letter === ' ' ? (
+                <span className="head-heading-space" key={i} aria-hidden="true" />
+              ) : (
+                <span key={i}>{letter}</span>
+              ),
+            )}
         </h1>
         <p className="head-subtitle">Thank you for playing{config.kidName ? `, ${config.kidName}` : ''}!</p>
       </div>
@@ -66,15 +82,29 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({ 
         <div className="success-page-thumb">
           <PlayyScene config={config} mode="color" finish className="h-full w-full" />
         </div>
-        {card && <div className="success-card"><TrumpCardFront card={card} scale={cardScale} /></div>}
+        {card && (
+          <div className="success-card">
+            <TrumpCardFront card={card} scale={cardScale} />
+          </div>
+        )}
         <div className="success-steps">
           <div className="success-step">
-            <span className="success-step-icon"><Printer strokeWidth={2.6} /></span>
-            <div><b>Collect your pages</b><span>Your coloring pages and trump card are printing now.</span></div>
+            <span className="success-step-icon">
+              <Printer strokeWidth={2.6} />
+            </span>
+            <div>
+              <b>Collect your pages</b>
+              <span>Your coloring pages and trump card are printing now.</span>
+            </div>
           </div>
           <div className="success-step">
-            <span className="success-step-icon is-pink"><Mail strokeWidth={2.6} /></span>
-            <div><b>Sent to our team</b><span>Your Playyy and trump card are on their way to the Playyy Kingdom team.</span></div>
+            <span className="success-step-icon is-pink">
+              <Mail strokeWidth={2.6} />
+            </span>
+            <div>
+              <b>Sent to our team</b>
+              <span>Your Playyy and trump card are on their way to the Playyy Kingdom team.</span>
+            </div>
           </div>
         </div>
       </div>

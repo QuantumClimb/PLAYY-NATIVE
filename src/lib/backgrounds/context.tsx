@@ -35,15 +35,10 @@ export const SceneBackgroundsProvider: React.FC<{ children: React.ReactNode }> =
     refreshBackgrounds();
   }, [refreshBackgrounds]);
 
-  const getSceneSetting = useCallback(
-    (sceneId: SceneId) => scenes[sceneId],
-    [scenes]
-  );
+  const getSceneSetting = useCallback((sceneId: SceneId) => scenes[sceneId], [scenes]);
 
   return (
-    <SceneBackgroundsContext.Provider
-      value={{ scenes, loading, error, refreshBackgrounds, getSceneSetting }}
-    >
+    <SceneBackgroundsContext.Provider value={{ scenes, loading, error, refreshBackgrounds, getSceneSetting }}>
       {children}
     </SceneBackgroundsContext.Provider>
   );

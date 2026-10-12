@@ -7,7 +7,8 @@ export const ARCHETYPES: PersonalityArchetype[] = [
     subTitle: 'Starlight Sentinel',
     element: '✨ Astral',
     rarity: 'Legendary',
-    description: 'A fearless cosmic traveler powered by stardust, capable of soaring across galaxies to discover unknown worlds.',
+    description:
+      'A fearless cosmic traveler powered by stardust, capable of soaring across galaxies to discover unknown worlds.',
     specialAbility1: {
       name: 'Supernova Blast',
       description: 'Unleashes a blinding burst of celestial energy.',
@@ -45,7 +46,8 @@ export const ARCHETYPES: PersonalityArchetype[] = [
     subTitle: 'Cloud Realm Weaver',
     element: '☁️ Aero',
     rarity: 'Rare',
-    description: 'A gentle spirit with endless imagination, turning dreams into reality and protecting peaceful realms.',
+    description:
+      'A gentle spirit with endless imagination, turning dreams into reality and protecting peaceful realms.',
     specialAbility1: {
       name: 'Dream Beam',
       description: 'Projects a peaceful wave of light that restores energy.',
@@ -95,16 +97,22 @@ export const ARCHETYPES: PersonalityArchetype[] = [
       damage: 72,
     },
     quote: 'Listen to the whisper of the ancient trees.',
-  }
+  },
 ];
 
 export function calculateArchetype(stats: CharacterStats): PersonalityArchetype {
   const highest = Object.entries(stats).reduce((max, curr) => (curr[1] > max[1] ? curr : max), ['power', 0]);
   switch (highest[0]) {
-    case 'energy': return ARCHETYPES[0];
-    case 'speed': return ARCHETYPES[1];
-    case 'intelligence': return ARCHETYPES[2];
-    case 'power': return ARCHETYPES[3];
-    case 'courage': default: return ARCHETYPES[4];
+    case 'energy':
+      return ARCHETYPES[0];
+    case 'speed':
+      return ARCHETYPES[1];
+    case 'intelligence':
+      return ARCHETYPES[2];
+    case 'power':
+      return ARCHETYPES[3];
+    case 'courage':
+    default:
+      return ARCHETYPES[4];
   }
 }

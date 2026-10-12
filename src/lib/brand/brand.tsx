@@ -84,7 +84,9 @@ export function useLogoSvg(): string | null {
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error('logo'))))
       .then((t) => live && setSvg(t))
       .catch(() => live && setSvg(null));
-    return () => { live = false; };
+    return () => {
+      live = false;
+    };
   }, [src]);
   return svg;
 }

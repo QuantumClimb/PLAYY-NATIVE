@@ -31,7 +31,9 @@ export default function App() {
   const [isPrinterDetectOpen, setIsPrinterDetectOpen] = useState(false);
 
   // A Playyy that could not be sent last time (no connection) goes out when the kiosk starts again
-  useEffect(() => { void retryPendingShare(); }, []);
+  useEffect(() => {
+    void retryPendingShare();
+  }, []);
 
   // Trigger browser / local print service
   const handlePrint = useCallback(() => {
@@ -81,12 +83,7 @@ export default function App() {
       {/* 2. Full-Screen Full-Bleed Magical Coloring Machine */}
       <main className="w-full h-full flex-1 flex flex-col overflow-hidden print:hidden">
         {/* PHASE 1: IDLE MOVIE (Continuous loop with TAP TO CREATE) */}
-        {phase === 'idle' && (
-          <KioskIdleMovie
-            onStart={handleStart}
-            onAdminTrigger={() => setIsAdminModalOpen(true)}
-          />
-        )}
+        {phase === 'idle' && <KioskIdleMovie onStart={handleStart} onAdminTrigger={() => setIsAdminModalOpen(true)} />}
 
         {/* Inner pages share the footer; the start page has none */}
         {phase !== 'idle' && (
@@ -141,10 +138,7 @@ export default function App() {
       />
 
       {/* 4. Operator Project Code Exporter Modal */}
-      <ExpoProjectExporterModal
-        isOpen={isExporterOpen}
-        onClose={() => setIsExporterOpen(false)}
-      />
+      <ExpoProjectExporterModal isOpen={isExporterOpen} onClose={() => setIsExporterOpen(false)} />
     </div>
   );
 }

@@ -30,7 +30,14 @@ interface PlayySceneProps {
 export const PlayyScene: React.FC<PlayySceneProps> = ({ config, mode, finish = false, className = '' }) => {
   const sel = useSelection(config);
   const layout = useMemo(
-    () => layoutScene({ background: sel.background, body: sel.body, head: sel.head, symbol: sel.symbol, reserveBottom: finish ? FINISH_RESERVE_BOTTOM : 0 }),
+    () =>
+      layoutScene({
+        background: sel.background,
+        body: sel.body,
+        head: sel.head,
+        symbol: sel.symbol,
+        reserveBottom: finish ? FINISH_RESERVE_BOTTOM : 0,
+      }),
     [sel, finish],
   );
 
@@ -38,7 +45,10 @@ export const PlayyScene: React.FC<PlayySceneProps> = ({ config, mode, finish = f
   const rc = resolveColors(sel, config.colors);
 
   return (
-    <div className={`relative overflow-hidden bg-white scene-cq ${className}`} style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}>
+    <div
+      className={`relative overflow-hidden bg-white scene-cq ${className}`}
+      style={{ aspectRatio: `${SCENE_W} / ${SCENE_H}` }}
+    >
       <AssetArt asset={sel.background} mode={mode} main={sel.headMain} stretch style={rectStyle(layout.background)} />
       <AssetArt
         asset={sel.body}

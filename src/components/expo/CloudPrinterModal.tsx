@@ -1,15 +1,5 @@
 import React, { useState } from 'react';
-import {
-  X,
-  Printer,
-  Cloud,
-  CheckCircle2,
-  Copy,
-  Check,
-  ChevronRight,
-  Terminal,
-  Usb,
-} from 'lucide-react';
+import { X, Printer, Cloud, CheckCircle2, Copy, Check, ChevronRight, Terminal, Usb } from 'lucide-react';
 import {
   CloudPrinterConfig,
   DEFAULT_CLOUD_PRINTER_CONFIG,
@@ -24,14 +14,12 @@ interface CloudPrinterModalProps {
   characterDescription: string;
 }
 
-export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
-  isOpen,
-  onClose,
-  characterDescription,
-}) => {
+export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({ isOpen, onClose, characterDescription }) => {
   const [config, setConfig] = useState<CloudPrinterConfig>(DEFAULT_CLOUD_PRINTER_CONFIG);
   const [activeTab, setActiveTab] = useState<'canonUsb' | 'test' | 'code'>('canonUsb');
-  const [codeLanguage, setCodeLanguage] = useState<'canonUsbKiosk' | 'printnodeUsb' | 'nodeUsbService' | 'raspberryPiCups'>('canonUsbKiosk');
+  const [codeLanguage, setCodeLanguage] = useState<
+    'canonUsbKiosk' | 'printnodeUsb' | 'nodeUsbService' | 'raspberryPiCups'
+  >('canonUsbKiosk');
   const [copiedCode, setCopiedCode] = useState(false);
 
   // Simulated Print Job dispatch state
@@ -107,7 +95,10 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
   };
 
   return (
-    <div data-sfx="none" className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      data-sfx="none"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-xs animate-in fade-in duration-200"
+    >
       <div
         className="w-full max-w-4xl max-h-[92vh] bg-slate-900 border border-slate-700 text-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
         onClick={(e) => e.stopPropagation()}
@@ -200,8 +191,9 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                   Your Hardware: Canon PIXMA G2430 (USB Only, No Wi-Fi)
                 </h3>
                 <p className="text-xs text-slate-300 leading-relaxed">
-                  Because the <strong>Canon PIXMA G2430</strong> does not have built-in Wi-Fi, it cannot receive wireless signals directly on its own. 
-                  However, you can easily connect and dispatch prints in <strong>two common ways</strong>:
+                  Because the <strong>Canon PIXMA G2430</strong> does not have built-in Wi-Fi, it cannot receive
+                  wireless signals directly on its own. However, you can easily connect and dispatch prints in{' '}
+                  <strong>two common ways</strong>:
                 </p>
               </div>
 
@@ -249,9 +241,21 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                       If the Touch Screen TV is connected to a mini-PC, laptop, or Intel NUC running Windows or Linux:
                     </p>
                     <ol className="text-xs text-slate-300 mt-2 space-y-1.5 list-decimal pl-4">
-                      <li>Plug the Canon G2430 USB cable into the PC and set it as <strong>Default Printer</strong> in Windows.</li>
-                      <li>Launch Chrome/Edge with the <code className="text-amber-300 bg-slate-900 px-1 py-0.5 rounded font-mono text-[11px]">--kiosk-printing</code> flag.</li>
-                      <li><strong>Done!</strong> When the kid taps &quot;Print&quot;, Windows sends the job over the USB cable instantly with <strong>zero dialogs or popups</strong>.</li>
+                      <li>
+                        Plug the Canon G2430 USB cable into the PC and set it as <strong>Default Printer</strong> in
+                        Windows.
+                      </li>
+                      <li>
+                        Launch Chrome/Edge with the{' '}
+                        <code className="text-amber-300 bg-slate-900 px-1 py-0.5 rounded font-mono text-[11px]">
+                          --kiosk-printing
+                        </code>{' '}
+                        flag.
+                      </li>
+                      <li>
+                        <strong>Done!</strong> When the kid taps &quot;Print&quot;, Windows sends the job over the USB
+                        cable instantly with <strong>zero dialogs or popups</strong>.
+                      </li>
                     </ol>
                   </div>
                   <div className="text-[11px] text-emerald-400 mt-4 font-bold border-t border-slate-700 pt-2 flex items-center gap-1.5">
@@ -271,11 +275,14 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                     </div>
                     <h4 className="text-base font-bold text-white">PrintNode USB Cloud Bridge</h4>
                     <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                      If you want to print from an Android TV box, iPad, or mobile device over the cloud to your USB Canon G2430:
+                      If you want to print from an Android TV box, iPad, or mobile device over the cloud to your USB
+                      Canon G2430:
                     </p>
                     <ol className="text-xs text-slate-300 mt-2 space-y-1.5 list-decimal pl-4">
                       <li>Plug the Canon G2430 into any computer or a $35 Raspberry Pi.</li>
-                      <li>Install the lightweight <strong>PrintNode client</strong> on that computer.</li>
+                      <li>
+                        Install the lightweight <strong>PrintNode client</strong> on that computer.
+                      </li>
                       <li>PrintNode exposes your USB Canon G2430 to the cloud.</li>
                       <li>Any touch screen, tablet, or web app can now print to it over HTTPS from anywhere!</li>
                     </ol>
@@ -293,7 +300,9 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                   <Terminal className="w-5 h-5 text-emerald-400" />
                   <div>
                     <div className="text-xs font-bold text-white">Ready 1-Click Kiosk Launcher Script:</div>
-                    <div className="text-[11px] text-slate-400 font-mono">start-kiosk.bat (Windows) &bull; start-kiosk.sh (Linux/Raspberry Pi)</div>
+                    <div className="text-[11px] text-slate-400 font-mono">
+                      start-kiosk.bat (Windows) &bull; start-kiosk.sh (Linux/Raspberry Pi)
+                    </div>
                   </div>
                 </div>
                 <button
@@ -323,12 +332,12 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                      Connection Method
-                    </label>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1">Connection Method</label>
                     <select
                       value={config.provider}
-                      onChange={(e) => setConfig({ ...config, provider: e.target.value as CloudPrinterConfig['provider'] })}
+                      onChange={(e) =>
+                        setConfig({ ...config, provider: e.target.value as CloudPrinterConfig['provider'] })
+                      }
                       className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs font-semibold focus:outline-hidden focus:border-indigo-500"
                     >
                       <option value="canon_usb">Direct USB (Silent Kiosk Printing)</option>
@@ -338,9 +347,7 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                      Target Printer Name
-                    </label>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1">Target Printer Name</label>
                     <input
                       type="text"
                       value={config.printerName}
@@ -350,12 +357,12 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                      Paper Size
-                    </label>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1">Paper Size</label>
                     <select
                       value={config.paperSize}
-                      onChange={(e) => setConfig({ ...config, paperSize: e.target.value as CloudPrinterConfig['paperSize'] })}
+                      onChange={(e) =>
+                        setConfig({ ...config, paperSize: e.target.value as CloudPrinterConfig['paperSize'] })
+                      }
                       className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-2.5 text-xs font-semibold focus:outline-hidden focus:border-indigo-500"
                     >
                       <option value="A4">A4 (Canon G2430 standard)</option>
@@ -364,9 +371,7 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-400 mb-1">
-                      Silent Dialog Bypassing
-                    </label>
+                    <label className="block text-[11px] font-bold text-slate-400 mb-1">Silent Dialog Bypassing</label>
                     <div className="bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-emerald-400 font-bold flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-400" />
                       <span>Enabled (--kiosk-printing)</span>
@@ -379,7 +384,11 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                   <button
                     type="button"
                     onClick={handleTriggerPrint}
-                    disabled={jobStatus.stage === 'generating' || jobStatus.stage === 'transmitting' || jobStatus.stage === 'spooling'}
+                    disabled={
+                      jobStatus.stage === 'generating' ||
+                      jobStatus.stage === 'transmitting' ||
+                      jobStatus.stage === 'spooling'
+                    }
                     className="w-full py-3.5 bg-gradient-to-r from-amber-400 via-amber-500 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-slate-950 font-black rounded-2xl shadow-lg flex items-center justify-center gap-2 cursor-pointer active:scale-98 transition-all"
                   >
                     <Printer className="w-5 h-5 stroke-[2.5]" />
@@ -464,7 +473,9 @@ export const CloudPrinterModal: React.FC<CloudPrinterModalProps> = ({
                     type="button"
                     onClick={() => setCodeLanguage('raspberryPiCups')}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      codeLanguage === 'raspberryPiCups' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                      codeLanguage === 'raspberryPiCups'
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     4. Raspberry Pi Wi-Fi Adapter

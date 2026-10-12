@@ -1,9 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  DEFAULT_POWER_QUIZ_QUESTIONS,
-  PowerQuizQuestion,
-  SYMBOL_MAP,
-} from '../lib/playys/powerQuiz';
+import { DEFAULT_POWER_QUIZ_QUESTIONS, PowerQuizQuestion, SYMBOL_MAP } from '../lib/playys/powerQuiz';
 
 export const PowerQuizPanel: React.FC = () => {
   const [questions, setQuestions] = useState<PowerQuizQuestion[]>([]);
@@ -113,12 +109,7 @@ export const PowerQuizPanel: React.FC = () => {
     });
   };
 
-  const updateSymbolWeight = (
-    qIndex: number,
-    optIndex: number,
-    symbolSlug: string,
-    weight: number
-  ) => {
+  const updateSymbolWeight = (qIndex: number, optIndex: number, symbolSlug: string, weight: number) => {
     setQuestions((prev) => {
       const next = [...prev];
       const q = { ...next[qIndex] };
@@ -145,9 +136,7 @@ export const PowerQuizPanel: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-gray-200 p-4 rounded-xl">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-            Power quiz
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">Power quiz</h2>
           <p className="text-sm text-gray-500 mt-0.5">
             Configure the 5 personality quiz questions and attribute symbol scoring rules.
           </p>
@@ -174,11 +163,7 @@ export const PowerQuizPanel: React.FC = () => {
       </div>
 
       {/* Notifications */}
-      {error && (
-        <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-800">
-          {error}
-        </div>
-      )}
+      {error && <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-sm text-red-800">{error}</div>}
       {successMsg && (
         <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-4 text-sm text-emerald-800">
           {successMsg}
@@ -188,10 +173,7 @@ export const PowerQuizPanel: React.FC = () => {
       {/* Questions List */}
       <div className="space-y-6">
         {questions.map((q, qIndex) => (
-          <div
-            key={q.id || qIndex}
-            className="bg-white border border-gray-200 p-5 rounded-2xl space-y-4"
-          >
+          <div key={q.id || qIndex} className="bg-white border border-gray-200 p-5 rounded-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-gray-200 pb-3">
               <span className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
                 Question {qIndex + 1} of {questions.length}
@@ -285,12 +267,7 @@ export const PowerQuizPanel: React.FC = () => {
                                   max="10"
                                   value={currentPts}
                                   onChange={(e) =>
-                                    updateSymbolWeight(
-                                      qIndex,
-                                      optIndex,
-                                      slug,
-                                      parseInt(e.target.value, 10) || 0
-                                    )
+                                    updateSymbolWeight(qIndex, optIndex, slug, parseInt(e.target.value, 10) || 0)
                                   }
                                   className="w-10 text-center bg-gray-50 border border-gray-300 rounded text-xs text-indigo-700 font-semibold"
                                 />

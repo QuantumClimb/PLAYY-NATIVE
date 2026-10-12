@@ -11,8 +11,18 @@ const existing = new Set((await listAssets()).map((a) => `${a.type}/${a.slug}`))
 
 let copied = 0;
 for (const r of local) {
-  if (existing.has(`${r.type}/${r.slug}`)) { console.log('skip  ', r.type, r.slug); continue; }
-  const a = await createAsset({ type: r.type, slug: r.slug, name: r.name, svg: r.svg, parts: JSON.parse(r.parts), meta: JSON.parse(r.meta) });
+  if (existing.has(`${r.type}/${r.slug}`)) {
+    console.log('skip  ', r.type, r.slug);
+    continue;
+  }
+  const a = await createAsset({
+    type: r.type,
+    slug: r.slug,
+    name: r.name,
+    svg: r.svg,
+    parts: JSON.parse(r.parts),
+    meta: JSON.parse(r.meta),
+  });
   await updateAsset(a.id, { enabled: !!r.enabled, sort: r.sort });
   console.log('copied', r.type, r.slug);
   copied++;

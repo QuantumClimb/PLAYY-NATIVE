@@ -1,14 +1,5 @@
 import React, { useState } from 'react';
-import {
-  X,
-  Download,
-  Copy,
-  Check,
-  FileCode,
-  FolderGit2,
-  Terminal,
-  CheckCircle2,
-} from 'lucide-react';
+import { X, Download, Copy, Check, FileCode, FolderGit2, Terminal, CheckCircle2 } from 'lucide-react';
 import { EXPO_PROJECT_FILES, ExpoProjectFile } from '../../lib/playys/expoProjectFiles';
 import { downloadExpoProjectZip } from '../../lib/playys/expoZipExporter';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
@@ -18,10 +9,7 @@ interface ExpoProjectExporterModalProps {
   onClose: () => void;
 }
 
-export const ExpoProjectExporterModal: React.FC<ExpoProjectExporterModalProps> = ({
-  isOpen,
-  onClose,
-}) => {
+export const ExpoProjectExporterModal: React.FC<ExpoProjectExporterModalProps> = ({ isOpen, onClose }) => {
   const [selectedFile, setSelectedFile] = useState<ExpoProjectFile>(EXPO_PROJECT_FILES[0]);
   const [copiedFile, setCopiedFile] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -119,11 +107,7 @@ export const ExpoProjectExporterModal: React.FC<ExpoProjectExporterModalProps> =
                         : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
                     }`}
                   >
-                    <FileCode
-                      className={`w-4 h-4 shrink-0 ${
-                        isSelected ? 'text-indigo-400' : 'text-slate-500'
-                      }`}
-                    />
+                    <FileCode className={`w-4 h-4 shrink-0 ${isSelected ? 'text-indigo-400' : 'text-slate-500'}`} />
                     <span className="truncate">{file.path}</span>
                   </button>
                 );
@@ -147,13 +131,9 @@ export const ExpoProjectExporterModal: React.FC<ExpoProjectExporterModalProps> =
             {/* File info bar */}
             <div className="px-4 py-2.5 bg-slate-900/80 border-b border-slate-800 flex items-center justify-between shrink-0">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="font-mono text-xs font-bold text-slate-200 truncate">
-                  {selectedFile.path}
-                </span>
+                <span className="font-mono text-xs font-bold text-slate-200 truncate">{selectedFile.path}</span>
                 <span className="text-[11px] text-slate-500 hidden sm:inline">&bull;</span>
-                <span className="text-[11px] text-slate-400 hidden sm:inline truncate">
-                  {selectedFile.description}
-                </span>
+                <span className="text-[11px] text-slate-400 hidden sm:inline truncate">{selectedFile.description}</span>
               </div>
 
               <button

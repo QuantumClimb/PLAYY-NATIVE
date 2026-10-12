@@ -7,7 +7,13 @@ interface Submission {
   email: string;
   phone: string;
   thumbnail: string | null;
-  config: { head?: string; pose?: string; symbol?: string; background?: string; colors?: { main?: string; highlight?: string } };
+  config: {
+    head?: string;
+    pose?: string;
+    symbol?: string;
+    background?: string;
+    colors?: { main?: string; highlight?: string };
+  };
   email_status: 'pending' | 'sent' | 'failed' | 'off';
   email_error: string | null;
 }
@@ -26,7 +32,14 @@ const STATUS_STYLE: Record<Submission['email_status'], string> = {
 };
 
 const when = (iso: string) =>
-  new Date(iso).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+  new Date(iso).toLocaleString('en-IN', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
 
 const csvCell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
 
@@ -49,7 +62,9 @@ export const UsersPanel: React.FC = () => {
       .catch((e) => setError((e as Error).message))
       .finally(() => setLoading(false));
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+  }, []);
 
   const shown = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -57,7 +72,9 @@ export const UsersPanel: React.FC = () => {
   }, [rows, query]);
 
   const resend = async (id: number) => {
-    setBusyId(id); setError(null); setNote(null);
+    setBusyId(id);
+    setError(null);
+    setNote(null);
     try {
       const res = await fetch(`/api/cc/submissions/${id}/resend`, { method: 'POST' });
       const d = await res.json().catch(() => ({}));
@@ -72,12 +89,39 @@ export const UsersPanel: React.FC = () => {
   };
 
   const downloadCsv = () => {
-    const head = ['Date and time', 'Name', 'Email', 'Phone', 'Head', 'Pose', 'Power', 'Background', 'Main colour', 'Highlight colour', 'Email status'];
-    const lines = shown.map((r) => [
-      new Date(r.created).toLocaleString('en-IN'), r.name, r.email, r.phone,
-      r.config.head, r.config.pose, r.config.symbol, r.config.background, r.config.colors?.main, r.config.colors?.highlight, STATUS_LABEL[r.email_status],
-    ].map(csvCell).join(','));
-    const blob = new Blob(['﻿' + [head.map(csvCell).join(','), ...lines].join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const head = [
+      'Date and time',
+      'Name',
+      'Email',
+      'Phone',
+      'Head',
+      'Pose',
+      'Power',
+      'Background',
+      'Main colour',
+      'Highlight colour',
+      'Email status',
+    ];
+    const lines = shown.map((r) =>
+      [
+        new Date(r.created).toLocaleString('en-IN'),
+        r.name,
+        r.email,
+        r.phone,
+        r.config.head,
+        r.config.pose,
+        r.config.symbol,
+        r.config.background,
+        r.config.colors?.main,
+        r.config.colors?.highlight,
+        STATUS_LABEL[r.email_status],
+      ]
+        .map(csvCell)
+        .join(','),
+    );
+    const blob = new Blob(['﻿' + [head.map(csvCell).join(','), ...lines].join('\r\n')], {
+      type: 'text/csv;charset=utf-8',
+    });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `playys-users-${new Date().toISOString().slice(0, 10)}.csv`;
@@ -91,18 +135,39 @@ export const UsersPanel: React.FC = () => {
     <div className="space-y-4">
       <div>
         <h2 className="text-xl font-semibold">Users</h2>
-        <p className="text-sm text-gray-500">Everyone who made a Playyy: their details, when, and a small picture of their final card.</p>
+        <p className="text-sm text-gray-500">
+          Everyone who made a Playyy: their details, when, and a small picture of their final card.
+        </p>
       </div>
 
       {error && <div className="rounded-lg bg-red-50 border border-red-200 p-2 text-sm text-red-800">{error}</div>}
-      {note && <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-2 text-sm text-emerald-800">{note}</div>}
+      {note && (
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-2 text-sm text-emerald-800">{note}</div>
+      )}
 
       <div className="flex flex-wrap items-center gap-3">
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search name, email or phone"
-          className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-72" />
-        <span className="text-sm text-gray-500">{shown.length} of {rows.length}</span>
-        <button type="button" onClick={() => { setLoading(true); void load(); }} className="cc-btn ml-auto">Refresh</button>
-        <button type="button" onClick={downloadCsv} disabled={shown.length === 0} className="cc-btn cc-btn-primary">Download CSV</button>
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search name, email or phone"
+          className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-72"
+        />
+        <span className="text-sm text-gray-500">
+          {shown.length} of {rows.length}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setLoading(true);
+            void load();
+          }}
+          className="cc-btn ml-auto"
+        >
+          Refresh
+        </button>
+        <button type="button" onClick={downloadCsv} disabled={shown.length === 0} className="cc-btn cc-btn-primary">
+          Download CSV
+        </button>
       </div>
 
       <div className="overflow-x-auto rounded-xl border border-gray-300">
@@ -120,29 +185,61 @@ export const UsersPanel: React.FC = () => {
           </thead>
           <tbody>
             {shown.length === 0 && (
-              <tr><td colSpan={7} className="px-3 py-6 text-center text-gray-400">{rows.length === 0 ? 'Nobody yet.' : 'No matches.'}</td></tr>
+              <tr>
+                <td colSpan={7} className="px-3 py-6 text-center text-gray-400">
+                  {rows.length === 0 ? 'Nobody yet.' : 'No matches.'}
+                </td>
+              </tr>
             )}
             {shown.map((r) => (
               <tr key={r.id} className="border-t border-gray-200 align-middle">
                 <td className="px-3 py-2">
-                  {r.thumbnail ? <img src={r.thumbnail} alt="" className="h-16 w-auto rounded-md border border-gray-200" /> : <span className="text-gray-300">-</span>}
+                  {r.thumbnail ? (
+                    <img src={r.thumbnail} alt="" className="h-16 w-auto rounded-md border border-gray-200" />
+                  ) : (
+                    <span className="text-gray-300">-</span>
+                  )}
                 </td>
                 <td className="px-3 py-2 font-medium">{r.name}</td>
                 <td className="px-3 py-2">{r.email}</td>
                 <td className="px-3 py-2">{r.phone}</td>
                 <td className="px-3 py-2 whitespace-nowrap">{when(r.created)}</td>
                 <td className="px-3 py-2 text-xs text-gray-600">
-                  <div>{r.config.head} · {r.config.pose}</div>
+                  <div>
+                    {r.config.head} · {r.config.pose}
+                  </div>
                   <div className="flex items-center gap-1">
-                    {r.config.colors?.main && <span className="inline-block h-3 w-3 rounded-full border border-gray-300" style={{ background: r.config.colors.main }} />}
-                    {r.config.colors?.highlight && <span className="inline-block h-3 w-3 rounded-full border border-gray-300" style={{ background: r.config.colors.highlight }} />}
-                    <span>{r.config.symbol} · {r.config.background}</span>
+                    {r.config.colors?.main && (
+                      <span
+                        className="inline-block h-3 w-3 rounded-full border border-gray-300"
+                        style={{ background: r.config.colors.main }}
+                      />
+                    )}
+                    {r.config.colors?.highlight && (
+                      <span
+                        className="inline-block h-3 w-3 rounded-full border border-gray-300"
+                        style={{ background: r.config.colors.highlight }}
+                      />
+                    )}
+                    <span>
+                      {r.config.symbol} · {r.config.background}
+                    </span>
                   </div>
                 </td>
                 <td className="px-3 py-2">
-                  <span title={r.email_error ?? ''} className={`text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_STYLE[r.email_status]}`}>{STATUS_LABEL[r.email_status]}</span>
+                  <span
+                    title={r.email_error ?? ''}
+                    className={`text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_STYLE[r.email_status]}`}
+                  >
+                    {STATUS_LABEL[r.email_status]}
+                  </span>
                   {r.email_status === 'failed' && (
-                    <button type="button" disabled={busyId === r.id} onClick={() => resend(r.id)} className="ml-2 text-xs underline text-gray-600">
+                    <button
+                      type="button"
+                      disabled={busyId === r.id}
+                      onClick={() => resend(r.id)}
+                      className="ml-2 text-xs underline text-gray-600"
+                    >
                       {busyId === r.id ? 'Sending…' : 'Resend'}
                     </button>
                   )}

@@ -26,9 +26,10 @@ export const ShareSheets = forwardRef<ShareSheetsHandle, ShareSheetsProps>(({ co
   const cardBack = useRef<HTMLDivElement>(null);
 
   useImperativeHandle(ref, () => ({
-    nodes: () => (bw.current && color.current && cardFront.current && cardBack.current
-      ? { bw: bw.current, color: color.current, cardFront: cardFront.current, cardBack: cardBack.current }
-      : null),
+    nodes: () =>
+      bw.current && color.current && cardFront.current && cardBack.current
+        ? { bw: bw.current, color: color.current, cardFront: cardFront.current, cardBack: cardBack.current }
+        : null,
   }));
 
   // Read the fonts now, while the visitor is still looking at the page, so sharing is quicker
@@ -44,8 +45,12 @@ export const ShareSheets = forwardRef<ShareSheetsHandle, ShareSheetsProps>(({ co
       <div ref={color} style={{ width: SCENE_W, height: SCENE_H, background: '#fff' }}>
         <PlayyScene config={config} mode="color" finish className="h-full w-full" />
       </div>
-      <div ref={cardFront} style={{ width: 340, height: 510 }}><TrumpCardFront card={card} scale={1} /></div>
-      <div ref={cardBack} style={{ width: 340, height: 510 }}><TrumpCardBack card={card} scale={1} /></div>
+      <div ref={cardFront} style={{ width: 340, height: 510 }}>
+        <TrumpCardFront card={card} scale={1} />
+      </div>
+      <div ref={cardBack} style={{ width: 340, height: 510 }}>
+        <TrumpCardBack card={card} scale={1} />
+      </div>
     </div>
   );
 });

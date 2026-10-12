@@ -42,7 +42,9 @@ const Login: React.FC<{ enabled: boolean; onDone: () => void }> = ({ enabled, on
           <p className="text-sm cc-muted">Sign in to manage the kiosk content.</p>
         </div>
         {!enabled && (
-          <div className="cc-alert cc-alert-warn">Disabled. Set COMMAND_CENTER_PASSWORD in .env and restart the server.</div>
+          <div className="cc-alert cc-alert-warn">
+            Disabled. Set COMMAND_CENTER_PASSWORD in .env and restart the server.
+          </div>
         )}
         <label className="block text-sm font-medium text-gray-700">
           Password
@@ -55,7 +57,9 @@ const Login: React.FC<{ enabled: boolean; onDone: () => void }> = ({ enabled, on
           />
         </label>
         {error && <div className="cc-alert cc-alert-error">{error}</div>}
-        <button type="submit" className="cc-btn cc-btn-primary w-full">Sign in</button>
+        <button type="submit" className="cc-btn cc-btn-primary w-full">
+          Sign in
+        </button>
       </form>
     </div>
   );
@@ -63,7 +67,18 @@ const Login: React.FC<{ enabled: boolean; onDone: () => void }> = ({ enabled, on
 
 export const CommandCenter: React.FC = () => {
   const [state, setState] = useState<'loading' | 'out' | 'in' | 'offline'>('loading');
-  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz' | 'intro-badges' | 'progress-tabs' | 'trump-card' | 'users' | 'share' | 'logo' | 'sounds'>('assets');
+  const [activeTab, setActiveTab] = useState<
+    | 'assets'
+    | 'scene-backgrounds'
+    | 'power-quiz'
+    | 'intro-badges'
+    | 'progress-tabs'
+    | 'trump-card'
+    | 'users'
+    | 'share'
+    | 'logo'
+    | 'sounds'
+  >('assets');
   const [enabled, setEnabled] = useState(true);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
@@ -106,12 +121,9 @@ export const CommandCenter: React.FC = () => {
     }
   };
 
-  const replaceAsset = (next: Asset) =>
-    setAssets((a) => a.map((x) => (x.id === next.id ? next : x)));
+  const replaceAsset = (next: Asset) => setAssets((a) => a.map((x) => (x.id === next.id ? next : x)));
 
-  const face =
-    assets.find((a) => a.type === 'face' && a.enabled) ??
-    assets.find((a) => a.type === 'face');
+  const face = assets.find((a) => a.type === 'face' && a.enabled) ?? assets.find((a) => a.type === 'face');
   const current = assets.find((a) => a.id === selected);
 
   const TABS = [
@@ -131,7 +143,11 @@ export const CommandCenter: React.FC = () => {
     <div className="cc-root min-h-screen h-screen overflow-y-auto">
       {state === 'loading' && <p className="p-8 cc-muted">Loading…</p>}
       {state === 'offline' && (
-        <div className="p-8"><div className="cc-alert cc-alert-warn max-w-xl">The kiosk server is not running. Start it with: npm run server</div></div>
+        <div className="p-8">
+          <div className="cc-alert cc-alert-warn max-w-xl">
+            The kiosk server is not running. Start it with: npm run server
+          </div>
+        </div>
       )}
       {state === 'out' && <Login enabled={enabled} onDone={load} />}
 
@@ -169,105 +185,101 @@ export const CommandCenter: React.FC = () => {
             </nav>
           </header>
 
-        <div className="max-w-7xl mx-auto p-6 space-y-6">
-          {error && (
-            <div className="rounded-lg bg-red-50 border border-red-200 p-2 text-sm text-red-800">
-              {error}
-            </div>
-          )}
+          <div className="max-w-7xl mx-auto p-6 space-y-6">
+            {error && (
+              <div className="rounded-lg bg-red-50 border border-red-200 p-2 text-sm text-red-800">{error}</div>
+            )}
 
-          {/* TAB 1: SVG Character Assets */}
-          {activeTab === 'assets' && (
-            <div className="grid md:grid-cols-[260px_1fr] gap-6">
-              <aside className="space-y-4">
-                <div className="flex gap-2">
-                  <select
-                    value={uploadType}
-                    onChange={(e) => setUploadType(e.target.value as AssetType)}
-                    className="bg-gray-50 border border-gray-300 rounded-lg px-2 py-1 text-sm flex-1"
-                  >
-                    {ASSET_TYPES.map((t) => (
-                      <option key={t} value={t}>
-                        {TYPE_LABEL[t]}
-                      </option>
-                    ))}
-                  </select>
-                  <label className="px-3 py-1.5 rounded-lg bg-indigo-600 font-semibold text-white text-sm cursor-pointer hover:bg-indigo-700">
-                    Upload SVG
-                    <input
-                      type="file"
-                      accept=".svg,image/svg+xml"
-                      hidden
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        e.target.value = '';
-                        if (f) upload(f);
+            {/* TAB 1: SVG Character Assets */}
+            {activeTab === 'assets' && (
+              <div className="grid md:grid-cols-[260px_1fr] gap-6">
+                <aside className="space-y-4">
+                  <div className="flex gap-2">
+                    <select
+                      value={uploadType}
+                      onChange={(e) => setUploadType(e.target.value as AssetType)}
+                      className="bg-gray-50 border border-gray-300 rounded-lg px-2 py-1 text-sm flex-1"
+                    >
+                      {ASSET_TYPES.map((t) => (
+                        <option key={t} value={t}>
+                          {TYPE_LABEL[t]}
+                        </option>
+                      ))}
+                    </select>
+                    <label className="px-3 py-1.5 rounded-lg bg-indigo-600 font-semibold text-white text-sm cursor-pointer hover:bg-indigo-700">
+                      Upload SVG
+                      <input
+                        type="file"
+                        accept=".svg,image/svg+xml"
+                        hidden
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          e.target.value = '';
+                          if (f) upload(f);
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {ASSET_TYPES.map((t) => {
+                    const items = assets.filter((a) => a.type === t);
+                    return (
+                      <div key={t}>
+                        <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">
+                          {TYPE_LABEL[t]} ({items.length})
+                        </div>
+                        {items.length === 0 && <div className="text-xs text-gray-400">None yet</div>}
+                        {items.map((a) => (
+                          <button
+                            key={a.id}
+                            type="button"
+                            onClick={() => setSelected(a.id)}
+                            className={`w-full text-left px-3 py-1.5 rounded-lg text-sm flex justify-between ${
+                              a.id === selected ? 'bg-gray-100' : 'hover:bg-gray-50'
+                            }`}
+                          >
+                            <span>{a.name}</span>
+                            {!a.enabled && <span className="text-xs text-gray-500">hidden</span>}
+                          </button>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </aside>
+
+                <main>
+                  {current ? (
+                    <AssetEditor
+                      key={`${current.id}-${current.updated}-${current.svg.length}`}
+                      asset={current}
+                      face={face}
+                      assets={assets}
+                      onSaved={replaceAsset}
+                      onDeleted={(id) => {
+                        setAssets((a) => a.filter((x) => x.id !== id));
+                        setSelected(null);
                       }}
                     />
-                  </label>
-                </div>
+                  ) : (
+                    <p className="text-gray-500">Upload an SVG or pick an asset to edit it.</p>
+                  )}
+                </main>
+              </div>
+            )}
 
-                {ASSET_TYPES.map((t) => {
-                  const items = assets.filter((a) => a.type === t);
-                  return (
-                    <div key={t}>
-                      <div className="text-xs uppercase tracking-wider text-gray-500 mb-1">
-                        {TYPE_LABEL[t]} ({items.length})
-                      </div>
-                      {items.length === 0 && (
-                        <div className="text-xs text-gray-400">None yet</div>
-                      )}
-                      {items.map((a) => (
-                        <button
-                          key={a.id}
-                          type="button"
-                          onClick={() => setSelected(a.id)}
-                          className={`w-full text-left px-3 py-1.5 rounded-lg text-sm flex justify-between ${
-                            a.id === selected ? 'bg-gray-100' : 'hover:bg-gray-50'
-                          }`}
-                        >
-                          <span>{a.name}</span>
-                          {!a.enabled && <span className="text-xs text-gray-500">hidden</span>}
-                        </button>
-                      ))}
-                    </div>
-                  );
-                })}
-              </aside>
+            {/* TAB 2: Scene Backgrounds CMS */}
+            {activeTab === 'scene-backgrounds' && <SceneBackgroundsPanel />}
 
-              <main>
-                {current ? (
-                  <AssetEditor
-                    key={`${current.id}-${current.updated}-${current.svg.length}`}
-                    asset={current}
-                    face={face}
-                    assets={assets}
-                    onSaved={replaceAsset}
-                    onDeleted={(id) => {
-                      setAssets((a) => a.filter((x) => x.id !== id));
-                      setSelected(null);
-                    }}
-                  />
-                ) : (
-                  <p className="text-gray-500">Upload an SVG or pick an asset to edit it.</p>
-                )}
-              </main>
-            </div>
-          )}
-
-          {/* TAB 2: Scene Backgrounds CMS */}
-          {activeTab === 'scene-backgrounds' && <SceneBackgroundsPanel />}
-
-          {/* TAB 3: Power Quiz Questions CMS */}
-          {activeTab === 'power-quiz' && <PowerQuizPanel />}
-          {activeTab === 'intro-badges' && <IntroBadgesPanel />}
-          {activeTab === 'progress-tabs' && <ProgressTabsPanel />}
-          {activeTab === 'trump-card' && <TrumpCardPanel />}
-          {activeTab === 'users' && <UsersPanel />}
-          {activeTab === 'share' && <ShareSettingsPanel />}
-          {activeTab === 'logo' && <LogoPanel />}
-          {activeTab === 'sounds' && <SoundsPanel />}
-        </div>
+            {/* TAB 3: Power Quiz Questions CMS */}
+            {activeTab === 'power-quiz' && <PowerQuizPanel />}
+            {activeTab === 'intro-badges' && <IntroBadgesPanel />}
+            {activeTab === 'progress-tabs' && <ProgressTabsPanel />}
+            {activeTab === 'trump-card' && <TrumpCardPanel />}
+            {activeTab === 'users' && <UsersPanel />}
+            {activeTab === 'share' && <ShareSettingsPanel />}
+            {activeTab === 'logo' && <LogoPanel />}
+            {activeTab === 'sounds' && <SoundsPanel />}
+          </div>
         </>
       )}
     </div>

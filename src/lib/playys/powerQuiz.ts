@@ -12,21 +12,18 @@ export interface PowerQuizQuestion {
   options: PowerQuizOption[];
 }
 
-export const SYMBOL_MAP: Record<
-  string,
-  { name: string; attribute: string; icon: string }
-> = {
+export const SYMBOL_MAP: Record<string, { name: string; attribute: string; icon: string }> = {
   'shining-star': { name: 'Shining Star', attribute: 'Confidence & Leadership', icon: '⭐' },
-  'star': { name: 'Shining Star', attribute: 'Confidence & Leadership', icon: '⭐' },
+  star: { name: 'Shining Star', attribute: 'Confidence & Leadership', icon: '⭐' },
   'puffy-cloud': { name: 'Puffy Cloud', attribute: 'Calmness & Imagination', icon: '☁️' },
-  'cloud': { name: 'Puffy Cloud', attribute: 'Calmness & Imagination', icon: '☁️' },
+  cloud: { name: 'Puffy Cloud', attribute: 'Calmness & Imagination', icon: '☁️' },
   'fire-spark': { name: 'Fire Spark', attribute: 'Energy & Enthusiasm', icon: '🔥' },
   'warm-heart': { name: 'Warm Heart', attribute: 'Kindness & Empathy', icon: '💖' },
-  'heart': { name: 'Warm Heart', attribute: 'Kindness & Empathy', icon: '💖' },
+  heart: { name: 'Warm Heart', attribute: 'Kindness & Empathy', icon: '💖' },
   'thunder-zap': { name: 'Thunder Zap', attribute: 'Speed & Boldness', icon: '⚡' },
-  'lightning': { name: 'Thunder Zap', attribute: 'Speed & Boldness', icon: '⚡' },
+  lightning: { name: 'Thunder Zap', attribute: 'Speed & Boldness', icon: '⚡' },
   'golden-crown': { name: 'Golden Crown', attribute: 'Leadership & Confidence', icon: '👑' },
-  'crown': { name: 'Golden Crown', attribute: 'Leadership & Confidence', icon: '👑' },
+  crown: { name: 'Golden Crown', attribute: 'Leadership & Confidence', icon: '👑' },
   'crescent-moon': { name: 'Crescent Moon', attribute: 'Creativity & Imagination', icon: '🌙' },
   'puppy-paw': { name: 'Puppy Paw', attribute: 'Friendship & Loyalty', icon: '🐾' },
 };
@@ -192,7 +189,7 @@ export const DEFAULT_POWER_QUIZ_QUESTIONS: PowerQuizQuestion[] = [
 export function calculatePowerSymbol(
   questions: PowerQuizQuestion[],
   answers: number[],
-  availableSymbolSlugs: string[] = []
+  availableSymbolSlugs: string[] = [],
 ): string {
   const scores: Record<string, number> = {};
 
@@ -217,9 +214,7 @@ export function calculatePowerSymbol(
 
   if (availableSymbolSlugs.length > 0) {
     if (availableSymbolSlugs.includes(bestSymbol)) return bestSymbol;
-    const match = availableSymbolSlugs.find(
-      (s) => s.includes(bestSymbol) || bestSymbol.includes(s)
-    );
+    const match = availableSymbolSlugs.find((s) => s.includes(bestSymbol) || bestSymbol.includes(s));
     if (match) return match;
     return availableSymbolSlugs[0];
   }

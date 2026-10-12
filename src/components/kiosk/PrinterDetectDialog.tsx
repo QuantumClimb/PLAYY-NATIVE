@@ -22,11 +22,7 @@ const STATUS_LABEL: Record<PrinterInfo['status'], { text: string; ok: boolean }>
   unknown: { text: 'Unknown', ok: false },
 };
 
-export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({
-  isOpen,
-  onClose,
-  onTestPrint,
-}) => {
+export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen, onClose, onTestPrint }) => {
   const [printers, setPrinters] = useState<PrinterInfo[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

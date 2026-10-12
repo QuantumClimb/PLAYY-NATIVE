@@ -22,7 +22,15 @@ interface CompositePreviewProps {
 
 /** A head on a body: the head's neck anchor is pinned to the body's neck anchor. */
 export const CompositePreview: React.FC<CompositePreviewProps> = ({
-  head, body, face, mode, headMain, bodyMain, bodySecondary, headScale, className = '',
+  head,
+  body,
+  face,
+  mode,
+  headMain,
+  bodyMain,
+  bodySecondary,
+  headScale,
+  className = '',
 }) => {
   const layout = useMemo(() => {
     try {
@@ -39,10 +47,12 @@ export const CompositePreview: React.FC<CompositePreviewProps> = ({
         h: hvb.h * headScale,
       };
       // The canvas grows to fit both, since the head usually pokes above the body
-      const x0 = Math.min(bodyRect.x, headRect.x), y0 = Math.min(bodyRect.y, headRect.y);
+      const x0 = Math.min(bodyRect.x, headRect.x),
+        y0 = Math.min(bodyRect.y, headRect.y);
       const x1 = Math.max(bodyRect.x + bodyRect.w, headRect.x + headRect.w);
       const y1 = Math.max(bodyRect.y + bodyRect.h, headRect.y + headRect.h);
-      const W = x1 - x0, H = y1 - y0;
+      const W = x1 - x0,
+        H = y1 - y0;
       const box = (r: typeof bodyRect): React.CSSProperties => ({
         position: 'absolute',
         left: `${((r.x - x0) / W) * 100}%`,

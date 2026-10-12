@@ -1,26 +1,9 @@
-export type SceneId =
-  | 'intro'
-  | 'head'
-  | 'body'
-  | 'symbol'
-  | 'world'
-  | 'name'
-  | 'quiz'
-  | 'review'
-  | 'celebrate';
+export type SceneId = 'intro' | 'head' | 'body' | 'symbol' | 'world' | 'name' | 'quiz' | 'review' | 'celebrate';
 
 export type BackgroundType = 'default' | 'image' | 'video';
 export type BackgroundFit = 'cover' | 'contain';
 export type BackgroundPosition =
-  | 'center'
-  | 'top'
-  | 'bottom'
-  | 'left'
-  | 'right'
-  | 'top left'
-  | 'top right'
-  | 'bottom left'
-  | 'bottom right';
+  'center' | 'top' | 'bottom' | 'left' | 'right' | 'top left' | 'top right' | 'bottom left' | 'bottom right';
 
 export type BadgePlacement =
   | 'below-start-button'
@@ -32,12 +15,7 @@ export type BadgePlacement =
   | 'bottom-right'
   | 'hidden';
 
-export type StartButtonPlacement =
-  | 'right-center'
-  | 'center'
-  | 'bottom-center'
-  | 'bottom-right'
-  | 'top-right';
+export type StartButtonPlacement = 'right-center' | 'center' | 'bottom-center' | 'bottom-right' | 'top-right';
 
 export type IntroButtonSize = 'large' | 'extra-large';
 export type IntroBadgeGap = 'comfortable' | 'relaxed';

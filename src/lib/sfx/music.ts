@@ -20,7 +20,9 @@ function ensurePlayer(): HTMLAudioElement {
       failures += 1;
       if (music && failures <= music.tracks.length) playIndex(index + 1);
     });
-    player.addEventListener('playing', () => { failures = 0; });
+    player.addEventListener('playing', () => {
+      failures = 0;
+    });
   }
   return player;
 }
@@ -31,7 +33,9 @@ function playIndex(next: number) {
   index = ((next % music.tracks.length) + music.tracks.length) % music.tracks.length;
   p.src = trackUrl(music.tracks[index]);
   p.volume = music.volume;
-  void p.play().catch(() => { /* blocked until the first tap; the unlock handler tries again */ });
+  void p.play().catch(() => {
+    /* blocked until the first tap; the unlock handler tries again */
+  });
 }
 
 function bindUnlock() {
