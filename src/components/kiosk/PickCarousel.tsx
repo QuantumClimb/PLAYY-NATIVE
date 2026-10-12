@@ -10,7 +10,7 @@ interface PickCarouselProps<T> {
   /** Cards per page: 3 columns by 2 rows, like the design */
   perPage?: number;
   /** 'colors': two large panels per page instead of the 3 x 2 grid of cards */
-  variant?: 'colors';
+  variant?: 'colors' | 'portrait';
   /** Called on any touch, drag or scroll, so the kiosk's inactivity timer stays quiet while someone browses */
   onInteract?: () => void;
 }
@@ -84,7 +84,7 @@ export function PickCarousel<T>({ items, keyOf, selectedKey, renderItem, perPage
   const many = pages.length > 1;
 
   return (
-    <div className={`pick-carousel ${variant === 'colors' ? 'is-colors' : ''}`}>
+    <div className={`pick-carousel ${variant ? `is-${variant}` : ''}`}>
       <div
         ref={scroller}
         className="pick-scroller"

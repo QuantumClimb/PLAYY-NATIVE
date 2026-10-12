@@ -73,6 +73,6 @@ export function effectiveRegionColor(colors: CharacterColorConfiguration | undef
 export const COLOR_SWATCHES: string[] = [
   '#ef2b2d', '#f7841f', '#f9d11f', '#38b63b',
   '#17c3e8', '#1b57e0', '#8a3fe0', '#f45fa0',
-  '#f98ad0', '#9b4de8', '#14d8c0', '#1e7d2d',
+  '#f98ad0', '#a6e22e', '#14d8c0', '#1e7d2d',
   '#7a4a25', '#9aa0a6', '#1b1b1f',
 ];

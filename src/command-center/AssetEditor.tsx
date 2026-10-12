@@ -120,7 +120,10 @@ export const AssetEditor: React.FC<AssetEditorProps> = ({ asset, face, assets, o
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3">
-        <input value={name} onChange={(e) => setName(e.target.value)} className={`${field} text-lg w-64`} />
+        <label className="flex flex-col text-xs text-gray-500">
+          Name shown on the kiosk
+          <input value={name} onChange={(e) => setName(e.target.value)} className={`${field} text-lg w-64`} placeholder="e.g. Thumbs Up" />
+        </label>
         <span className="text-xs uppercase tracking-wider text-gray-500">{asset.type}</span>
         <button type="button" onClick={toggle} className={`text-xs font-medium px-2.5 py-1 rounded-full border ${asset.enabled ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
           {asset.enabled ? 'Live on kiosk' : 'Hidden'}

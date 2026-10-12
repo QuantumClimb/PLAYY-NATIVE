@@ -76,6 +76,13 @@ export function ensureSchema() {
       )`);
 
     await sql.query(`
+      CREATE TABLE IF NOT EXISTS progress_tabs (
+        id      INTEGER PRIMARY KEY DEFAULT 1,
+        data    JSONB NOT NULL DEFAULT '{}',
+        updated TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
+    await sql.query(`
       CREATE TABLE IF NOT EXISTS brand (
         id       INTEGER PRIMARY KEY DEFAULT 1,
         logo_svg TEXT,                         -- sanitized SVG, or NULL to use the built-in PNG logo
@@ -296,6 +303,27 @@ export async function saveIntroBadges(badges) {
 
 export async function resetIntroBadges() {
   await query('DELETE FROM intro_badges WHERE id = 1');
+}
+
+// ---------- Progress tabs along the top of the kiosk pages (label, icon, labels on or off) ----------
+export async function getProgressTabs() {
+  const rows = await query('SELECT data FROM progress_tabs WHERE id = 1');
+  return rows[0]?.data ?? null;
+}
+
+export async function saveProgressTabs(tabs) {
+  const rows = await query(
+    `INSERT INTO progress_tabs (id, data, updated)
+     VALUES (1, $1, now())
+     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated = now()
+     RETURNING data`,
+    [JSON.stringify(tabs)],
+  );
+  return rows[0]?.data;
+}
+
+export async function resetProgressTabs() {
+  await query('DELETE FROM progress_tabs WHERE id = 1');
 }
 
 // ---------- Brand: the logo slot (SVG) and its outline settings ----------

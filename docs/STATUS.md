@@ -80,6 +80,12 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 - Pick for Me on the name screen gives a fun name. The preview card on the left shows the finished page as it is typed.
 - The finished page (colour and black-and-white, preview and print) has the logo top left, the name big under the character, and "Notes: email - phone" as a small line at the bottom.
 
+## Progress tabs, names and background page
+- Command center has a Progress tabs tab (table `progress_tabs`): rename the eight top tabs, change their icons (original, built-in icon, uploaded image or emoji) and switch the labels off. The numbers ("1.") are gone from the labels.
+- Pose, background (and every asset) names are edited in Characters, using the "Name shown on the kiosk" field at the top of the asset, then Save.
+- Background page: portrait (A4) preview on the left; the world cards are portrait with the artwork edge to edge and the name laid over the bottom.
+- Poses whose layers have no roles in the CMS follow the head's colour (see AssetArt).
+
 ## Open questions
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?

@@ -16,6 +16,8 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { PickCarousel } from './PickCarousel';
 import { ColorModeToggle, ColorPanel } from './ColorPanel';
 import { DetailField, DetailsKeyboard } from './DetailsKeyboard';
+import { StageTabsRow } from './StageTabs';
+import { useProgressTabs } from '../../lib/progress/tabs';
 import { COLOR_SWATCHES, effectiveRegionColor, regionGroup, resolveColors } from '../../lib/playys/colors';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { calculateArchetype } from '../../lib/playys/archetypes';
@@ -81,17 +83,6 @@ const FRIENDLY_REGION_NAMES: Record<string, string> = {
 
 const regionLabel = (key: string) => FRIENDLY_REGION_NAMES[key] ?? key.replace(/[_-]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-const DISPLAY_STAGES = [
-  { label: 'FACE', icon: 'face' },
-  { label: 'POSE', icon: 'pose' },
-  { label: 'COLORS', icon: 'palette' },
-  { label: 'YOU', icon: 'heart' },
-  { label: 'POWER', icon: 'star' },
-  { label: 'BACKGROUND', icon: 'landscape' },
-  { label: 'NAME', icon: 'name' },
-  { label: 'PREVIEW', icon: 'printer' },
-] as const;
-
 const displayStageIndex = (step: MachineStep) => {
   if (step === 'head') return 0;
   if (step === 'pose') return 1;
@@ -103,33 +94,9 @@ const displayStageIndex = (step: MachineStep) => {
   return 7;
 };
 
-const StageIcon: React.FC<{ type: (typeof DISPLAY_STAGES)[number]['icon'] }> = ({ type }) => {
-  if (type === 'face') return <><circle cx="32" cy="28" r="11" /><circle cx="27" cy="27" r="2" fill="currentColor" stroke="none" /><circle cx="37" cy="27" r="2" fill="currentColor" stroke="none" /><path d="M26 32c3 4 9 4 12 0" /></>;
-  if (type === 'pose') return <><circle cx="32" cy="17" r="4" /><path d="M32 22v14M32 26l-9 7M32 26l9 7M32 36l-7 9M32 36l7 9" /></>;
-  if (type === 'palette') return <><path d="M32 14c-11 0-19 7-19 16 0 8 6 13 13 13h4c2 0 3-2 2-4-1-2 0-4 3-4h4c7 0 12-5 12-11 0-6-8-10-19-10Z" /><circle cx="22" cy="26" r="2" fill="currentColor" stroke="none" /><circle cx="29" cy="21" r="2" fill="currentColor" stroke="none" /><circle cx="38" cy="21" r="2" fill="currentColor" stroke="none" /><path d="m45 14 6-6" /></>;
-  if (type === 'heart') return <path d="M32 43S15 33 15 23c0-5 4-8 8-8 4 0 7 3 9 6 2-3 5-6 9-6 4 0 8 3 8 8 0 10-17 20-17 20Z" fill="currentColor" stroke="none" />;
-  if (type === 'star') return <path d="m32 13 5.5 11 12 1.8-8.7 8.5 2 12-10.8-5.7-10.8 5.7 2-12-8.7-8.5 12-1.8Z" fill="currentColor" stroke="none" />;
-  if (type === 'landscape') return <><path d="M15 43 27 29l6 7 6-8 10 15Z" fill="currentColor" stroke="none" /><circle cx="43" cy="20" r="4" fill="currentColor" stroke="none" /></>;
-  if (type === 'name') return <><path d="M17 19h30M17 29h30M17 39h21" /><path d="M23 12v34" /></>;
-  return <><rect x="17" y="18" width="30" height="22" rx="2" /><path d="M22 18v-6h20v6M23 40v6h18v-6M22 33h20" /><circle cx="41" cy="23" r="2" fill="currentColor" stroke="none" /></>;
-};
-
-const StageIndicator: React.FC<{ currentStep: MachineStep }> = ({ currentStep }) => {
-  const active = displayStageIndex(currentStep);
-  return (
-    <div className="stage-indicator" aria-label={`Progress: ${DISPLAY_STAGES[active].label}`}>
-      <div className="stage-indicator-line" aria-hidden="true" />
-      {DISPLAY_STAGES.map((stage, index) => (
-        <div className={`stage-item ${index === active ? 'is-active' : ''}`} key={stage.label}>
-          <div className="stage-badge">
-            <svg viewBox="0 0 64 64" aria-hidden="true"><StageIcon type={stage.icon} /></svg>
-          </div>
-          <span>{index + 1}. {stage.label}</span>
-        </div>
-      ))}
-    </div>
-  );
-};
+const StageIndicator: React.FC<{ currentStep: MachineStep }> = ({ currentStep }) => (
+  <StageTabsRow active={displayStageIndex(currentStep)} tabs={useProgressTabs()} />
+);
 
 const CMS_SCENE_BY_STEP: Record<MachineStep, SceneId> = {
   head: 'head',
@@ -296,9 +263,25 @@ const ChoiceCard: React.FC<{
   onClick: () => void;
   label: string;
   selectionCard?: boolean;
+  /** The artwork fills the whole card edge to edge, with the name laid over its bottom */
+  bleed?: boolean;
   children: React.ReactNode;
-}> = ({ selected, onClick, label, selectionCard = false, children }) =>
-  selectionCard ? (
+}> = ({ selected, onClick, label, selectionCard = false, bleed = false, children }) =>
+  selectionCard && bleed ? (
+    <button
+      type="button"
+      data-sfx="select"
+      aria-pressed={selected}
+      onClick={onClick}
+      className={`pick-card is-bleed ${selected ? 'is-selected' : ''}`}
+    >
+      {selected && <span className="pick-selected-check" aria-label="Selected">✓</span>}
+      <div className="pick-bleed">
+        <div className="pick-bleed-art">{children}</div>
+        <div className="pick-card-label">{label}</div>
+      </div>
+    </button>
+  ) : selectionCard ? (
     <button
       type="button"
       data-sfx="select"
@@ -606,7 +589,7 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
   return (
     <div
       onClick={resetIdleTimer}
-      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' || currentStep === 'world' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'details' ? 'pick-page pick-details' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : ''}`}
+      className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${currentStep === 'head' || currentStep === 'pose' ? 'pick-page' : currentStep === 'colors' ? 'pick-page pick-colors' : currentStep === 'world' ? 'pick-page pick-world' : currentStep === 'details' ? 'pick-page pick-details' : currentStep === 'quiz' ? 'quiz-selection-page' : currentStep === 'power' ? 'power-selection-page' : ''}`}
     >
       {/* Dynamic CMS Scene Background */}
       <SceneBackground sceneId={CMS_SCENE_BY_STEP[currentStep]} />
@@ -874,9 +857,11 @@ export const MagicalColoringMachine: React.FC<MagicalColoringMachineProps> = ({
               keyOf={(bg) => bg.id}
               selectedKey={sel.background.id}
               onInteract={resetIdleTimer}
+              perPage={3}
+              variant="portrait"
               renderItem={(bg) => (
-                <ChoiceCard selected={sel.background.slug === bg.slug} onClick={() => handleSelectBackground(bg.slug)} label={bg.name} selectionCard>
-                  <AssetArt asset={bg} mode="color" main={sel.headMain} className="h-full max-w-full rounded-xl overflow-hidden" />
+                <ChoiceCard selected={sel.background.slug === bg.slug} onClick={() => handleSelectBackground(bg.slug)} label={bg.name} selectionCard bleed>
+                  <AssetArt asset={bg} mode="color" main={sel.headMain} stretch style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', aspectRatio: 'auto' }} />
                 </ChoiceCard>
               )}
             />

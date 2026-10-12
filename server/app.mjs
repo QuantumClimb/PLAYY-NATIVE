@@ -25,6 +25,9 @@ import {
   getIntroBadges,
   saveIntroBadges,
   resetIntroBadges,
+  getProgressTabs,
+  saveProgressTabs,
+  resetProgressTabs,
   getBrand,
   saveBrandLogo,
   saveBrandSettings,
@@ -505,6 +508,39 @@ app.put('/api/cc/intro-badges', requireAdmin, wrap(async (req, res) => {
 
 app.post('/api/cc/intro-badges/reset', requireAdmin, wrap(async (_req, res) => {
   await resetIntroBadges();
+  res.json({ ok: true });
+}));
+
+// ---------- Progress tabs (the row of steps at the top of the kiosk pages) ----------
+const PROGRESS_TAB_COUNT = 8;
+const PROGRESS_ICON = /^(builtin|lucide:[A-Za-z0-9]{1,40}|media:[A-Za-z0-9_-]{1,80}|emoji:.{1,8})$/u;
+
+function checkProgressTabs(body) {
+  if (!body || typeof body.showLabels !== 'boolean') return 'showLabels must be true or false';
+  if (!Array.isArray(body.stages) || body.stages.length !== PROGRESS_TAB_COUNT) return `There must be exactly ${PROGRESS_TAB_COUNT} tabs`;
+  for (const t of body.stages) {
+    if (!t || typeof t.label !== 'string' || !t.label.trim() || t.label.length > 14) return 'Each tab needs a label of 1 to 14 characters';
+    if (typeof t.icon !== 'string' || !PROGRESS_ICON.test(t.icon)) return 'Invalid tab icon';
+  }
+  return null;
+}
+
+app.get('/api/progress-tabs', wrap(async (_req, res) => {
+  res.json({ tabs: (await getProgressTabs()) || null });
+}));
+
+app.put('/api/cc/progress-tabs', requireAdmin, wrap(async (req, res) => {
+  const problem = checkProgressTabs(req.body);
+  if (problem) return res.status(400).json({ error: problem });
+  const tabs = {
+    showLabels: req.body.showLabels,
+    stages: req.body.stages.map((t) => ({ label: t.label.trim(), icon: t.icon })),
+  };
+  res.json({ tabs: await saveProgressTabs(tabs) });
+}));
+
+app.post('/api/cc/progress-tabs/reset', requireAdmin, wrap(async (_req, res) => {
+  await resetProgressTabs();
   res.json({ ok: true });
 }));
 

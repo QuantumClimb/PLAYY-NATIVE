@@ -4,6 +4,7 @@ import { AssetEditor } from './AssetEditor';
 import { SceneBackgroundsPanel } from './SceneBackgroundsPanel';
 import { PowerQuizPanel } from './PowerQuizPanel';
 import { IntroBadgesPanel } from './IntroBadgesPanel';
+import { ProgressTabsPanel } from './ProgressTabsPanel';
 import { LogoPanel } from './LogoPanel';
 import { SoundsPanel } from './SoundsPanel';
 import { defaultParts, parseSvgAsset } from '../lib/assets/svgParts';
@@ -59,7 +60,7 @@ const Login: React.FC<{ enabled: boolean; onDone: () => void }> = ({ enabled, on
 
 export const CommandCenter: React.FC = () => {
   const [state, setState] = useState<'loading' | 'out' | 'in' | 'offline'>('loading');
-  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz' | 'intro-badges' | 'logo' | 'sounds'>('assets');
+  const [activeTab, setActiveTab] = useState<'assets' | 'scene-backgrounds' | 'power-quiz' | 'intro-badges' | 'progress-tabs' | 'logo' | 'sounds'>('assets');
   const [enabled, setEnabled] = useState(true);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [selected, setSelected] = useState<number | null>(null);
@@ -114,6 +115,7 @@ export const CommandCenter: React.FC = () => {
     { id: 'assets', label: 'Characters' },
     { id: 'scene-backgrounds', label: 'Scene backgrounds' },
     { id: 'intro-badges', label: 'Intro badges' },
+    { id: 'progress-tabs', label: 'Progress tabs' },
     { id: 'power-quiz', label: 'Power quiz' },
     { id: 'logo', label: 'Logo' },
     { id: 'sounds', label: 'Sounds' },
@@ -253,6 +255,7 @@ export const CommandCenter: React.FC = () => {
           {/* TAB 3: Power Quiz Questions CMS */}
           {activeTab === 'power-quiz' && <PowerQuizPanel />}
           {activeTab === 'intro-badges' && <IntroBadgesPanel />}
+          {activeTab === 'progress-tabs' && <ProgressTabsPanel />}
           {activeTab === 'logo' && <LogoPanel />}
           {activeTab === 'sounds' && <SoundsPanel />}
         </div>

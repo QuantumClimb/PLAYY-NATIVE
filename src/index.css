@@ -917,3 +917,30 @@
   .cc-table th { text-align: left; font-size: .75rem; font-weight: 500; color: #6b7280; text-transform: uppercase; letter-spacing: .04em; padding: .6rem .75rem; background: #f9fafb; border-bottom: 1px solid #e5e7eb; }
   .cc-table td { padding: .65rem .75rem; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
 }
+
+/* ===== Background page: a portrait (A4) preview on the left; the worlds are portrait cards, artwork edge to edge ===== */
+.pick-page.pick-world .head-preview-column { left: 11%; top: 19%; width: auto; height: 66%; aspect-ratio: 1000 / 1435; }
+.pick-page.pick-world .pick-options-area { left: 40.5%; top: 28.5%; width: 57%; height: 56.5%; }
+.pick-carousel.is-portrait .pick-page-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: calc(100cqh - 4.4vh); gap: 1.8vw; align-content: start; justify-items: center;
+  padding: 1vh 1.2vh 3.4vh;
+}
+.pick-page .pick-card.is-bleed {
+  width: min(100%, calc((100cqh - 9vh) * 1000 / 1435)); height: auto; aspect-ratio: 1000 / 1435; align-self: center; padding: 0;
+  display: block; background: transparent;
+}
+.pick-bleed { position: absolute; inset: 0; overflow: hidden; border-radius: calc(2.3vw - .55vh); background: #fff; }
+.pick-bleed-art { position: absolute; inset: 0; }
+.pick-bleed-art > div { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pick-page .pick-card.is-bleed .pick-card-label {
+  position: absolute; left: 0; right: 0; bottom: 0; margin: 0; padding: 4.2vh .6vw 1.4vh; color: #fff;
+  background: linear-gradient(transparent, rgba(24, 20, 100, .78)); text-shadow: 0 .3vh .6vh rgba(0, 0, 0, .5);
+}
+.pick-page .pick-card.is-bleed.is-selected { box-shadow: 0 0 0 .35vh #ffd22b, 0 0 2.6vh rgba(255, 210, 44, .75), 0 1.8vh 2.4vh rgba(30, 26, 100, .25); }
+
+/* Progress tab icons set in the command center */
+.stage-badge-img { width: 66%; height: 66%; object-fit: contain; }
+.stage-badge-emoji { font-size: calc(var(--badge, 3.8rem) * .52); line-height: 1; }
+.stage-badge svg.stage-badge-lucide { width: 58%; height: 58%; fill: none; stroke: currentColor; stroke-width: 2.4; }
+.stage-item > span { text-transform: uppercase; }
+.progress-tabs-preview { background: linear-gradient(#7d70f2, #5368e6); overflow-x: auto; }
