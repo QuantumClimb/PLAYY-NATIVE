@@ -31,6 +31,17 @@ export const AssetArt: React.FC<AssetArtProps> = React.memo(({ asset, face, mode
       ...Object.fromEntries(parsed.parts.map((part) => [part.key, part.defaults])),
       ...asset.parts,
     };
+    // A body whose layers were never given a role in the CMS (all left on "fixed" with no color) still follows the
+    // character: hoodie, trousers and shoes take the main color, trim, cuffs, soles and strings a lighter shade of it.
+    if (asset.type === 'body') {
+      Object.keys(parts).forEach((key) => {
+        const cfg = parts[key];
+        if (cfg.mode !== 'fixed' || cfg.color) return;
+        const k = normalizeId(key);
+        if (/^(hoodie|jacket|top|shirt|trousers?|pants?|shoes?|sneakers?|boots?)$/.test(k)) parts[key] = { ...cfg, mode: 'main', bw: 'white' };
+        else if (/^(cuffs+|trim|soles?|tassles?)$/.test(k)) parts[key] = { ...cfg, mode: 'derived', dL: 45, bw: 'white' };
+      });
+    }
     Object.keys(partColors ?? {}).forEach((key) => {
       const color = partColors?.[key];
       if (!color) return;
