@@ -1,3 +1,4 @@
+import { api } from '../../data/api';
 import type { PlayyConfiguration } from '../playys/types';
 import type { ShareCapture } from './capture';
 
@@ -19,14 +20,8 @@ interface Pending {
 const PENDING_KEY = 'playys-pending-share';
 
 async function post(body: Pending): Promise<ShareResult> {
-  const res = await fetch('/api/submissions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) throw new Error(`Share failed (${res.status})`);
-  const data = await res.json();
-  return { ok: true, email: data.email };
+  const { email } = await api.post<{ id: number; email: string }>('/api/submissions', body);
+  return { ok: true, email };
 }
 
 /** Logs the Playyy and has the server email the PDFs. If the server cannot be reached it is kept to try again later. */

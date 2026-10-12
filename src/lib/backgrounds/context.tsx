@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { api } from '../../data/api';
 import { SceneBackgroundSetting, SceneId } from './types';
 
 interface SceneBackgroundsContextType {
@@ -19,9 +20,7 @@ export const SceneBackgroundsProvider: React.FC<{ children: React.ReactNode }> =
   const refreshBackgrounds = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/scene-backgrounds');
-      if (!res.ok) throw new Error('Failed to fetch scene backgrounds');
-      const data = await res.json();
+      const data = await api.get<{ scenes?: Record<string, SceneBackgroundSetting> }>('/api/scene-backgrounds');
       setScenes(data.scenes || {});
       setError(null);
     } catch (e) {

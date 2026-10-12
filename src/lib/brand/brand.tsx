@@ -1,3 +1,4 @@
+import { api } from '../../data/api';
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
 
 /** Tight drop shadow used wherever the logo sits in the app itself. */
@@ -40,9 +41,9 @@ const listeners = new Set<() => void>();
 export async function refreshBrand(): Promise<void> {
   started = true;
   try {
-    const res = await fetch('/api/brand');
-    if (!res.ok) return;
-    const d = await res.json();
+    const d = await api.get<{ logoUrl?: string | null; shadow?: Partial<BrandShadow>; stroke?: Partial<BrandStroke> }>(
+      '/api/brand',
+    );
     current = {
       logoUrl: d.logoUrl ?? null,
       shadow: { ...DEFAULT_SHADOW, ...d.shadow },

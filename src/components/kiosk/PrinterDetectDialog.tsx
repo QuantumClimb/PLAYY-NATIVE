@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { X, Printer, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { api } from '../../data/api';
 
 interface PrinterInfo {
   name: string;
@@ -27,14 +28,11 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const call = useCallback(async (url: string, init?: RequestInit) => {
+  const load = useCallback(async (request: () => Promise<{ printers: PrinterInfo[] }>) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(url, init);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
-      setPrinters(data.printers);
+      setPrinters((await request()).printers);
     } catch (e) {
       setPrinters(null);
       const msg = (e as Error).message;
@@ -48,14 +46,8 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen
     }
   }, []);
 
-  const detect = useCallback(() => call('/api/printers'), [call]);
-
-  const setDefault = (name: string) =>
-    call('/api/printers/default', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name }),
-    });
+  const detect = useCallback(() => load(() => api.get('/api/printers')), [load]);
+  const setDefault = (name: string) => load(() => api.post('/api/printers/default', { name }));
 
   useEffect(() => {
     if (isOpen) detect();

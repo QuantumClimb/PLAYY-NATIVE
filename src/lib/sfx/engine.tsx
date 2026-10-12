@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { synthById } from './synth';
+import { api } from '../../data/api';
 import { startMusic } from './music';
 import { DEFAULT_SOUND_SETTINGS, SFX_EVENTS, SfxEvent, SoundSettings, cleanSettings } from './settings';
 
@@ -100,8 +101,8 @@ function inferEvent(el: HTMLElement): SfxEvent | 'none' {
 export const SfxProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     let live = true;
-    fetch('/api/sounds')
-      .then((r) => r.json())
+    api
+      .get<{ settings: unknown }>('/api/sounds')
       .then((d) => {
         if (live) {
           settings = cleanSettings(d.settings);
