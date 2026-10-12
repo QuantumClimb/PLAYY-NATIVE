@@ -26,10 +26,10 @@ export interface Brand {
 }
 
 /** The built-in logo, committed in the repo. An uploaded one (command center) replaces it everywhere. */
-export const DEFAULT_LOGO = '/assets/SVG/logo/logo.svg';
+const DEFAULT_LOGO = '/assets/SVG/logo/logo.svg';
 
-export const DEFAULT_SHADOW: BrandShadow = { enabled: true, blur: 2, offsetY: 1.5, opacity: 0.45 };
-export const DEFAULT_STROKE: BrandStroke = { enabled: true, color: '#ffffff', width: 1.5 };
+const DEFAULT_SHADOW: BrandShadow = { enabled: true, blur: 2, offsetY: 1.5, opacity: 0.45 };
+const DEFAULT_STROKE: BrandStroke = { enabled: true, color: '#ffffff', width: 1.5 };
 const DEFAULT_BRAND: Brand = { logoUrl: null, shadow: DEFAULT_SHADOW, stroke: DEFAULT_STROKE };
 
 // A tiny shared store: the first component to ask loads /api/brand, everyone else reuses it.

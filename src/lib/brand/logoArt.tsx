@@ -11,7 +11,7 @@ const SHAPES = 'path,circle,ellipse,rect,polygon,polyline';
  *    stay black, and every shape gets a black stroke so the white shapes stay visible on white paper
  * Stroke width is a % of the logo's height. The viewBox grows by the stroke so nothing is clipped.
  */
-export function renderLogoArt(svgText: string, opts: { mode: 'color' | 'line'; stroke: BrandStroke }): string {
+function renderLogoArt(svgText: string, opts: { mode: 'color' | 'line'; stroke: BrandStroke }): string {
   const vb = parseSvgAsset(svgText).viewBox;
   const w = ((opts.stroke.enabled ? opts.stroke.width : 0) * vb.h) / 100;
   // line art always needs a stroke; fall back to a sensible one if the setting is off

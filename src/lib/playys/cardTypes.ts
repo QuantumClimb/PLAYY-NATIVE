@@ -20,18 +20,6 @@ export interface PersonalityArchetype {
   quote: string;
 }
 
-export interface QuizQuestion {
-  id: number;
-  question: string;
-  subtitle: string;
-  options: {
-    label: string;
-    icon: string;
-    description: string;
-    statBoost: Partial<CharacterStats>;
-  }[];
-}
-
 export interface GeneratedCard {
   id: string;
   config: PlayyConfiguration;

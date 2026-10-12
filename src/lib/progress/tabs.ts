@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 /** One step in the row along the top of the kiosk pages. */
-export interface ProgressTab {
+interface ProgressTab {
   label: string;
   /** `builtin` (the original drawn icon), `lucide:Star`, `media:<id>` (uploaded image) or `emoji:🎨` */
   icon: string;
@@ -13,7 +13,6 @@ export interface ProgressTabs {
   stages: ProgressTab[];
 }
 
-export const PROGRESS_TAB_COUNT = 8;
 export const MAX_TAB_LABEL = 14;
 
 export const DEFAULT_PROGRESS_TABS: ProgressTabs = {

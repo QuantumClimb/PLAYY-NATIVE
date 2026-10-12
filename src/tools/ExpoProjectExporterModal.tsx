@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X, Download, Copy, Check, FileCode, FolderGit2, Terminal, CheckCircle2 } from 'lucide-react';
-import { EXPO_PROJECT_FILES, ExpoProjectFile } from '../../lib/playys/expoProjectFiles';
-import { downloadExpoProjectZip } from '../../lib/playys/expoZipExporter';
-import { nativeFeedback } from '../../lib/playys/nativeFeedback';
+import { EXPO_PROJECT_FILES, ExpoProjectFile } from './expoProjectFiles';
+import { downloadExpoProjectZip } from './expoZipExporter';
+import { nativeFeedback } from '../lib/playys/nativeFeedback';
 
 interface ExpoProjectExporterModalProps {
   isOpen: boolean;

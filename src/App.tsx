@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useCallback } from 'react';
 import { PlayyConfiguration } from './lib/playys/types';
 import { DEFAULT_CONFIGURATION } from './lib/playys/configuration';
 
@@ -14,9 +14,15 @@ import { KioskIdleMovie } from './components/kiosk/KioskIdleMovie';
 import { MagicalColoringMachine } from './components/kiosk/MagicalColoringMachine';
 import { KioskCelebrationScreen } from './components/kiosk/KioskCelebrationScreen';
 import { PrinterDetectDialog } from './components/kiosk/PrinterDetectDialog';
-import { CloudPrinterModal } from './components/expo/CloudPrinterModal';
-import { ExpoProjectExporterModal } from './components/expo/ExpoProjectExporterModal';
 import { retryPendingShare } from './lib/share/send';
+
+// Operator tools: only loaded when an operator opens them, so the kiosk does not carry their code
+const CloudPrinterModal = lazy(() =>
+  import('./tools/CloudPrinterModal').then((m) => ({ default: m.CloudPrinterModal })),
+);
+const ExpoProjectExporterModal = lazy(() =>
+  import('./tools/ExpoProjectExporterModal').then((m) => ({ default: m.ExpoProjectExporterModal })),
+);
 
 export type MachinePhase = 'idle' | 'create' | 'celebrate';
 
@@ -128,17 +134,19 @@ export default function App() {
         onTestPrint={handlePrint}
       />
 
-      {/* 3. Hidden Operator / Cloud & USB Printer Modal (Triggered by 5s Logo Hold or Cmd+D) */}
-      <CloudPrinterModal
-        isOpen={isAdminModalOpen}
-        onClose={() => setIsAdminModalOpen(false)}
-        characterDescription={`${configuration.head.toUpperCase()} - ${configuration.pose.toUpperCase()} by ${
-          configuration.kidName ? configuration.kidName.toUpperCase() : 'PLAYY'
-        }`}
-      />
-
-      {/* 4. Operator Project Code Exporter Modal */}
-      <ExpoProjectExporterModal isOpen={isExporterOpen} onClose={() => setIsExporterOpen(false)} />
+      {/* 3. Hidden operator tools (opened by holding the logo for 4.5 seconds, or Ctrl+D) */}
+      <Suspense fallback={null}>
+        {isAdminModalOpen && (
+          <CloudPrinterModal
+            isOpen
+            onClose={() => setIsAdminModalOpen(false)}
+            characterDescription={`${configuration.head.toUpperCase()} - ${configuration.pose.toUpperCase()} by ${
+              configuration.kidName ? configuration.kidName.toUpperCase() : 'PLAYY'
+            }`}
+          />
+        )}
+        {isExporterOpen && <ExpoProjectExporterModal isOpen onClose={() => setIsExporterOpen(false)} />}
+      </Suspense>
     </div>
   );
 }

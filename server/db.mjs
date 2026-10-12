@@ -11,7 +11,7 @@ export const ASSET_TYPES = ['head', 'face', 'body', 'symbol', 'background'];
 
 let ready;
 /** Creates the tables on first use (idempotent), once per server instance. */
-export function ensureSchema() {
+function ensureSchema() {
   ready ??= (async () => {
     await sql.query(`
       CREATE TABLE IF NOT EXISTS assets (
@@ -199,10 +199,6 @@ export async function listAssets({ type, enabledOnly = false } = {}) {
   );
 }
 
-export async function getAsset(id) {
-  return (await query('SELECT * FROM assets WHERE id = $1', [id]))[0] ?? null;
-}
-
 export async function createAsset({ type, slug, name, svg, parts = {}, meta = {} }) {
   const rows = await query(
     `INSERT INTO assets (type, slug, name, svg, parts, meta, sort)
@@ -211,6 +207,10 @@ export async function createAsset({ type, slug, name, svg, parts = {}, meta = {}
     [type, slug, name, svg, JSON.stringify(parts), JSON.stringify(meta)],
   );
   return rows[0];
+}
+
+async function getAsset(id) {
+  return (await query('SELECT * FROM assets WHERE id = $1', [id]))[0] ?? null;
 }
 
 export async function updateAsset(id, patch) {
@@ -231,11 +231,6 @@ export async function deleteAsset(id) {
 
 export async function listSceneBackgrounds() {
   return query('SELECT * FROM scene_backgrounds ORDER BY scene_id');
-}
-
-export async function getSceneBackground(sceneId) {
-  const rows = await query('SELECT * FROM scene_backgrounds WHERE scene_id = $1', [sceneId]);
-  return rows[0] ?? null;
 }
 
 export async function upsertSceneBackground(sceneId, settings) {

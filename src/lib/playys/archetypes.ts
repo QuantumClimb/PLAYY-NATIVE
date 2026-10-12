@@ -1,6 +1,6 @@
 import { PersonalityArchetype, CharacterStats } from './cardTypes';
 
-export const ARCHETYPES: PersonalityArchetype[] = [
+const ARCHETYPES: PersonalityArchetype[] = [
   {
     id: 'cosmic-explorer',
     title: 'Cosmic Explorer',

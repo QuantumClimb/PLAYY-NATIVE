@@ -10,7 +10,7 @@ let settings: SoundSettings = DEFAULT_SOUND_SETTINGS;
 const buffers = new Map<string, Promise<AudioBuffer | null>>();
 
 /** Browsers only allow audio after a tap; this is called from tap handlers and creates the context on first use. */
-export function audio(): { ctx: AudioContext; master: GainNode } | null {
+function audio(): { ctx: AudioContext; master: GainNode } | null {
   try {
     if (!ctx) {
       const Ctor =
@@ -76,7 +76,7 @@ export function playSfx(event: SfxEvent): void {
 
 // ---------- working out which action a tapped button is ----------
 /** Explicit `data-sfx` wins; otherwise the button's own wording and role decide. */
-export function inferEvent(el: HTMLElement): SfxEvent | 'none' {
+function inferEvent(el: HTMLElement): SfxEvent | 'none' {
   const tagged = el.closest<HTMLElement>('[data-sfx]')?.dataset.sfx;
   if (tagged === 'none') return 'none';
   if (tagged && (SFX_EVENTS as readonly string[]).includes(tagged)) return tagged as SfxEvent;

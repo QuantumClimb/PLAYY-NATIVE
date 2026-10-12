@@ -11,7 +11,7 @@ export interface ExpoProjectFile {
   content: string;
 }
 
-export const EXPO_PACKAGE_JSON = `{
+const EXPO_PACKAGE_JSON = `{
   "name": "playys-native-creator",
   "version": "1.0.0",
   "description": "Interactive composable SVG character creator and printable coloring book configurator built with React Native and Expo.",
@@ -44,7 +44,7 @@ export const EXPO_PACKAGE_JSON = `{
   "private": true
 }`;
 
-export const EXPO_APP_JSON = `{
+const EXPO_APP_JSON = `{
   "expo": {
     "name": "PLAYYS Native",
     "slug": "playys-native-creator",
@@ -87,14 +87,14 @@ export const EXPO_APP_JSON = `{
   }
 }`;
 
-export const EXPO_TSCONFIG = `{
+const EXPO_TSCONFIG = `{
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true
   }
 }`;
 
-export const EXPO_README = `# PLAYYS Creator - React Native Expo App
+const EXPO_README = `# PLAYYS Creator - React Native Expo App
 
 Interactive composable SVG character creator and printable coloring book configurator built for iOS, Android, and Web using **React Native** and **Expo SDK 52**.
 
@@ -128,7 +128,7 @@ Interactive composable SVG character creator and printable coloring book configu
 - 📱 **Multi-Platform**: Runs seamlessly on iPhone, iPad, Android phones, tablets, and Web.
 `;
 
-export const EXPO_APP_TSX = `import React, { useState, useCallback } from 'react';
+const EXPO_APP_TSX = `import React, { useState, useCallback } from 'react';
 import {
   StyleSheet,
   View,
@@ -806,7 +806,7 @@ const styles = StyleSheet.create({
 });
 `;
 
-export const EXPO_SVG_TSX = `import React from 'react';
+const EXPO_SVG_TSX = `import React from 'react';
 import Svg, { G, Path, Rect, Circle, Ellipse, Text as SvgText } from 'react-native-svg';
 import { PlayyConfig } from '../types';
 
@@ -918,7 +918,7 @@ export const PlayySvg: React.FC<PlayySvgProps> = ({
 };
 `;
 
-export const EXPO_PRINT_TEMPLATE_TS = `import { PlayyConfig } from '../types';
+const EXPO_PRINT_TEMPLATE_TS = `import { PlayyConfig } from '../types';
 
 export function generateColoringHtml(config: PlayyConfig): string {
   return \`

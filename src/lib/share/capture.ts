@@ -1,7 +1,7 @@
 import { getFontEmbedCSS, toJpeg } from 'html-to-image';
 
 /** The finished pages as JPEGs (base64, no data: prefix) plus a small thumbnail of the card, ready to send. */
-export interface ShareImages {
+interface ShareImages {
   bw: string;
   color: string;
   cardFront: string;

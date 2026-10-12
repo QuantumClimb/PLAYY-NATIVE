@@ -57,7 +57,7 @@ const ScaledFrame: React.FC<{
   </div>
 );
 
-export const heroName = (card: GeneratedCard) => (card.config.kidName?.trim() || 'PLAYY HERO').toUpperCase();
+const heroName = (card: GeneratedCard) => (card.config.kidName?.trim() || 'PLAYY HERO').toUpperCase();
 
 /** The front: only the final colored artwork the visitor made, inside the outline. */
 export const TrumpCardFront: React.FC<TrumpCardProps> = ({ card, scale = 1, settings }) => {

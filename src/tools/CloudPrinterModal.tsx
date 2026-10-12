@@ -5,8 +5,8 @@ import {
   DEFAULT_CLOUD_PRINTER_CONFIG,
   PrintJobStatus,
   CLOUD_PRINT_CODE_SNIPPETS,
-} from '../../lib/playys/cloudPrintService';
-import { nativeFeedback } from '../../lib/playys/nativeFeedback';
+} from './cloudPrintService';
+import { nativeFeedback } from '../lib/playys/nativeFeedback';
 
 interface CloudPrinterModalProps {
   isOpen: boolean;

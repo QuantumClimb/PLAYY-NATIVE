@@ -36,7 +36,7 @@ export const EVENT_DEFS: Record<SfxEvent, { label: string; help: string }> = {
 };
 
 /** `none`, `synth:<id>` (built in) or `custom:<id>` (an uploaded file) */
-export type SoundRef = string;
+type SoundRef = string;
 
 export interface CustomSound {
   id: string;

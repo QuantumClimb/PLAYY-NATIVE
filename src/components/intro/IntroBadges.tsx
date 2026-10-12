@@ -25,7 +25,7 @@ const BadgeIcon: React.FC<{ icon: string; color: string }> = ({ icon, color }) =
 };
 
 /** One static badge: cream tile, thick accent border, darker lip underneath. */
-export const IntroBadge: React.FC<{ badge: IntroBadgeData }> = ({ badge }) => {
+const IntroBadge: React.FC<{ badge: IntroBadgeData }> = ({ badge }) => {
   const color = normalizeColor(badge.color) ?? '#f6ae00';
   return (
     <div

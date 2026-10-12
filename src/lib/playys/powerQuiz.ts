@@ -1,4 +1,4 @@
-export interface PowerQuizOption {
+interface PowerQuizOption {
   id: string;
   label: string;
   icon?: string;

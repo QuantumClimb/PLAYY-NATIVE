@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Check, Delete, X } from 'lucide-react';
 
-export type KeyboardLayout = 'name' | 'email' | 'phone';
+type KeyboardLayout = 'name' | 'email' | 'phone';
 
 interface DetailsKeyboardProps {
   layout: KeyboardLayout;

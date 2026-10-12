@@ -31,7 +31,7 @@ import {
   calculatePowerSymbol,
 } from '../../lib/playys/powerQuiz';
 
-export type MachineStep =
+type MachineStep =
   'head' | 'pose' | 'colors' | 'quiz' | 'power' | 'world' | 'details' | 'preview' | 'card' | 'complete';
 
 interface MagicalColoringMachineProps {

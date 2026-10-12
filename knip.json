@@ -1,0 +1,5 @@
+{
+  "entry": ["src/tools/*.tsx", "api/index.mjs", "scripts/*.mjs", "tests/**/*.ts"],
+  "project": ["src/**/*.{ts,tsx}", "server/**/*.mjs", "api/**/*.mjs", "scripts/**/*.mjs", "tests/**/*.ts"],
+  "ignoreDependencies": ["tailwindcss", "autoprefixer", "esbuild", "vite"]
+}

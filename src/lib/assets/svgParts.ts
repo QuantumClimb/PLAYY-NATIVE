@@ -22,7 +22,7 @@ export interface PartConfig {
   bw: BwRule;
 }
 
-export interface ParsedPart {
+interface ParsedPart {
   /** Id exactly as exported */
   id: string;
   /** Normalized id used for matching and as the key in `parts` */
@@ -70,7 +70,7 @@ export function normalizeColor(c: string | null | undefined): string | null {
   return null;
 }
 
-export function hexToHsl(hex: string): [number, number, number] {
+function hexToHsl(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16);
   const r = ((n >> 16) & 255) / 255,
     g = ((n >> 8) & 255) / 255,
@@ -86,7 +86,7 @@ export function hexToHsl(hex: string): [number, number, number] {
   return [h, s * 100, l * 100];
 }
 
-export function hslToHex(h: number, s: number, l: number): string {
+function hslToHex(h: number, s: number, l: number): string {
   s /= 100;
   l /= 100;
   const c = (1 - Math.abs(2 * l - 1)) * s;

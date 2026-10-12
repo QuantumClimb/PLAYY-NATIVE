@@ -168,7 +168,7 @@ export interface Selection {
 
 type SelectionKeys = Pick<PlayyConfiguration, 'head' | 'pose' | 'symbol' | 'background'>;
 
-export function resolveSelection(lib: AssetLibrary, config: SelectionKeys): Selection {
+function resolveSelection(lib: AssetLibrary, config: SelectionKeys): Selection {
   const pick = (list: Asset[], slug: string) => list.find((a) => a.slug === slug) ?? list[0];
   const head = pick(lib.heads, config.head);
   const headMain = normalizeColor(head.meta.main) ?? '#3b82f6';

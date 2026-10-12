@@ -12,7 +12,7 @@ interface HexSwatchProps {
 }
 
 /** One glossy hexagon swatch. The selected one is a little larger, ringed in gold, with a green check. */
-export const HexSwatch: React.FC<HexSwatchProps> = ({ color, selected, label, onPick }) => {
+const HexSwatch: React.FC<HexSwatchProps> = ({ color, selected, label, onPick }) => {
   const id = useId();
   const base = normalizeColor(color) ?? '#888888';
   return (

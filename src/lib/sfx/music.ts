@@ -74,7 +74,7 @@ export function startMusic(settings: MusicSettings): void {
   bindUnlock();
 }
 
-export function stopMusic(): void {
+function stopMusic(): void {
   if (player) {
     player.pause();
     player.removeAttribute('src');
