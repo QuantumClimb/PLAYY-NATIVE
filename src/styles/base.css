@@ -1,0 +1,19 @@
+@layer base {
+  body {
+    font-family: 'Fredoka', 'Nunito', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Buttons and their labels (asset names, options, Next/Back, Start) stay Fredoka */
+  button,
+  button * {
+    font-family: 'Fredoka', 'Nunito', system-ui, sans-serif;
+    font-weight: 700;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Sniglet', 'Fredoka', system-ui, sans-serif;
+    font-weight: 800;
+  }
+}

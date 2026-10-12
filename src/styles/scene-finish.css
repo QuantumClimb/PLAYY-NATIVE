@@ -1,0 +1,50 @@
+/* The finished page: logo, the name under the character, and the contact details as a small note */
+.scene-cq { container-type: inline-size; }
+
+.scene-logo { position: absolute; z-index: 3; left: 3%; top: 1.6%; width: 31%; aspect-ratio: 995.8 / 527.1; }
+
+.scene-name {
+  position: absolute; left: 0; right: 0; bottom: 3.6%; z-index: 3; display: flex; justify-content: center; align-items: center;
+  --fs: min(13, calc(74 / (var(--n) * .64)));
+  --dash: calc(50% - (var(--n) * .32 * var(--fs) * 1cqw) - 7cqw);
+}
+
+.scene-name-text {
+  position: relative; z-index: 2; white-space: nowrap; line-height: 1; letter-spacing: .015em;
+  font-family: 'Sniglet', 'Fredoka', sans-serif; font-weight: 800; font-size: calc(var(--fs) * 1cqw);
+}
+
+.scene-name[data-mode='color'] .scene-name-text { filter: drop-shadow(0 0 .3cqw rgba(35, 25, 110, .95)) drop-shadow(0 .7cqw .5cqw rgba(0, 0, 0, .22)); }
+
+.scene-name[data-mode='color'] .scene-name-text > span { -webkit-text-stroke: calc(var(--fs) * .17cqw) #fff; paint-order: stroke fill; }
+
+.scene-name[data-mode='line'] .scene-name-text > span { color: #fff; -webkit-text-stroke: calc(var(--fs) * .13cqw) #111; paint-order: stroke fill; }
+
+.scene-dash { position: absolute; z-index: 1; width: 4cqw; height: 1cqw; border-radius: 999px; background: #111; }
+
+.scene-dash-l1 { left: var(--dash); top: calc(50% - 6cqw); transform: rotate(-58deg); }
+
+.scene-dash-l2 { left: calc(var(--dash) - 3cqw); top: calc(50% - 1cqw); transform: rotate(-6deg); }
+
+.scene-dash-l3 { left: var(--dash); top: calc(50% + 4cqw); transform: rotate(52deg); }
+
+.scene-dash-r1 { right: var(--dash); top: calc(50% - 6cqw); transform: rotate(58deg); }
+
+.scene-dash-r2 { right: calc(var(--dash) - 3cqw); top: calc(50% - 1cqw); transform: rotate(6deg); }
+
+.scene-dash-r3 { right: var(--dash); top: calc(50% + 4cqw); transform: rotate(-52deg); }
+
+.scene-name[data-mode='color'] .scene-dash-l1, .scene-name[data-mode='color'] .scene-dash-r3 { background: #f6cf1f; }
+
+.scene-name[data-mode='color'] .scene-dash-l2, .scene-name[data-mode='color'] .scene-dash-r1 { background: #f45fa0; }
+
+.scene-name[data-mode='color'] .scene-dash-l3, .scene-name[data-mode='color'] .scene-dash-r2 { background: #1aa3ea; }
+
+.scene-notes-wrap { position: absolute; left: 0; right: 0; bottom: .8%; z-index: 3; display: flex; justify-content: center; }
+
+.scene-notes {
+  max-width: 94%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: .25cqw 1.8cqw; border-radius: 999px;
+  background: rgba(255, 255, 255, .85); color: #2b2b4f; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.9cqw;
+}
+
+.scene-notes-wrap[data-mode='line'] .scene-notes { background: #fff; color: #111; }

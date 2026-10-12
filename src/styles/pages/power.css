@@ -1,0 +1,55 @@
+.pick-page.pick-power .head-title { display: none; }
+
+.pick-page.pick-power .head-preview-column { left: 2.5%; top: 13%; width: 40%; height: 73%; }
+
+.pick-page.pick-power .head-preview-panel { background: none; border: 0; box-shadow: none; border-radius: 0; overflow: visible; }
+
+.pick-page.pick-power .head-preview-panel > div { filter: drop-shadow(0 1.6vh 1.6vh rgba(20, 15, 80, .35)); }
+
+.pick-page.pick-power .pick-options-area { left: 43%; top: 18%; width: 54%; height: 66%; }
+
+.pick-power .power-award-layout { overflow: visible; height: 100%; padding: 0; align-items: center; }
+
+.pick-power .power-award-panel { position: relative; width: 100%; height: 100%; box-sizing: border-box; padding: 5.35rem 2.2rem 1.25rem; border: 7px solid #ffd633; border-radius: 2.45rem; background: linear-gradient(145deg, #fffef2 0%, #fff7df 62%, #fcebd0 100%); box-shadow: inset 0 0 0 3px rgba(255,255,255,.78), inset 0 -12px 0 rgba(232,139,14,.28), 0 14px 30px rgba(50,37,99,.3); color: #17246f; }
+
+.pick-power .power-award-panel::after { content: ''; position: absolute; inset: .65rem; z-index: 0; pointer-events: none; border: 2px solid rgba(244,166,34,.42); border-radius: 1.95rem; }
+
+.pick-power .power-award-ribbon { position: absolute; z-index: 2; top: -1.8rem; left: 5%; width: 90%; min-height: 5.6rem; display: flex; align-items: center; justify-content: center; padding: .7rem 4.25rem; border: 5px solid #e89415; border-radius: 48% 48% 38% 38% / 45% 45% 34% 34%; background: linear-gradient(180deg, #fff276 0%, #ffd32c 54%, #f6a91a 100%); box-shadow: inset 0 5px 0 rgba(255,255,255,.58), inset 0 -9px 0 rgba(213,105,10,.3), 0 8px 0 rgba(178,83,13,.48), 0 12px 18px rgba(91,54,28,.25); color: #40127c; font-family: 'Sniglet','Fredoka',system-ui,sans-serif; font-size: clamp(2rem, 3.15vw, 3.45rem); font-weight: 900; line-height: .95; text-align: center; text-shadow: 0 3px 0 #fff28b, 0 6px 0 rgba(53,34,62,.35); transform: rotate(-1deg); }
+
+.pick-power .power-award-ribbon i, .pick-power .power-award-ribbon b { position: absolute; color: #fff4a1; font-size: 2.2rem; font-style: normal; text-shadow: 0 3px 0 #dc8a12; }
+
+.pick-power .power-award-ribbon i { left: 1.25rem; transform: rotate(-15deg); }
+
+.pick-power .power-award-ribbon b { right: 1.25rem; transform: rotate(15deg); }
+
+.pick-power .power-award-main { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(12rem, 42%) minmax(0, 1fr); align-items: center; gap: 1.75rem; min-height: 20rem; }
+
+.pick-power .power-symbol-display { position: relative; display: grid; place-items: center; min-height: 18rem; }
+
+.pick-power .power-symbol-glow { position: absolute; width: 86%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(255,223,63,.8) 0%, rgba(255,237,135,.46) 34%, rgba(255,244,194,0) 72%); filter: blur(3px); }
+
+.pick-power .power-symbol-art { position: relative; z-index: 1; width: min(78%, 16rem); height: auto; filter: drop-shadow(0 9px 5px rgba(120,71,21,.24)); }
+
+.pick-power .power-symbol-fallback { position: relative; z-index: 1; font-size: clamp(6rem, 11vw, 10rem); filter: drop-shadow(0 8px 5px rgba(120,71,21,.25)); }
+
+.pick-power .power-award-copy { position: relative; z-index: 1; min-width: 0; text-align: left; }
+
+.pick-power .power-award-label { display: inline-block; padding: .55rem 1.35rem; border-radius: 999px; background: linear-gradient(180deg,#eeeaff,#dcd7ff); color: #2648bb; font-size: clamp(.75rem, 1vw, 1rem); font-weight: 900; letter-spacing: .12em; }
+
+.pick-power .power-award-copy h2 { margin: 1rem 0 .55rem; color: #40127c; font-family: 'Sniglet','Fredoka',system-ui,sans-serif; font-size: clamp(2rem, 3.25vw, 4rem); font-weight: 900; line-height: .98; overflow-wrap: anywhere; text-shadow: 0 4px 0 #f6b82b, 0 7px 0 rgba(63,38,68,.2); }
+
+.pick-power .power-award-attribute { color: #17246f; font-family: 'Sniglet','Fredoka',system-ui,sans-serif; font-size: clamp(1.25rem, 1.8vw, 2rem); font-weight: 900; line-height: 1.05; }
+
+.pick-power .power-award-description { max-width: 34rem; margin-top: 1.35rem; color: #17246f; font-size: clamp(.95rem, 1.25vw, 1.35rem); font-weight: 800; line-height: 1.25; }
+
+.pick-power .power-award-strip { position: relative; z-index: 1; display: flex; align-items: center; gap: 1rem; min-height: 5.7rem; margin-top: 1rem; padding: .55rem 1.15rem; border-radius: 2rem; background: linear-gradient(90deg, #f9e4ff, #f3d9ff 55%, #fbe6ff); box-shadow: inset 0 3px 0 rgba(255,255,255,.7), 0 5px 0 rgba(152,96,169,.15); color: #17246f; font-family: 'Sniglet','Fredoka',system-ui,sans-serif; font-size: clamp(.9rem, 1.2vw, 1.25rem); font-weight: 900; line-height: 1.15; }
+
+.pick-power .power-award-thumb { flex: 0 0 4.25rem; width: 4.25rem; height: 4.25rem; padding: .25rem; border: 3px solid #fff; border-radius: 50%; background: #fff8ef; box-shadow: 0 4px 8px rgba(86,54,106,.18); overflow: hidden; }
+
+.pick-power .power-award-thumb > div { width: 100%; height: 100%; }
+
+.pick-power .power-award-panel { display: flex; flex-direction: column; }
+
+.pick-power .power-award-main { flex: 1 1 auto; min-height: 0; }
+
+.pick-power .power-award-strip { margin-top: auto; }

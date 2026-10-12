@@ -1,0 +1,31 @@
+/* ===== Trump card page: one big card, tap to flip ===== */
+.pick-page.pick-trump .head-title { left: 20%; width: 60%; top: 10.8%; }
+
+.pick-page.pick-trump .pick-options-area { left: 20%; top: 25%; width: 60%; height: 62%; }
+
+.trump-stage { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.6vh; }
+
+.trump-flip { position: relative; padding: 0; border: 0; background: none; cursor: pointer; transform-style: preserve-3d; transition: transform .6s cubic-bezier(.3, .7, .3, 1); perspective: none; filter: drop-shadow(0 2.4vh 2.4vh rgba(15, 10, 80, .45)); }
+
+.trump-flip.is-back { transform: rotateY(180deg); }
+
+.trump-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+
+.trump-face-back { transform: rotateY(180deg); }
+
+.trump-hint {
+  padding: .8vh 2.2vw; border-radius: 999px; background: rgba(255, 255, 255, .92); color: #17246f;
+  font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(1.45vw, 2.6vh); box-shadow: 0 .6vh 0 rgba(120, 100, 190, .35);
+}
+
+.pick-page.pick-trump .pick-options-area { top: 24%; height: 64%; }
+
+.trump-flip { filter: none; }
+
+.trump-face { filter: drop-shadow(0 2.4vh 2.4vh rgba(15, 10, 80, .45)); }
+
+.trump-stage { position: relative; }
+
+.trump-hint { position: absolute; left: calc(50% + 21vw); top: 50%; transform: translateY(-50%); width: 15vw; text-align: center; font-size: min(1.5vw, 2.7vh); }
+
+.trump-hint { width: 17vw; left: calc(50% + 20.5vw); border-radius: 2.4vw; }

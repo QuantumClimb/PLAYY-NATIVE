@@ -1,0 +1,29 @@
+/* ===== Coloring page preview: the black-and-white page and the full-colour page side by side ===== */
+.pick-page.pick-preview .head-title { left: 20%; width: 60%; top: 10.8%; }
+
+.pick-page.pick-preview .pick-options-area { left: 20%; top: 27%; width: 60%; height: 58%; }
+
+.preview-pair { width: 100%; height: 100%; display: flex; justify-content: center; gap: 4.5vw; }
+
+.preview-card {
+  --ring: #bce7ff; --lip: #7fb6dc;
+  position: relative; height: 100%; aspect-ratio: 1000 / 1435; border-radius: 1.5vw; background: #fff;
+  box-shadow: 0 0 0 .8vh var(--ring), 0 1.5vh 0 .8vh var(--lip), 0 2.6vh 3.6vh rgba(20, 15, 90, .38);
+}
+
+.preview-card-color { --ring: #ffd633; --lip: #d89a12; }
+
+.preview-card-art { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
+
+.preview-card-label {
+  position: absolute; z-index: 3; top: -2.7vh; left: 50%; transform: translateX(-50%); padding: .8vh 2vw; border: .5vh solid #f0a91c; border-radius: 999px;
+  background: linear-gradient(#fff477, #ffd22e); color: #32136f; white-space: nowrap;
+  font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(1.35vw, 2.4vh); letter-spacing: .02em;
+  box-shadow: inset 0 .4vh 0 rgba(255, 255, 255, .68), 0 .6vh 0 rgba(174, 83, 13, .35), 0 1vh 1.4vh rgba(59, 36, 94, .25);
+}
+
+.pick-page.pick-preview .pick-options-area { top: 29.5%; height: 56%; }
+
+.preview-card-label { top: -4.6vh; }
+
+.complete-row .preview-card { height: 100%; }

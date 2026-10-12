@@ -1,0 +1,169 @@
+/* Keep the primary navigation together at the bottom on every kiosk step. */
+.kiosk-machine .machine-navigation { justify-content: center; gap: 24px; }
+
+.head-title-star { position: absolute; z-index: 2; color: #ffe044; line-height: 1; font-size: clamp(1rem, 1.7vw, 1.8rem); -webkit-text-stroke: 1px #ff9d0a; text-shadow: 0 3px 0 #d86b0b, 0 0 10px rgba(255, 226, 52, .8); pointer-events: none; }
+
+.head-title-star-left { left: 1%; top: 28%; transform: rotate(-14deg); }
+
+.head-title-star-right { right: 1%; top: 20%; transform: rotate(15deg); }
+
+.head-title-star-bottom-left { left: 17%; bottom: 7%; color: #ff9fd2; -webkit-text-stroke: 1px #ff63a8; font-size: 1.2rem; }
+
+.head-title-star-bottom-right { right: 17%; bottom: 7%; color: #ff9fd2; -webkit-text-stroke: 1px #ff63a8; font-size: 1.2rem; }
+
+.kiosk-create-shell:has(.pick-page) .kiosk-footer { display: none; }
+
+/* Details page: colourful, touch-first keyboard styling. */
+/* Coloring-page preview screen. */
+/* Trump-card review screen. */
+/* Print-complete celebration screen. */
+/* Final celebration screen: only the heading and scenery opacity are overridden. */
+/* =====================================================================
+   Head, pose and background pages: one shared layout.
+   Every piece is placed from the design reference (1663 x 933) as a percentage of the screen,
+   so it scales. The header and navigation are flattened (display: contents) so their children
+   can be positioned against the page itself.
+   ===================================================================== */
+.kiosk-machine.pick-page {
+  --badge: min(3.9vw, 6.9vh);
+  display: block;
+  position: relative;
+  padding: 0;
+  gap: 0;
+  overflow: hidden;
+  color: #1b1a6e;
+}
+
+.pick-page > *:not(.absolute) { z-index: 2; }
+
+.pick-page .head-content,
+.pick-page .head-header { display: contents; }
+
+.pick-page .machine-navigation.machine-navigation {
+  position: absolute; z-index: 6; left: 2.9%; right: 2.7%; bottom: 3.6%; width: auto; height: 9.6%; padding: 0; gap: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+/* Logo */
+.pick-page .head-page-logo { position: absolute; z-index: 6; left: 1.2%; top: 1.4%; height: 12%; width: auto; pointer-events: auto; }
+
+/* "Pick for Me!" */
+.pick-page .pick-me-btn {
+  position: absolute; z-index: 6; right: 2.2%; top: 3.4%; width: 16.4%; height: 8%;
+  display: flex; align-items: center; justify-content: center; gap: .9vw; padding: 0 1vw;
+  border: .55vh solid #fff3b8; border-radius: 999px;
+  background: linear-gradient(#fff07a 0%, #ffd22a 50%, #ffaf14 100%);
+  color: #1b1464; font-family: 'Fredoka', sans-serif; font-size: min(1.95vw, 3.4vh); font-weight: 700;
+  letter-spacing: 0; text-shadow: none; text-transform: none;
+  box-shadow: 0 0 0 .4vh rgba(255, 214, 45, .4), 0 .7vh 0 #d88a00, 0 1.6vh 2.2vh rgba(0, 0, 0, .3), inset 0 .4vh 0 rgba(255, 255, 255, .65);
+}
+
+.pick-page .pick-me-btn::before { display: none; }
+
+.pick-me-dice { width: 1.15em; height: 1.15em; flex: none; }
+
+/* Title and subtitle, over the card grid */
+.pick-page .head-title { position: absolute; z-index: 5; left: 47.4%; width: 49.6%; top: 10.8%; margin: 0; padding: 0; text-align: center; }
+
+.pick-page .head-arched-heading {
+  display: flex; justify-content: center; align-items: baseline; margin: 0;
+  color: transparent; font-family: 'Sniglet', 'Fredoka', sans-serif; font-weight: 800;
+  font-size: min(4.9vw, 8.7vh); line-height: 1; letter-spacing: .01em; white-space: nowrap;
+  filter: drop-shadow(0 .55vh 0 #b8520a) drop-shadow(0 1.3vh 1.3vh rgba(30, 20, 90, .45));
+}
+
+.pick-page .head-arched-heading > span:not(.head-heading-space) {
+  display: inline-block; transform: none;
+  background: linear-gradient(180deg, #fff7a6 0%, #ffd92f 52%, #ffa51a 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-stroke: .5vh #9a3f00;
+}
+
+.pick-page .head-heading-space { display: inline-block; width: .4em; margin: 0; }
+
+.pick-page .head-subtitle {
+  margin: .5vh 0 0; color: #1b1a6e; font-family: 'Sniglet', 'Fredoka', sans-serif; font-weight: 800;
+  font-size: min(2.45vw, 4.2vh); transform: rotate(-1.5deg); -webkit-text-stroke: 0;
+  text-shadow: 0 0 .6vh #fff, 0 0 .6vh #fff, 0 0 1.4vh rgba(255, 255, 255, .9);
+}
+
+/* Preview card */
+.pick-page .head-preview-column {
+  position: absolute; z-index: 3; left: 7.6%; top: 19%; width: 37.4%; height: 65.8%; margin: 0; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.pick-page .head-preview-panel {
+  position: relative; width: 100%; height: 100%; max-width: none; aspect-ratio: auto; overflow: hidden;
+  border: .9vh solid transparent; border-radius: 3vw;
+  background: linear-gradient(#fffdf7, #fff3d4) padding-box, linear-gradient(#ffe97f, #f5b21b) border-box;
+  box-shadow: 0 1vh 0 #d89a12, 0 2.2vh 3.4vh rgba(20, 18, 90, .4);
+}
+
+.pick-page .head-preview-panel > div { background: transparent; }
+
+.pick-page .head-preview-inner { position: relative; padding: 2vh; display: flex; align-items: center; justify-content: center; background: transparent; }
+
+.pick-page .head-preview-shadow {
+  position: absolute; left: 50%; bottom: 11%; width: 62%; height: 7%; transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(79, 56, 170, .35), transparent 70%);
+}
+
+/* Options: a carousel of 3 x 2 pages, swiped left and right */
+.pick-page .pick-options-area {
+  position: absolute; z-index: 4; left: 46.8%; top: 29%; width: 50.4%; height: 56%;
+  margin: 0; padding: 0; overflow: visible; container-type: size;
+}
+
+/* Back (bottom left) and Next (bottom right), at the design's size */
+.pick-page .head-nav-button {
+  position: relative; flex: none; width: 18.43%; height: 100%; min-height: 0; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: 1.1vw;
+  border: .6vh solid #fff; border-radius: 999px; color: #fff; cursor: pointer;
+  font-family: 'Fredoka', sans-serif; font-size: min(2.35vw, 4.2vh); font-weight: 700; letter-spacing: .02em;
+  text-shadow: 0 .3vh 0 rgba(0, 0, 0, .2);
+}
+
+.pick-page .head-nav-button::before { display: none; }
+
+.pick-page .head-nav-button svg { width: 1.15em; height: 1.15em; flex: none; }
+
+.pick-page .head-nav-button:not(.head-nav-next) {
+  background: linear-gradient(#5db4ff 0%, #2f80f3 55%, #2562dc 100%);
+  box-shadow: 0 0 0 .35vh rgba(120, 180, 255, .4), 0 .8vh 0 #1b49b0, 0 1.8vh 2.6vh rgba(10, 20, 90, .4), inset 0 .5vh 0 rgba(255, 255, 255, .45);
+}
+
+.pick-page .head-nav-next {
+  margin-left: auto;
+  background: linear-gradient(#46f0c4 0%, #1fd3a6 55%, #0fae8a 100%);
+  box-shadow: 0 0 0 .35vh rgba(90, 240, 200, .4), 0 .8vh 0 #087a63, 0 1.8vh 2.6vh rgba(10, 60, 70, .4), inset 0 .5vh 0 rgba(255, 255, 255, .45);
+}
+
+/* Head, pose and background pages: refinements */
+.pick-page .head-heading-space { flex: 0 0 .4em; }
+
+.pick-page .head-title { top: 12.8%; }
+
+.pick-page .head-arched-heading { --title-chars: 16; font-size: min(4.2vw, 7.5vh, calc(45vw / (var(--title-chars) * .64))); }
+
+.pick-page .head-title-star-left { left: -.5%; top: 14%; }
+
+.pick-page .head-title-star-right { right: -.5%; top: 8%; }
+
+.pick-page .head-title-star-bottom-left { left: 9%; bottom: 14%; }
+
+.pick-page .head-title-star-bottom-right { right: 9%; bottom: 14%; }
+
+.pick-page .head-subtitle { -webkit-text-stroke: .75vh #fff; paint-order: stroke fill; text-shadow: none; }
+
+.kiosk-machine.pick-page { background: linear-gradient(#7d70f2 0%, #5368e6 45%, #8a5fe0 100%); }
+
+/* a vivid sky when no background image is set in the command center */
+.pick-page .bg-gradient-to-b.from-indigo-950 { background-image: linear-gradient(#7d70f2 0%, #5368e6 45%, #8a5fe0 100%); }
+
+/* ===== Colours page: shares the pick-page chrome; two panels of hexagon swatches ===== */
+.pick-page .head-subtitle { font-size: min(2.45vw, 4.2vh, calc(50vw / (var(--sub-chars, 30) * .63))); white-space: nowrap; }
+
+/* The Back/Next container spans the bottom of the page; only the buttons themselves take taps */
+.pick-page .machine-navigation { pointer-events: none; }
+
+.pick-page .machine-navigation .head-nav-button { pointer-events: auto; }
