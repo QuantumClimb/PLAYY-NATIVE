@@ -1,7 +1,7 @@
 import { api } from './api';
 
 /** Reads a file in the browser and returns its content as base64 (without the `data:` prefix). */
-export function readAsBase64(file: File): Promise<string> {
+function readAsBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result).split(',')[1] ?? '');

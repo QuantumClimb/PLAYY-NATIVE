@@ -1,11 +1,11 @@
 import express from 'express';
 import { isEmail } from '../../shared/validation.mjs';
 import { requireAdmin } from '../auth.mjs';
-import { addSubmission, getSubmission, getSubmissionFiles, listSubmissions, settings } from '../db/index.mjs';
-import { HttpError, badRequest, notFound, rateLimiter, wrap } from '../http.mjs';
+import { addSubmission, listSubmissions, settings } from '../db/index.mjs';
+import { HttpError, badRequest, rateLimiter, wrap } from '../http.mjs';
 import { smtpConfigured } from '../mailer.mjs';
 import { emailSubmission, shareSettings } from '../shareService.mjs';
-import { IMAGE_KEYS, parseSubmission } from '../submission.mjs';
+import { parseSubmission } from '../submission.mjs';
 
 const MAX_RECIPIENTS = 2;
 const SHARES_PER_MINUTE = 20;
@@ -57,17 +57,4 @@ shareRouter.get(
   '/cc/submissions',
   requireAdmin,
   wrap(async (_req, res) => res.json({ submissions: await listSubmissions(MAX_LISTED) })),
-);
-
-shareRouter.post(
-  '/cc/submissions/:id/resend',
-  requireAdmin,
-  wrap(async (req, res) => {
-    const id = Number(req.params.id);
-    const who = Number.isInteger(id) ? await getSubmission(id) : null;
-    if (!who) throw notFound();
-    const images = await getSubmissionFiles(id);
-    if (IMAGE_KEYS.some((key) => !images[key])) throw new HttpError(409, 'The files for this one are no longer kept');
-    res.json({ email: await emailSubmission(id, who, images) });
-  }),
 );

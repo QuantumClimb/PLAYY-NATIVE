@@ -16,13 +16,11 @@ interface UsersTableProps {
   rows: Submission[];
   /** Why the table is empty: nobody yet, or the search found nothing */
   emptyText: string;
-  resendingId: number | null;
-  onResend: (id: number) => void;
 }
 
 const HEADINGS = ['Card', 'Name', 'Email', 'Phone', 'Date and time', 'Character', 'Email'];
 
-export const UsersTable: React.FC<UsersTableProps> = ({ rows, emptyText, resendingId, onResend }) => (
+export const UsersTable: React.FC<UsersTableProps> = ({ rows, emptyText }) => (
   <div className="overflow-x-auto rounded-xl border border-gray-300">
     <table className="w-full text-sm text-left">
       <thead className="bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
@@ -74,16 +72,6 @@ export const UsersTable: React.FC<UsersTableProps> = ({ rows, emptyText, resendi
               >
                 {STATUS_LABEL[r.email_status]}
               </span>
-              {r.email_status === 'failed' && (
-                <button
-                  type="button"
-                  disabled={resendingId === r.id}
-                  onClick={() => onResend(r.id)}
-                  className="ml-2 text-xs underline text-gray-600"
-                >
-                  {resendingId === r.id ? 'Sending…' : 'Resend'}
-                </button>
-              )}
             </td>
           </tr>
         ))}

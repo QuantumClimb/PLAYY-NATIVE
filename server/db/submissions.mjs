@@ -23,27 +23,3 @@ export async function listSubmissions(limit = 500) {
     [limit],
   );
 }
-
-export async function getSubmission(id) {
-  const rows = await query('SELECT id, created, name, email, phone FROM submissions WHERE id = $1', [id]);
-  return rows[0] ?? null;
-}
-
-export async function saveSubmissionFiles(id, files) {
-  for (const [name, data] of Object.entries(files)) {
-    await query(
-      `INSERT INTO submission_files (submission_id, name, data) VALUES ($1, $2, $3)
-       ON CONFLICT (submission_id, name) DO UPDATE SET data = EXCLUDED.data`,
-      [id, name, data],
-    );
-  }
-}
-
-export async function getSubmissionFiles(id) {
-  const rows = await query('SELECT name, data FROM submission_files WHERE submission_id = $1', [id]);
-  return Object.fromEntries(rows.map((r) => [r.name, r.data]));
-}
-
-export async function deleteSubmissionFiles(id) {
-  await query('DELETE FROM submission_files WHERE submission_id = $1', [id]);
-}

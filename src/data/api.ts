@@ -1,5 +1,5 @@
 /** A failed request to the server, with the HTTP status and the message the server gave. */
-export class ApiError extends Error {
+class ApiError extends Error {
   readonly status: number;
 
   constructor(message: string, status: number) {

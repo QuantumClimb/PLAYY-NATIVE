@@ -28,11 +28,7 @@ vi.mock('../../server/db/index.mjs', () => ({
   upsertSceneBackground: vi.fn(),
   resetSceneBackground: vi.fn(),
   addSubmission: vi.fn(),
-  getSubmission: vi.fn(),
-  getSubmissionFiles: vi.fn(),
   listSubmissions: vi.fn(async () => []),
-  saveSubmissionFiles: vi.fn(),
-  deleteSubmissionFiles: vi.fn(),
   setSubmissionEmail: vi.fn(),
   settings: {
     powerQuiz: memory('quiz'),

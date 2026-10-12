@@ -9,9 +9,7 @@ export const UsersPanel: React.FC = () => {
   const [rows, setRows] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [note, setNote] = useState<string | null>(null);
   const [query, setQuery] = useState('');
-  const [resendingId, setResendingId] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -30,21 +28,6 @@ export const UsersPanel: React.FC = () => {
 
   const shown = useMemo(() => rows.filter((r) => matchesQuery(r, query)), [rows, query]);
 
-  const resend = async (id: number) => {
-    setResendingId(id);
-    setError(null);
-    setNote(null);
-    try {
-      const { email } = await api.post<{ email: string }>(`/api/cc/submissions/${id}/resend`);
-      setNote(email === 'sent' ? 'Email sent.' : 'The email could not be sent. Check the Share & email tab.');
-      await load();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setResendingId(null);
-    }
-  };
-
   const downloadCsv = () =>
     downloadText(
       `playys-users-${new Date().toISOString().slice(0, 10)}.csv`,
@@ -59,7 +42,7 @@ export const UsersPanel: React.FC = () => {
       title="Users"
       description="Everyone who made a Playy: their details, when, and a small picture of their final card."
       error={error}
-      note={note}
+      note={null}
     >
       <div className="flex flex-wrap items-center gap-3">
         <input
@@ -79,12 +62,7 @@ export const UsersPanel: React.FC = () => {
         </button>
       </div>
 
-      <UsersTable
-        rows={shown}
-        emptyText={rows.length === 0 ? 'Nobody yet.' : 'No matches.'}
-        resendingId={resendingId}
-        onResend={resend}
-      />
+      <UsersTable rows={shown} emptyText={rows.length === 0 ? 'Nobody yet.' : 'No matches.'} />
     </CmsPanel>
   );
 };

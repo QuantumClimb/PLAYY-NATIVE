@@ -110,15 +110,6 @@ export async function runMigrations(sql) {
         email_error  TEXT,
         emailed_at   TIMESTAMPTZ
       )`);
-  // The PDFs are kept only while an email has not gone out, so it can be resent later
-  await sql.query(`
-      CREATE TABLE IF NOT EXISTS submission_files (
-        submission_id INTEGER NOT NULL,
-        name          TEXT NOT NULL,
-        data          TEXT NOT NULL,
-        PRIMARY KEY (submission_id, name)
-      )`);
-
   await sql.query(`
       CREATE TABLE IF NOT EXISTS brand (
         id       INTEGER PRIMARY KEY DEFAULT 1,
