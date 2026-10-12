@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { synthById } from './synth';
+import { startMusic } from './music';
 import { DEFAULT_SOUND_SETTINGS, SFX_EVENTS, SfxEvent, SoundSettings, cleanSettings } from './settings';
 
 // ---------- the audio context and the loaded settings ----------
@@ -100,8 +101,8 @@ export const SfxProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     let live = true;
     fetch('/api/sounds')
       .then((r) => r.json())
-      .then((d) => { if (live) settings = cleanSettings(d.settings); })
-      .catch(() => { /* keep the defaults */ });
+      .then((d) => { if (live) { settings = cleanSettings(d.settings); startMusic(settings.music); } })
+      .catch(() => { if (live) startMusic(settings.music); /* keep the defaults */ });
 
     const onClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement | null;

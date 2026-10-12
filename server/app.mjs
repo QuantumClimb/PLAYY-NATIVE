@@ -266,10 +266,10 @@ app.post('/api/cc/scene-backgrounds/upload', requireAdmin, wrap(async (req, res)
   }
 
   const buffer = Buffer.from(base64, 'base64');
-  const maxBytes = isVideo ? 30 * 1024 * 1024 : isAudio ? 2 * 1024 * 1024 : 10 * 1024 * 1024;
+  const maxBytes = isVideo ? 30 * 1024 * 1024 : isAudio ? 10 * 1024 * 1024 : 10 * 1024 * 1024;
   if (buffer.length > maxBytes) {
     return res.status(400).json({
-      error: `File size (${(buffer.length / (1024 * 1024)).toFixed(1)}MB) exceeds limit of ${isVideo ? '30MB for video' : isAudio ? '2MB for audio' : '10MB for image'}.`,
+      error: `File size (${(buffer.length / (1024 * 1024)).toFixed(1)}MB) exceeds limit of ${isVideo ? '30MB for video' : isAudio ? '10MB for audio' : '10MB for image'}.`,
     });
   }
 
@@ -454,6 +454,7 @@ app.put('/api/cc/brand/settings', requireAdmin, wrap(async (req, res) => {
 
 // ---------- Kiosk sounds ----------
 const SFX_EVENTS = ['tap', 'start', 'next', 'back', 'select', 'surprise', 'key', 'backspace', 'flip', 'answer', 'print', 'change', 'done', 'reveal'];
+const MUSIC_SRC = /^(file:\/assets\/audio\/music\/[A-Za-z0-9 ._()-]{1,120}|media:[A-Za-z0-9_-]{1,80})$/;
 const SOUND_REF = /^(none|synth:[a-z0-9-]{1,30}|custom:[A-Za-z0-9_-]{1,60})$/;
 
 function checkSounds(s) {
@@ -461,6 +462,13 @@ function checkSounds(s) {
   if (!Array.isArray(s.custom) || s.custom.length > 40) return 'Too many custom sounds (40 max)';
   for (const c of s.custom) {
     if (typeof c?.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(c.id) || typeof c.mediaId !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(c.mediaId)) return 'Invalid custom sound';
+  }
+  if (s.music !== undefined) {
+    const m = s.music;
+    if (!m || typeof m.enabled !== 'boolean' || !(m.volume >= 0 && m.volume <= 1) || !Array.isArray(m.tracks) || m.tracks.length > 20) return 'Invalid music settings';
+    for (const t of m.tracks) {
+      if (typeof t?.id !== 'string' || !/^[A-Za-z0-9_-]{1,60}$/.test(t.id) || typeof t.src !== 'string' || !MUSIC_SRC.test(t.src)) return 'Invalid music track';
+    }
   }
   for (const e of SFX_EVENTS) {
     const v = s.events?.[e];
@@ -483,6 +491,13 @@ app.put('/api/cc/sounds', requireAdmin, wrap(async (req, res) => {
     custom: s.custom.map((c) => ({ id: c.id, name: String(c.name ?? 'Sound').slice(0, 40), mediaId: c.mediaId })),
     events: Object.fromEntries(SFX_EVENTS.map((e) => [e, { sound: s.events[e].sound, volume: s.events[e].volume }])),
   };
+  if (s.music) {
+    clean.music = {
+      enabled: s.music.enabled,
+      volume: s.music.volume,
+      tracks: s.music.tracks.map((t) => ({ id: t.id, name: String(t.name ?? 'Track').slice(0, 60), src: t.src })),
+    };
+  }
   res.json({ settings: await saveSoundSettings(clean) });
 }));
 

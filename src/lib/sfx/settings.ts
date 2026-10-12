@@ -31,18 +31,52 @@ export interface CustomSound {
   mediaId: string;
 }
 
+/** One song in the kiosk's background music playlist. `src` is `file:/assets/...` (shipped with the app) or `media:<id>` (uploaded). */
+export interface MusicTrack {
+  id: string;
+  name: string;
+  src: string;
+}
+
+export interface MusicSettings {
+  enabled: boolean;
+  /** Music volume 0 to 1 (separate from the button sounds) */
+  volume: number;
+  /** The songs play one after the other, then the playlist starts again */
+  tracks: MusicTrack[];
+}
+
+export const MAX_MUSIC_TRACKS = 20;
+
+/** The URL a track plays from. */
+export const trackUrl = (t: MusicTrack): string =>
+  t.src.startsWith('media:') ? `/api/media/${t.src.slice(6)}` : encodeURI(t.src.slice(5));
+
+export const DEFAULT_MUSIC: MusicSettings = {
+  enabled: true,
+  volume: 0.3,
+  tracks: [
+    { id: 'tune-01', name: 'Playy Tune 01', src: 'file:/assets/audio/music/playy_tune_01.mp3' },
+    { id: 'toylike-groove', name: 'Toylike Groove', src: 'file:/assets/audio/music/Toylike Groove.mp3' },
+  ],
+};
+
+const TRACK_SRC = /^(file:\/assets\/audio\/music\/[A-Za-z0-9 ._()-]{1,120}|media:[A-Za-z0-9_-]{1,80})$/;
+
 export interface SoundSettings {
   enabled: boolean;
   /** Master volume 0 to 1 */
   volume: number;
   events: Record<SfxEvent, { sound: SoundRef; volume: number }>;
   custom: CustomSound[];
+  music: MusicSettings;
 }
 
 export const DEFAULT_SOUND_SETTINGS: SoundSettings = {
   enabled: true,
   volume: 0.8,
   custom: [],
+  music: DEFAULT_MUSIC,
   events: {
     tap: { sound: 'synth:pop', volume: 1 },
     start: { sound: 'synth:tada', volume: 1 },
@@ -72,7 +106,19 @@ export function cleanSettings(input: unknown): SoundSettings {
       events[e] = { sound: v.sound, volume: typeof v.volume === 'number' ? Math.min(1, Math.max(0, v.volume)) : 1 };
     }
   });
+  const m = s.music;
+  const music: MusicSettings = m && typeof m === 'object' && Array.isArray(m.tracks)
+    ? {
+        enabled: typeof m.enabled === 'boolean' ? m.enabled : d.music.enabled,
+        volume: typeof m.volume === 'number' ? Math.min(1, Math.max(0, m.volume)) : d.music.volume,
+        tracks: m.tracks
+          .filter((t) => t && typeof t.id === 'string' && typeof t.src === 'string' && TRACK_SRC.test(t.src))
+          .slice(0, MAX_MUSIC_TRACKS)
+          .map((t) => ({ id: t.id, name: String(t.name ?? 'Track').slice(0, 60), src: t.src })),
+      }
+    : d.music;
   return {
+    music,
     enabled: typeof s.enabled === 'boolean' ? s.enabled : d.enabled,
     volume: typeof s.volume === 'number' ? Math.min(1, Math.max(0, s.volume)) : d.volume,
     events,

@@ -111,6 +111,11 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 - Back/Next container no longer swallows taps in the middle of the page (this had broken the Advanced colour toggle).
 - Removed unused old pages and components (the old creator, wizard and Expo-simulator screens, the SVG-component heads, poses, symbols and backgrounds, old questions list) and the unused mascot image.
 
+## Background music
+- A playlist plays on every kiosk screen: the songs one after another, then it starts again. Shipped songs live in `public/assets/audio/music` (playy_tune_01.mp3, Toylike Groove.mp3).
+- Command center, Sounds tab, Background music: on/off, volume, reorder, rename, remove, preview, add a song (upload) or re-add a shipped one. Stored with the sound settings. Uploads over about 3 MB do not fit through Vercel; put big files in the music folder instead.
+- The browser only allows sound after a tap, so music starts at the first tap on the intro screen (immediately if Chrome is started with `--autoplay-policy=no-user-gesture-required`, which is worth adding to the kiosk launch command).
+
 ## Open questions
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?
