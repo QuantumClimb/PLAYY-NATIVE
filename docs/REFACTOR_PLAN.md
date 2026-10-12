@@ -2,6 +2,8 @@
 
 Written 2026-10-12, after the kiosk flow, command center, sharing and music were all working. The goal of the refactor is **clean code that is small, obvious and tested, with no junk and no behaviour change**.
 
+**Status: planning only.** Nothing in this plan has been started. The decisions in section 6 were answered on 2026-10-12 and are built into the plan below.
+
 ## 1. Principles
 
 1. **No behaviour change.** A refactor step is finished only when the kiosk looks and works exactly as before. New features wait.
@@ -16,7 +18,7 @@ Written 2026-10-12, after the kiosk flow, command center, sharing and music were
 
 | Measure | Now |
 |---|---|
-| TypeScript/TSX in `src` | about 10,300 lines (about 7,800 once the legacy Expo tooling is gone) |
+| TypeScript/TSX in `src` | about 10,300 lines (about 2,030 of them the Expo exporter and cloud printer tooling, kept) |
 | Server (`server/*.mjs`) | about 1,350 lines; `app.mjs` has 39 routes in one file |
 | `src/index.css` | 931 lines, 310 rules, every page in one file |
 | Largest files | `expoProjectFiles.ts` 1,113, `MagicalColoringMachine.tsx` 993, `index.css` 931, `SceneBackgroundsPanel.tsx` 812, `app.mjs` 689, `CloudPrinterModal.tsx` 501, `db.mjs` 495 |
@@ -41,7 +43,7 @@ Severity: **High** = causes bugs or blocks safe change. **Medium** = slows every
 ### 3.2 Dead and legacy code
 | # | Finding | Size |
 |---|---|---|
-| D1 | The **Expo project exporter and cloud printer admin modals** (`components/expo/CloudPrinterModal.tsx`, `ExpoProjectExporterModal.tsx`, `lib/playys/expoProjectFiles.ts`, `expoZipExporter.ts`, `cloudPrintService.ts`) are reachable only from a hidden operator dialog. They generate source for an Expo app that now lives in `expo-app/`. | about 2,030 lines |
+| D1 | **Kept by decision (see section 6).** The **Expo project exporter and cloud printer admin modals** (`components/expo/CloudPrinterModal.tsx`, `ExpoProjectExporterModal.tsx`, `lib/playys/expoProjectFiles.ts`, `expoZipExporter.ts`, `cloudPrintService.ts`) are reachable only from a hidden operator dialog. They generate source for an Expo app that now lives in `expo-app/`. They are not deleted; Phase 1 isolates them (own folder, loaded only when the operator opens them) so they do not weigh on the kiosk bundle or the dead-code check. | about 2,030 lines |
 | D2 | `lib/playys/heads.ts`, `poses.ts`, `symbols.ts`, `backgrounds.ts` and the `HeadDefinition`, `PoseDefinition`, `SymbolDefinition`, `BackgroundDefinition`, `RenderMode` types in `types.ts` only feed `generateRandomConfiguration()`, which `App.tsx` imports but never calls. Also unused: `getHead`, `getPose`, `getSymbol`, `getBackground`, `QuizQuestion`, `printToCanonG2430Usb`, `sendToPrintNode`, `PROGRESS_TAB_COUNT`. | about 250 lines |
 | D3 | Unused or doubtful dependencies: `@google/genai`, `motion` (never imported); `jszip` is used only by D1. `GEMINI_API_KEY` and `APP_URL` in `.env.example` and `metadata.json`/root `app.json` (AI Studio leftovers) do nothing. | config |
 | D4 | One-off scripts: `scripts/trace-body-png.mjs`, `scripts/trace-trousers.ps1`, `scripts/migrate-sqlite-to-neon.mjs` (already run). | 4 files |
@@ -135,10 +137,10 @@ Each phase ends with: type-check, lint, unit tests, end-to-end walk-through and 
 
 ### Phase 1: Remove dead code (S to M)
 1. Delete D2 (legacy libs and types, unused exports), D3 (unused dependencies and AI Studio leftovers), D4 (one-off scripts), D5 (hard-coded asset path).
-2. D1 after the decision in section 6.
+2. D1 is kept: move the Expo exporter and cloud printer modals and their libraries into `src/tools/` and load them lazily (`React.lazy`) from the operator dialog, so the kiosk bundle no longer includes them. Mark the folder as an allowed entry in the dead-code check.
 3. Run the dead-code check (the import-graph script plus `knip`) in CI so dead code cannot return.
 
-**Done when:** `knip` reports nothing and the bundle is smaller. Expected: about 2,300 fewer lines and 3 fewer dependencies.
+**Done when:** `knip` reports nothing and the kiosk bundle is smaller. Expected: about 250 fewer lines, 2 fewer dependencies (`@google/genai`, `motion`) and about 2,000 lines out of the kiosk bundle.
 
 ### Phase 2: Shared client infrastructure (M)
 1. `data/api.ts`: one typed `api.get/put/post` that throws a readable `ApiError` (R1, R3).
@@ -166,7 +168,7 @@ Each phase ends with: type-check, lint, unit tests, end-to-end walk-through and 
 3. Extract each step into `kiosk/steps/*Step.tsx`, one at a time, moving its markup and its handlers together. Extract `useDetailsForm` (typing rules, validation), `usePowerQuiz` (answers, scoring) and `useIdleReset`.
 4. Resolve the character once in `useSelection` and pass a `Selection` down, instead of re-deriving it (K5).
 5. Make card and page scale reactive (`useElementSize`/`ResizeObserver`) (K4).
-6. Rename `MagicalColoringMachine` to `KioskFlow`; settle the spelling "Playyy" in all copy (K6).
+6. Rename `MagicalColoringMachine` to `KioskFlow`. Move every visitor-facing string into one `copy.ts` and apply the brand spelling (section 6, decision 6): the brand is **PLAYY**, written "Playy" in sentences and "PLAYY" in capitals; "Playyy" and "PlayPal" are retired (K6).
 
 **Done when:** the flow component is under about 150 lines, no step file is over about 200, and the screenshot baselines from Phase 0 are unchanged.
 
@@ -180,18 +182,22 @@ Each phase ends with: type-check, lint, unit tests, end-to-end walk-through and 
 **Done when:** no `!important`, no rule that overrides another in the same file, and the baselines still match.
 
 ### Phase 6: Functional debt and docs (M)
-1. Make the card stats real (F1): each quiz answer adds to the stats through a weights table (data, editable in the Power quiz tab later); the archetype follows from the stats. Log answers and outcome with the submission (F2). Unit tests for the scoring.
+1. Make the card stats real (F1) with the weighting system in section 9: pure `computeStats(questions, answers)` in `domain/`, unit tests including the simulation of every answer combination, the archetype and rarity from the stats, and the answers and outcome logged with the submission (F2).
 2. Retry queue holds a list, not one item (F3). Fix the colours page label contrast (F4).
 3. Rewrite the docs: `README.md` (run, deploy), `docs/ARCHITECTURE.md` (the tree above and the data flow), `docs/STATUS.md` kept short and current, short decision records for Neon, the single Express app, client-side capture for PDFs.
 
-## 6. Decisions needed from you
+## 6. Decisions (answered 2026-10-12)
 
-1. **Expo tooling (D1):** delete the Expo project exporter and the cloud-printer (PrintNode) modals, about 2,000 lines? Recommended: **delete**; the Expo app is in `expo-app/` and the web kiosk prints through the browser. Say so if the PrintNode route is still wanted.
-2. **`expo-app/` folder:** keep in this repo, or move it to its own repository when the mobile work starts? Recommended: keep until then, but exclude it from the web build and checks (already excluded from `tsc`).
-3. **Strict TypeScript:** switch on now in Phase 0? Recommended: **yes** (it already passes).
-4. **Test tools:** Vitest for unit tests and Playwright for end-to-end and screenshots. Recommended: **yes**.
-5. **Trump card stats (F1):** should they come from the quiz answers as planned, and do you want to set the weights yourself in the command center, or should I propose a first set?
-6. **Spelling:** "Playy", "Playyy" and "PlayPal" all appear in the kiosk. Which one is the brand spelling?
+| # | Question | Answer | Effect on the plan |
+|---|---|---|---|
+| 1 | Delete the Expo exporter and cloud printer modals? | **Keep** | Not deleted. Phase 1 isolates and lazy-loads them (D1). |
+| 2 | `expo-app/` in this repo? | **Keep** | Stays here, excluded from the web build and checks. |
+| 3 | Strict TypeScript now? | **Yes** | Phase 0, step 1. |
+| 4 | Vitest and Playwright? | **Yes** | Phase 0, steps 3 and 4. |
+| 5 | Trump card stats from the quiz? | **Yes: propose a proper weighting system, with an explanation** | Section 9 below; built in Phase 6. |
+| 6 | Brand spelling | **PLAYY** | Written "Playy" in sentences, "PLAYY" in capitals; one `copy.ts` (Phase 4, step 6). |
+
+Note on decision 1: it was answered "Keep yes"; I have read that as keep. If delete was meant, Phase 1 step 2 becomes a deletion.
 
 ## 7. Order and effort
 
@@ -210,3 +216,71 @@ Phase 0 is the gate; nothing after it should start without it. Phases 1 to 3 do 
 ## 8. Not in this refactor
 
 SMTP and WhatsApp setup (waiting on the client), silent printing, the offline asset cache (F5), a portrait layout, and the Expo mobile app.
+
+## 9. Trump card stats: the weighting system (proposal)
+
+### 9.1 What is wrong today
+Every card is built from the same starting numbers (all 50) and the quiz answers never change them, so every visitor gets the same stats and the same character type ("Flame Champion"). The quiz does already pick a **power symbol** from per-answer weights; the stats ignore it.
+
+### 9.2 Goals
+1. **Fair and transparent:** the same answers always give the same card. No randomness.
+2. **Every answer matters** and every stat can come out on top.
+3. **No card looks weak.** This is for children: the lowest stat never goes below 35 and the highest is always a clear peak.
+4. **Edit-proof:** the client edits the quiz in the command center. Whatever they write, the stats must stay balanced, so the system calibrates itself from the quiz rather than relying on hand-tuned numbers.
+5. **One source of truth:** no second table of per-answer stat values to keep in step. The stats come from the symbol weights the quiz already has.
+
+### 9.3 The model
+**Step 1: from answers to symbols (exists today).** Each answer carries symbol weights, for example "Helping my friends" = Warm Heart 3, Puppy Paw 2.
+
+**Step 2: from symbols to stats (new, one small table).** Each symbol is a mix of stats that adds up to 1:
+
+| Symbol | Stat mix |
+|---|---|
+| Golden Crown | Power 60%, Courage 40% |
+| Shining Star | Courage 60%, Energy 40% |
+| Thunder Zap | Speed 70%, Power 30% |
+| Fire Spark | Energy 70%, Speed 30% |
+| Crescent Moon | Intelligence 70%, Energy 30% |
+| Puffy Cloud | Intelligence 60%, Courage 40% |
+| Warm Heart | Courage 60%, Intelligence 40% |
+| Puppy Paw | Courage 50%, Energy 50% |
+
+**Step 3: points per answer.** Each answer is worth 10 points, shared between its symbols in proportion to their weights (3:2 gives 6 and 4), and each symbol's points are spread over its stat mix. "Helping my friends" gives Warm Heart 6 points (3.6 Courage, 2.4 Intelligence) and Puppy Paw 4 points (2 Courage, 2 Energy).
+
+**Step 4: add up and calibrate.** Add the points for each stat over all the answers. Then convert to a 0 to 100 stat with a z-score, using the quiz's own average and spread for that stat (these can be worked out directly from the questions, no simulation needed):
+
+`stat = 58 + 13 x (points - average points for that stat) / spread of that stat`
+
+This is what keeps it fair: a stat that is easy to earn (Courage appears in many symbols) is scaled down and a hard one (Power) is scaled up, so each stat has a similar chance to come out on top, however the quiz is written.
+
+**Step 5: the winning power adds a signature bonus.** The symbol the visitor is awarded adds +6 to its main stat and +3 to its second stat, so the card matches the power shown on the previous screen.
+
+**Step 6: limits.** Round to a whole number and clamp to 35 to 98 (never 0 and never a "perfect" 100).
+
+**Step 7: character type and rarity.**
+- The **archetype** is the highest stat (Power: Flame Champion, Speed: Storm Guardian, Intelligence: Mystic Dreamer, Energy: Cosmic Explorer, Courage: Nature Guardian). A tie goes to the awarded symbol's main stat, then to a fixed order, so it is deterministic.
+- **Rarity** comes from how strong the peak is, not from the archetype: top stat 88 or more is Legendary, 78 to 87 Epic, below that Rare. There is no Common card for children. With the current quiz this gives about 20% Legendary, 38% Epic and 42% Rare; the thresholds are tuned in Phase 6 with the simulation.
+- The two **abilities** and the quote come from the archetype, as now.
+
+### 9.4 Worked example (calculated with the current quiz)
+A visitor answers "Helping my friends", "Give them a big hug", "Having a heart full of magic", "Kind and caring" and "Spreading love". Every answer leans to Warm Heart, so the awarded power is **Warm Heart**. The card comes out as Courage 98 (it reaches the cap), Intelligence 60, Energy 52, Power 41, Speed 35. The archetype is **Nature Guardian**, rarity Legendary, and the back shows Warm Heart, Kindness and Empathy.
+
+### 9.5 Checked against the current quiz (all 1,024 answer combinations)
+| | Plain points (start at 30, no calibration) | Proposed (calibrated) |
+|---|---|---|
+| Top stat share | Courage 35%, Intelligence 30%, Energy 27%, Speed 5%, Power 3% | Intelligence 27%, Courage 22%, Energy 22%, Power 15%, Speed 14% |
+| Highest stat (min / average / max) | 47 / 55 / 68 | 63 / 80 / 98 |
+| Lowest stat | | 35 |
+
+Without calibration, Speed and Power almost never win, because the current quiz gives them few chances. Calibration fixes most of it. What remains (Intelligence a little high) comes from how the quiz is written: Puppy Paw, Shining Star and Thunder Zap are rarely a main answer. Phase 6 therefore also includes **a balance check in the command center's Power quiz tab**: it shows, for the quiz as written, how often each power and each character type would come up, and warns if one is below about 8% or above about 30%.
+
+### 9.6 What stays editable and what is fixed
+- Editable in the command center (already): the questions, the answers and each answer's symbol weights.
+- Fixed in code, with a test: the symbol-to-stat table, the calibration numbers (58 and 13), the clamp and the rarity thresholds. If the client later wants to change these, they can move into the Power quiz tab as one more small table.
+
+### 9.7 What gets built (Phase 6)
+1. `domain/stats.ts`: `computeStats(questions, answers)` as pure functions (points, calibration, bonus, clamp) and `archetypeFor` / `rarityFor`.
+2. Unit tests: the worked example, determinism, tie-break, every stat reachable as the top stat, no stat outside 35 to 98, an edited quiz stays balanced (a generated quiz with lopsided weights), and a simulation over all answer combinations that fails if any character type falls under 8%.
+3. The share log stores the answers, the stats and the awarded power with each submission, for marketing.
+4. The card back and the Users tab show the real numbers.
+
