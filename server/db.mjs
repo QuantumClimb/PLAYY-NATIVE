@@ -90,6 +90,36 @@ export function ensureSchema() {
       )`);
 
     await sql.query(`
+      CREATE TABLE IF NOT EXISTS share_settings (
+        id      INTEGER PRIMARY KEY DEFAULT 1,
+        data    JSONB NOT NULL DEFAULT '{}',
+        updated TIMESTAMPTZ NOT NULL DEFAULT now()
+      )`);
+
+    // One row per Playyy made: who made it (for marketing), a small thumbnail of the final card, and how the email went
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS submissions (
+        id           SERIAL PRIMARY KEY,
+        created      TIMESTAMPTZ NOT NULL DEFAULT now(),
+        name         TEXT NOT NULL DEFAULT '',
+        email        TEXT NOT NULL DEFAULT '',
+        phone        TEXT NOT NULL DEFAULT '',
+        thumbnail    TEXT,
+        config       JSONB NOT NULL DEFAULT '{}',
+        email_status TEXT NOT NULL DEFAULT 'pending',
+        email_error  TEXT,
+        emailed_at   TIMESTAMPTZ
+      )`);
+    // The PDFs are kept only while an email has not gone out, so it can be resent later
+    await sql.query(`
+      CREATE TABLE IF NOT EXISTS submission_files (
+        submission_id INTEGER NOT NULL,
+        name          TEXT NOT NULL,
+        data          TEXT NOT NULL,
+        PRIMARY KEY (submission_id, name)
+      )`);
+
+    await sql.query(`
       CREATE TABLE IF NOT EXISTS brand (
         id       INTEGER PRIMARY KEY DEFAULT 1,
         logo_svg TEXT,                         -- sanitized SVG, or NULL to use the built-in PNG logo
@@ -352,6 +382,71 @@ export async function saveTrumpCard(settings) {
 
 export async function resetTrumpCard() {
   await query('DELETE FROM trump_card WHERE id = 1');
+}
+
+// ---------- Share: who gets the emails, and the log of everyone who made a Playyy ----------
+export async function getShareSettings() {
+  const rows = await query('SELECT data FROM share_settings WHERE id = 1');
+  return rows[0]?.data ?? null;
+}
+
+export async function saveShareSettings(settings) {
+  const rows = await query(
+    `INSERT INTO share_settings (id, data, updated)
+     VALUES (1, $1, now())
+     ON CONFLICT (id) DO UPDATE SET data = EXCLUDED.data, updated = now()
+     RETURNING data`,
+    [JSON.stringify(settings)],
+  );
+  return rows[0]?.data;
+}
+
+export async function addSubmission({ name, email, phone, thumbnail, config }) {
+  const rows = await query(
+    `INSERT INTO submissions (name, email, phone, thumbnail, config)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id, created`,
+    [name, email, phone, thumbnail, JSON.stringify(config ?? {})],
+  );
+  return rows[0];
+}
+
+export async function setSubmissionEmail(id, status, error = null) {
+  await query(
+    `UPDATE submissions SET email_status = $2, email_error = $3, emailed_at = CASE WHEN $2 = 'sent' THEN now() ELSE emailed_at END WHERE id = $1`,
+    [id, status, error],
+  );
+}
+
+export async function listSubmissions(limit = 500) {
+  return query(
+    `SELECT id, created, name, email, phone, thumbnail, config, email_status, email_error, emailed_at
+     FROM submissions ORDER BY created DESC LIMIT $1`,
+    [limit],
+  );
+}
+
+export async function getSubmission(id) {
+  const rows = await query('SELECT id, created, name, email, phone FROM submissions WHERE id = $1', [id]);
+  return rows[0] ?? null;
+}
+
+export async function saveSubmissionFiles(id, files) {
+  for (const [name, data] of Object.entries(files)) {
+    await query(
+      `INSERT INTO submission_files (submission_id, name, data) VALUES ($1, $2, $3)
+       ON CONFLICT (submission_id, name) DO UPDATE SET data = EXCLUDED.data`,
+      [id, name, data],
+    );
+  }
+}
+
+export async function getSubmissionFiles(id) {
+  const rows = await query('SELECT name, data FROM submission_files WHERE submission_id = $1', [id]);
+  return Object.fromEntries(rows.map((r) => [r.name, r.data]));
+}
+
+export async function deleteSubmissionFiles(id) {
+  await query('DELETE FROM submission_files WHERE submission_id = $1', [id]);
 }
 
 // ---------- Brand: the logo slot (SVG) and its outline settings ----------

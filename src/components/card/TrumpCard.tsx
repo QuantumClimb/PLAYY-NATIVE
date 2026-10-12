@@ -106,7 +106,7 @@ export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1, setti
           <div className="min-w-0 leading-tight">
             <div className="text-[9px] tracking-widest" style={{ color: s.backAccent }}>YOUR POWER</div>
             <div className="truncate text-sm" style={{ fontFamily: FONT, fontWeight: 800 }}>{power.name}</div>
-            <div className="truncate text-[10px] text-white/70">{power.attribute}</div>
+            <div className="text-[10px] leading-tight text-white/70">{power.attribute}</div>
           </div>
         </div>
 
@@ -126,7 +126,7 @@ export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1, setti
           <div className="text-[11px] tracking-wider" style={{ color: s.backAccent }}>⚡ SPECIAL ABILITIES</div>
           {abilities.map((a) => (
             <div key={a.name} className="rounded-xl p-2" style={panel}>
-              <div className="flex justify-between text-xs">
+              <div className="flex justify-between gap-2 whitespace-nowrap text-xs">
                 <span>{a.name}</span>
                 <span style={{ color: s.backAccent }}>DMG: {a.damage}</span>
               </div>
@@ -138,8 +138,8 @@ export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1, setti
         <div className="text-center text-[11px] italic text-white/80">"{archetype.quote}"</div>
 
         <div className="flex justify-between border-t border-white/20 pt-1 text-[9px]">
-          <span className="text-white/60">CARD SERIAL: #{id.toUpperCase()}</span>
-          <span style={{ color: s.backAccent }}>AUTHENTIC COLLECTIBLE ★</span>
+          <span className="whitespace-nowrap text-white/60">SERIAL #{id.toUpperCase()}</span>
+          <span className="whitespace-nowrap" style={{ color: s.backAccent }}>AUTHENTIC COLLECTIBLE ★</span>
         </div>
       </div>
     </ScaledFrame>

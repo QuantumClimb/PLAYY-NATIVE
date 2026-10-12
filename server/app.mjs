@@ -6,6 +6,7 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { listPrinters, setDefault } from './printers.mjs';
+import { buildPdfs, sendShareEmail, smtpConfigured } from './share.mjs';
 import {
   ASSET_TYPES,
   listAssets,
@@ -31,6 +32,15 @@ import {
   getTrumpCard,
   saveTrumpCard,
   resetTrumpCard,
+  getShareSettings,
+  saveShareSettings,
+  addSubmission,
+  setSubmissionEmail,
+  listSubmissions,
+  getSubmission,
+  saveSubmissionFiles,
+  getSubmissionFiles,
+  deleteSubmissionFiles,
   getBrand,
   saveBrandLogo,
   saveBrandSettings,
@@ -49,6 +59,7 @@ const SECRET =
 const SESSION_MS = 8 * 60 * 60 * 1000;
 
 const app = express();
+if (HOSTED) app.set('trust proxy', true);
 app.use(express.json({ limit: '50mb' }));
 
 // ---------- Printers (used by the Alt+Shift+P dialog) ----------
@@ -572,6 +583,90 @@ app.put('/api/cc/trump-card', requireAdmin, wrap(async (req, res) => {
 app.post('/api/cc/trump-card/reset', requireAdmin, wrap(async (_req, res) => {
   await resetTrumpCard();
   res.json({ ok: true });
+}));
+
+// ---------- Share: log every Playyy and email the PDFs ----------
+const DEFAULT_SHARE = { enabled: true, recipients: ['qcquantumclimb@gmail.com', 'aum.janakiram@gmail.com'] };
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+async function shareSettings() {
+  const saved = await getShareSettings();
+  return {
+    enabled: saved?.enabled !== false,
+    recipients: Array.isArray(saved?.recipients) ? saved.recipients : DEFAULT_SHARE.recipients,
+  };
+}
+
+app.get('/api/cc/share-settings', requireAdmin, wrap(async (_req, res) => {
+  res.json({ settings: await shareSettings(), smtp: smtpConfigured(), whatsapp: false });
+}));
+
+app.put('/api/cc/share-settings', requireAdmin, wrap(async (req, res) => {
+  const { enabled, recipients } = req.body ?? {};
+  if (typeof enabled !== 'boolean' || !Array.isArray(recipients) || recipients.length > 2) return res.status(400).json({ error: 'Invalid settings' });
+  const clean = recipients.map((r) => String(r ?? '').trim());
+  if (clean.some((r) => r && !EMAIL_RE.test(r))) return res.status(400).json({ error: 'One of the emails is not valid' });
+  res.json({ settings: await saveShareSettings({ enabled, recipients: clean.filter(Boolean) }), smtp: smtpConfigured(), whatsapp: false });
+}));
+
+// A visitor can only send a few per minute from one place
+const shareHits = new Map();
+const tooMany = (ip) => {
+  const now = Date.now();
+  const hits = (shareHits.get(ip) || []).filter((t) => now - t < 60_000);
+  hits.push(now);
+  shareHits.set(ip, hits);
+  return hits.length > 20;
+};
+
+const JPEG_B64 = /^[A-Za-z0-9+/=]+$/;
+const IMAGE_KEYS = ['bw', 'color', 'cardFront', 'cardBack'];
+
+async function emailSubmission(id, who, images) {
+  const settings = await shareSettings();
+  if (!settings.enabled) { await setSubmissionEmail(id, 'off'); return 'off'; }
+  try {
+    const files = await buildPdfs(images);
+    await sendShareEmail({
+      recipients: settings.recipients, name: who.name, email: who.email, phone: who.phone,
+      when: new Date(who.created).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }) + ' (India time)', files,
+    });
+    await setSubmissionEmail(id, 'sent');
+    await deleteSubmissionFiles(id);
+    return 'sent';
+  } catch (e) {
+    await setSubmissionEmail(id, 'failed', String(e.message).slice(0, 300));
+    await saveSubmissionFiles(id, images); // kept so it can be resent from the command center
+    return 'failed';
+  }
+}
+
+app.post('/api/submissions', wrap(async (req, res) => {
+  if (tooMany(req.ip)) return res.status(429).json({ error: 'Too many requests' });
+  const { name, email, phone, thumbnail, config, images } = req.body ?? {};
+  const text = (v, max) => String(v ?? '').trim().slice(0, max);
+  const who = { name: text(name, 40), email: text(email, 120), phone: text(phone, 30) };
+  if (!who.name) return res.status(400).json({ error: 'A name is needed' });
+  if (typeof thumbnail !== 'string' || !/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(thumbnail) || thumbnail.length > 120_000) return res.status(400).json({ error: 'Invalid thumbnail' });
+  if (!images || IMAGE_KEYS.some((k) => typeof images[k] !== 'string' || !JPEG_B64.test(images[k]) || images[k].length > 4_000_000)) return res.status(400).json({ error: 'Invalid images' });
+  const safeConfig = {};
+  for (const k of ['head', 'pose', 'symbol', 'background', 'colors']) if (config && config[k] !== undefined) safeConfig[k] = config[k];
+  const row = await addSubmission({ ...who, thumbnail, config: safeConfig });
+  const status = await emailSubmission(row.id, { ...who, created: row.created }, Object.fromEntries(IMAGE_KEYS.map((k) => [k, images[k]])));
+  res.json({ id: row.id, email: status });
+}));
+
+app.get('/api/cc/submissions', requireAdmin, wrap(async (_req, res) => {
+  res.json({ submissions: await listSubmissions(500) });
+}));
+
+app.post('/api/cc/submissions/:id/resend', requireAdmin, wrap(async (req, res) => {
+  const id = Number(req.params.id);
+  const who = Number.isInteger(id) ? await getSubmission(id) : null;
+  if (!who) return res.status(404).json({ error: 'Not found' });
+  const images = await getSubmissionFiles(id);
+  if (IMAGE_KEYS.some((k) => !images[k])) return res.status(409).json({ error: 'The files for this one are no longer kept' });
+  res.json({ email: await emailSubmission(id, who, images) });
 }));
 
 app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found' }));

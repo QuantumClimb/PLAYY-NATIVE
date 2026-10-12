@@ -19,6 +19,7 @@ import { KioskCelebrationScreen } from './components/kiosk/KioskCelebrationScree
 import { PrinterDetectDialog } from './components/kiosk/PrinterDetectDialog';
 import { CloudPrinterModal } from './components/expo/CloudPrinterModal';
 import { ExpoProjectExporterModal } from './components/expo/ExpoProjectExporterModal';
+import { retryPendingShare } from './lib/share/send';
 
 export type MachinePhase = 'idle' | 'create' | 'celebrate';
 
@@ -31,6 +32,9 @@ export default function App() {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isExporterOpen, setIsExporterOpen] = useState(false);
   const [isPrinterDetectOpen, setIsPrinterDetectOpen] = useState(false);
+
+  // A Playyy that could not be sent last time (no connection) goes out when the kiosk starts again
+  useEffect(() => { void retryPendingShare(); }, []);
 
   // Trigger browser / local print service
   const handlePrint = useCallback(() => {

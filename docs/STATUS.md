@@ -98,6 +98,14 @@ Copy `.env.example` to `.env` and set `COMMAND_CENTER_PASSWORD` and `DATABASE_UR
 - Command center has a Trump card tab (table `trump_card`): outline colour and thickness, corner roundness, back background and highlight colour, with a live preview. The power icons and stat icons are fixed (not editable there).
 - Continue on the card goes on to the print and complete screen (still the old layout).
 
+## Share, users log and email
+- Final screen: the black-and-white page, the colour page and the trump card in a row, with Back and SHARE.
+- SHARE: photographs the pages (html-to-image), POSTs them to `/api/submissions`, then opens the print dialog and goes on to the celebration screen. The print is the black-and-white page, the colour page and the card (front and back).
+- Server: logs every Playyy in `submissions` (name, email, phone, date and time, a small card thumbnail, the character choices), builds two PDFs with pdf-lib (coloring pages; trump card) and emails them with nodemailer to the recipients in `share_settings`. If the email fails the four JPEGs are kept in `submission_files` so Resend works from the command center; if the kiosk cannot reach the server the Playyy is kept in the browser and sent on the next start.
+- Command center: Users tab (table, search, Download CSV, Resend) and Share & email tab (two recipient slots, on/off switch, WhatsApp placeholder).
+- Needs `SMTP_USER` and `SMTP_PASS` (Gmail app password) in `.env` and in Vercel. Until then emails show as "Not sent".
+- WhatsApp is not built yet (waiting for the client's token).
+
 ## Open questions
 - Cyan trim on the blue character is not a pure lightness shift (hue 196 vs 218). Keep it fixed, or derive it?
 - Should the hoodie be split so the head sits inside the hood?
