@@ -30,28 +30,19 @@ const NameBanner: React.FC<{ name: string; mode: 'color' | 'line' }> = ({ name, 
 interface SceneFinishProps {
   mode: 'color' | 'line';
   name?: string;
-  email?: string;
-  phone?: string;
 }
 
 /**
- * What turns the scene into the finished page: the logo top left, the name under the character,
- * and the contact details as a small note along the bottom. The parent needs `scene-cq` (container query units).
+ * What turns the scene into the finished page: the logo top left and the name under the character. The parent needs `scene-cq` (container query units).
  */
-export const SceneFinish: React.FC<SceneFinishProps> = ({ mode, name = '', email = '', phone = '' }) => {
-  const notes = [email.trim(), phone.trim()].filter(Boolean).join('   ·   ');
+export const SceneFinish: React.FC<SceneFinishProps> = ({ mode, name = '' }) => {
   return (
     <>
       <LogoArt mode={mode} className="scene-logo" />
       <NameBanner name={name} mode={mode} />
-      {notes && (
-        <div className="scene-notes-wrap" data-mode={mode}>
-          <span className="scene-notes">Notes: {notes}</span>
-        </div>
-      )}
     </>
   );
 };
 
-/** How much of the scene's bottom the name and notes take, so the character is stood above them. */
+/** How much of the scene's bottom the name takes, so the character is stood above it. */
 export const FINISH_RESERVE_BOTTOM = 0.115;

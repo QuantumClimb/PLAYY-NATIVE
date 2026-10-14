@@ -59,14 +59,14 @@ const ScaledFrame: React.FC<{
 
 const heroName = (card: GeneratedCard) => (card.config.kidName?.trim() || 'PLAYY HERO').toUpperCase();
 
-/** The front: only the final colored artwork the visitor made, inside the outline. */
+/** The front: the final colored artwork the visitor made, with the logo and name, inside the outline. */
 export const TrumpCardFront: React.FC<TrumpCardProps> = ({ card, scale = 1, settings }) => {
   const saved = useTrumpCardSettings();
   const s = settings ?? saved;
   return (
     <ScaledFrame scale={scale} settings={s} background="#ffffff">
-      {/* The A4 artwork fills the card (centered, a sliver of the sides is trimmed) */}
-      <PlayyScene config={card.config} mode="color" className="absolute left-1/2 top-0 h-full -translate-x-1/2" />
+      {/* The A4 artwork with the logo and name fills the card (centered, a sliver of the sides is trimmed) */}
+      <PlayyScene config={card.config} mode="color" finish className="absolute left-1/2 top-0 h-full -translate-x-1/2" />
     </ScaledFrame>
   );
 };

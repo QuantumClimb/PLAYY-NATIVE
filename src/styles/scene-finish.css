@@ -1,4 +1,4 @@
-/* The finished page: logo, the name under the character, and the contact details as a small note */
+/* The finished page: logo and the name under the character */
 .scene-cq { container-type: inline-size; }
 
 .scene-logo { position: absolute; z-index: 3; left: 3%; top: 1.6%; width: 31%; aspect-ratio: 995.8 / 527.1; }
@@ -45,12 +45,3 @@
 .scene-name[data-mode='color'] .scene-dash-l2, .scene-name[data-mode='color'] .scene-dash-r1 { background: #f45fa0; }
 
 .scene-name[data-mode='color'] .scene-dash-l3, .scene-name[data-mode='color'] .scene-dash-r2 { background: #1aa3ea; }
-
-.scene-notes-wrap { position: absolute; left: 0; right: 0; bottom: .8%; z-index: 3; display: flex; justify-content: center; }
-
-.scene-notes {
-  max-width: 94%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: .25cqw 1.8cqw; border-radius: 999px;
-  background: rgba(255, 255, 255, .85); color: #2b2b4f; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: 1.9cqw;
-}
-
-.scene-notes-wrap[data-mode='line'] .scene-notes { background: #fff; color: #111; }

@@ -11,7 +11,7 @@ interface PlayySceneProps {
   config: PlayyConfiguration;
   /** color = the artwork; line = the black-and-white coloring page */
   mode: 'color' | 'line';
-  /** The finished page: adds the logo, the name under the character and the contact details as a small note */
+  /** The finished page: adds the logo, and the name under the character */
   finish?: boolean;
   className?: string;
 }
@@ -48,7 +48,7 @@ export const PlayyScene: React.FC<PlayySceneProps> = ({ config, mode, finish = f
         showBackground
         showSymbol
       />
-      {finish && <SceneFinish mode={mode} name={config.kidName} email={config.email} phone={config.phone} />}
+      {finish && <SceneFinish mode={mode} name={config.kidName} />}
     </div>
   );
 };
