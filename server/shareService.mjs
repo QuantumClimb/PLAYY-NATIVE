@@ -1,5 +1,5 @@
 import { setSubmissionEmail, settings } from './db/index.mjs';
-import { sendShareEmail } from './mailer.mjs';
+import { sendShareEmail, sendVisitorEmail } from './mailer.mjs';
 import { buildPdfs } from './pdf.mjs';
 
 const SEND_ATTEMPTS = 2;
@@ -29,16 +29,28 @@ export async function emailSubmission(id, who, images) {
   }
   const message = { recipients, name: who.name, email: who.email, phone: who.phone, when: whenText(who.created) };
   const files = await buildPdfs(images);
+  const jobs = [sendWithRetry(() => sendVisitorEmail({ name: who.name, email: who.email, files }))];
+  // The team copy is skipped when nobody is listed; the visitor still gets theirs
+  if (recipients.length) jobs.push(sendWithRetry(() => sendShareEmail({ ...message, files })));
+  const failure = (await Promise.all(jobs)).find(Boolean);
+  if (failure) {
+    await setSubmissionEmail(id, 'failed', String(failure.message).slice(0, 300));
+    return 'failed';
+  }
+  await setSubmissionEmail(id, 'sent');
+  return 'sent';
+}
+
+/** Tries a send up to SEND_ATTEMPTS times; resolves to the last error, or undefined when it went through. */
+async function sendWithRetry(send) {
   let failure;
   for (let attempt = 0; attempt < SEND_ATTEMPTS; attempt += 1) {
     try {
-      await sendShareEmail({ ...message, files });
-      await setSubmissionEmail(id, 'sent');
-      return 'sent';
+      await send();
+      return undefined;
     } catch (e) {
       failure = e;
     }
   }
-  await setSubmissionEmail(id, 'failed', String(failure.message).slice(0, 300));
-  return 'failed';
+  return failure;
 }

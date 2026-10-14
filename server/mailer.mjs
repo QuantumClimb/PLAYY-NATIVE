@@ -31,19 +31,44 @@ function messageBody({ name, email, phone, when }) {
   };
 }
 
+const attachmentsFor = (name, files) => {
+  const slug = fileSlug(name);
+  return [
+    { filename: `playy-coloring-${slug}.pdf`, content: files.coloring, contentType: 'application/pdf' },
+    { filename: `playy-trump-card-${slug}.pdf`, content: files.card, contentType: 'application/pdf' },
+  ];
+};
+
+function requireSmtp() {
+  if (!smtpConfigured()) throw new Error('SMTP is not set up (SMTP_USER and SMTP_PASS are missing)');
+}
+
 /** Emails the two PDFs to the recipients. Throws when SMTP is not set up or the send fails. */
 export async function sendShareEmail({ recipients, name, email, phone, when, files }) {
-  if (!smtpConfigured()) throw new Error('SMTP is not set up (SMTP_USER and SMTP_PASS are missing)');
+  requireSmtp();
   if (!recipients.length) throw new Error('No recipient emails are set in the command center');
-  const slug = fileSlug(name);
   await transport().sendMail({
     from: SMTP.from,
     to: recipients,
     subject: `New Playy by ${name || 'a visitor'}`,
     ...messageBody({ name, email, phone, when }),
-    attachments: [
-      { filename: `playy-coloring-${slug}.pdf`, content: files.coloring, contentType: 'application/pdf' },
-      { filename: `playy-trump-card-${slug}.pdf`, content: files.card, contentType: 'application/pdf' },
-    ],
+    attachments: attachmentsFor(name, files),
+  });
+}
+
+/** Emails the visitor their own Playy, to the address they entered. Throws when the send fails. */
+export async function sendVisitorEmail({ name, email, files }) {
+  requireSmtp();
+  const greeting = `Hi ${name || 'there'},`;
+  const body = `Thanks for making a Playy! ${ATTACHED}`;
+  await transport().sendMail({
+    from: SMTP.from,
+    to: email,
+    subject: 'Your Playy is here!',
+    text: `${greeting}
+
+${body}`,
+    html: `<p>${escapeHtml(greeting)}</p><p>${escapeHtml(body)}</p>`,
+    attachments: attachmentsFor(name, files),
   });
 }
