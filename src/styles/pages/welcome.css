@@ -1,0 +1,37 @@
+/* ===== After "Tap to Start": FIRST TIME? / Already a PlayyPal? and the phone number keypad ===== */
+.welcome-logo { position: absolute; z-index: 6; left: 2.5%; top: 2.5%; height: 14%; width: auto; }
+
+.welcome-choices {
+  position: absolute; z-index: 5; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5vh;
+}
+
+.welcome-btn {
+  width: min(72vw, 130vh); padding: 4.5vh 2vw; white-space: nowrap; font-family: 'Sniglet', 'Fredoka', sans-serif; font-weight: 800;
+  font-size: min(4.6vw, 8vh); letter-spacing: .02em; text-align: center;
+}
+
+.welcome-phone {
+  position: absolute; z-index: 5; left: 50%; top: 12%; bottom: 3%; width: min(62vw, 110vh); transform: translateX(-50%);
+  display: flex; flex-direction: column; gap: 1.2vh;
+}
+
+.welcome-title {
+  margin: 0; text-align: center; font-family: 'Sniglet', 'Fredoka', sans-serif; font-weight: 800; font-size: min(3.6vw, 6.4vh); white-space: nowrap;
+  color: #fff; text-shadow: 0 .5vh 0 rgba(30, 20, 120, .6), 0 0 2vh rgba(30, 20, 120, .5);
+}
+
+.welcome-subtitle {
+  margin: 0 0 1vh; text-align: center; font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(2.2vw, 3.8vh);
+  color: #fff; text-shadow: 0 .3vh 0 rgba(30, 20, 120, .6);
+}
+
+.welcome-phone .detail-field { flex-basis: 10vh; }
+
+.welcome-phone .details-error { min-height: 3.4vh; }
+
+.welcome-phone .details-keyboard.is-phone .dk-key { font-size: min(2.6vw, 4.4vh); }
+
+.welcome-back {
+  position: absolute; left: -22%; bottom: 0; display: flex; align-items: center; gap: .8vw; padding: 2.2vh 2.4vw;
+  font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(2vw, 3.6vh);
+}

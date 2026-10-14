@@ -7,14 +7,11 @@ import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { calculatePowerSymbol, usePowerQuizQuestions } from '../../lib/playys/powerQuiz';
 import type { PlayyConfiguration } from '../../lib/playys/types';
 import { playSfx } from '../../lib/sfx/engine';
-import { useIdleReset } from './useIdleReset';
+import { IDLE_SECONDS, useIdleReset } from './useIdleReset';
 import { useDetailsForm } from './useDetailsForm';
 import { usePowerQuiz } from './usePowerQuiz';
 import { useShare } from './useShare';
 import { STEPS, StepContext, StepId, stepAfter, stepBefore } from './steps';
-
-/** Seconds without a touch before the kiosk goes back to the intro screen */
-const IDLE_SECONDS = 45;
 
 const anyOf = <T>(list: T[]): T => list[Math.floor(Math.random() * list.length)];
 
@@ -143,6 +140,8 @@ export function useKioskFlow({ config, onChangeConfig, onCardChange, library, se
     def: STEPS[step],
     context,
     touch,
+    /** Back to the intro screen */
+    exit: onExit,
     next: step === 'complete' ? share.share : next,
     back,
     surprise,

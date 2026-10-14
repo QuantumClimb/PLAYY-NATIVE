@@ -110,6 +110,13 @@ export async function runMigrations(sql) {
         email_error  TEXT,
         emailed_at   TIMESTAMPTZ
       )`);
+  // Phone numbers typed on the "Already a PlayyPal?" screen, so a visitor who walks away before SHARE can still be reached
+  await sql.query(`
+      CREATE TABLE IF NOT EXISTS leads (
+        id      SERIAL PRIMARY KEY,
+        created TIMESTAMPTZ NOT NULL DEFAULT now(),
+        phone   TEXT NOT NULL
+      )`);
   await sql.query(`
       CREATE TABLE IF NOT EXISTS brand (
         id       INTEGER PRIMARY KEY DEFAULT 1,

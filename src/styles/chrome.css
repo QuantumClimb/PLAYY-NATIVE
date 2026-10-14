@@ -49,7 +49,7 @@
 
 /* "Pick for Me!" */
 .pick-page .pick-me-btn {
-  position: absolute; z-index: 6; right: 2.2%; top: 3.4%; width: 16.4%; height: 8%;
+  position: absolute; z-index: 6; right: 9.6%; top: 3.4%; width: 14.2%; height: 8%;
   display: flex; align-items: center; justify-content: center; gap: .9vw; padding: 0 1vw;
   border: .55vh solid #fff3b8; border-radius: 999px;
   background: linear-gradient(#fff07a 0%, #ffd22a 50%, #ffaf14 100%);
@@ -59,6 +59,14 @@
 }
 
 .pick-page .pick-me-btn::before { display: none; }
+
+/* Home: round, same height as "Pick for Me!", at the right edge */
+.pick-page .home-btn {
+  position: absolute; z-index: 6; right: 2.2%; top: 3.4%; width: 6%; height: 8%; padding: 0; border-radius: 999px;
+  border: .55vh solid #d9ebff;
+}
+
+.pick-page .home-btn svg { width: min(2.8vw, 4.6vh); height: min(2.8vw, 4.6vh); color: #fff; }
 
 .pick-me-dice { width: 1.15em; height: 1.15em; flex: none; }
 

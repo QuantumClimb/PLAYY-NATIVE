@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { api } from '../data/api';
 import { CmsPanel } from './CmsPanel';
-import { Submission, downloadText, matchesQuery, submissionsToCsv } from './submissions';
+import { Submission, downloadText, formatWhen, matchesQuery, submissionsToCsv } from './submissions';
 import { UsersTable } from './UsersTable';
 
 /** Command center: everyone who made a Playy, for the marketing team. */
@@ -10,11 +10,13 @@ export const UsersPanel: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState('');
+  const [leads, setLeads] = useState<{ id: number; created: string; phone: string }[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       setRows((await api.get<{ submissions: Submission[] }>('/api/cc/submissions')).submissions);
+      setLeads((await api.get<{ leads: typeof leads }>('/api/cc/leads')).leads);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -63,6 +65,28 @@ export const UsersPanel: React.FC = () => {
       </div>
 
       <UsersTable rows={shown} emptyText={rows.length === 0 ? 'Nobody yet.' : 'No matches.'} />
+
+      <h3 className="font-semibold pt-4">Started but did not finish</h3>
+      <p className="text-sm text-gray-500">
+        Phone numbers typed on "Already a PlayyPal?" with no finished Playy under the same number.
+      </p>
+      <div className="overflow-x-auto rounded-xl border border-gray-300">
+        <table className="w-full text-sm text-left">
+          <tbody>
+            {leads.length === 0 && (
+              <tr>
+                <td className="px-3 py-4 text-center text-gray-400">Nobody yet.</td>
+              </tr>
+            )}
+            {leads.map((l) => (
+              <tr key={l.id} className="border-t border-gray-200 first:border-t-0">
+                <td className="px-3 py-2">{l.phone}</td>
+                <td className="px-3 py-2 whitespace-nowrap text-gray-500">{formatWhen(l.created)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </CmsPanel>
   );
 };

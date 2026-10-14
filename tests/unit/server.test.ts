@@ -27,6 +27,8 @@ vi.mock('../../server/db/index.mjs', () => ({
   listSceneBackgrounds: vi.fn(async () => []),
   upsertSceneBackground: vi.fn(),
   resetSceneBackground: vi.fn(),
+  addLead: vi.fn(),
+  listAbandonedLeads: vi.fn(async () => []),
   addSubmission: vi.fn(),
   listSubmissions: vi.fn(async () => []),
   setSubmissionEmail: vi.fn(),
@@ -92,6 +94,7 @@ describe('the command center', () => {
   it('turns away anyone who is not signed in', async () => {
     expect((await call('/cc/progress-tabs', { method: 'PUT', json: {} })).status).toBe(401);
     expect((await call('/cc/submissions')).status).toBe(401);
+    expect((await call('/cc/leads')).status).toBe(401);
     expect((await call('/cc/session').then((r) => r.json())).signedIn).toBe(false);
   });
 
@@ -139,6 +142,13 @@ describe('sharing', () => {
     const res = await call('/submissions', { method: 'POST', json: { name: '' } });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe('A name is needed');
+  });
+
+  it('keeps the phone number from "Already a PlayyPal?" and refuses a bad one', async () => {
+    const db = await import('../../server/db/index.mjs');
+    expect((await call('/leads', { method: 'POST', json: { phone: '12' } })).status).toBe(400);
+    expect((await call('/leads', { method: 'POST', json: { phone: '+91 98765 43210' } })).status).toBe(200);
+    expect(db.addLead).toHaveBeenCalledWith('+91 98765 43210');
   });
 });
 

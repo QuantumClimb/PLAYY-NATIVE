@@ -4,6 +4,7 @@ import { BrandLogo } from '../lib/brand/brand';
 import { useProgressTabs } from '../lib/progress/tabs';
 import { ArchedHeading } from './components/ArchedHeading';
 import { ColorModeToggle } from './components/ColorPanel';
+import { HomeButton } from './components/HomeButton';
 import { PickForMeButton } from './components/PickForMeButton';
 import { StageTabsRow } from './components/StageTabs';
 import { copy } from './copy';
@@ -39,6 +40,7 @@ const Header: React.FC<{ flow: KioskFlow }> = ({ flow }) => {
       ) : (
         pickForMe
       )}
+      <HomeButton onClick={flow.exit} />
     </div>
   );
 };

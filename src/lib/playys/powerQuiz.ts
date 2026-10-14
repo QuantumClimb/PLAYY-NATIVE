@@ -157,7 +157,7 @@ export const DEFAULT_POWER_QUIZ_QUESTIONS: PowerQuizQuestion[] = [
   },
   {
     id: 5,
-    question: 'What would you like your Playy to be known for?',
+    question: 'What would you like your PlayyPal to be known for?',
     subtitle: 'Choose your hero legacy',
     options: [
       {

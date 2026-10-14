@@ -27,11 +27,11 @@ const HEADINGS: Record<Exclude<KioskPage, 'quiz' | 'power'>, RegExp> = {
   preview: /YOURCOLORINGPAGE/,
   card: /YOURTRUMPCARD/,
   share: /ALLDONE/,
-  success: /YOURPLAYYISREADY/,
+  success: /YOURPLAYYPALISREADY/,
 };
 
 /** Opens the kiosk with the print dialog switched off and the share request answered locally. */
-export async function openKiosk(page: Page): Promise<void> {
+export async function openKiosk(page: Page, welcome: 'first-time' | 'stay' = 'first-time'): Promise<void> {
   await page.addInitScript(() => {
     (window as unknown as { __printed: number }).__printed = 0;
     window.print = () => {
@@ -45,6 +45,8 @@ export async function openKiosk(page: Page): Promise<void> {
   await page.getByText('Tap to Start').waitFor();
   await page.waitForTimeout(800);
   await page.mouse.click(300, 400);
+  await page.getByText('FIRST TIME?').waitFor();
+  if (welcome === 'first-time') await page.getByText('FIRST TIME?').click();
 }
 
 async function headingOf(page: Page): Promise<string> {

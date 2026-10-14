@@ -60,11 +60,11 @@ export async function sendShareEmail({ recipients, name, email, phone, when, fil
 export async function sendVisitorEmail({ name, email, files }) {
   requireSmtp();
   const greeting = `Hi ${name || 'there'},`;
-  const body = `Thanks for making a Playy! ${ATTACHED}`;
+  const body = `Thanks for making a PlayyPal! ${ATTACHED}`;
   await transport().sendMail({
     from: SMTP.from,
     to: email,
-    subject: 'Your Playy is here!',
+    subject: 'Your PlayyPal is here!',
     text: `${greeting}
 
 ${body}`,

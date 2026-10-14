@@ -1,7 +1,7 @@
 import express from 'express';
-import { isEmail } from '../../shared/validation.mjs';
+import { isEmail, isPhone } from '../../shared/validation.mjs';
 import { requireAdmin } from '../auth.mjs';
-import { addSubmission, listSubmissions, settings } from '../db/index.mjs';
+import { addLead, addSubmission, listAbandonedLeads, listSubmissions, settings } from '../db/index.mjs';
 import { HttpError, badRequest, rateLimiter, wrap } from '../http.mjs';
 import { smtpConfigured } from '../mailer.mjs';
 import { emailSubmission, shareSettings } from '../shareService.mjs';
@@ -51,6 +51,24 @@ shareRouter.post(
     const email = await emailSubmission(row.id, { ...who, created: row.created }, images);
     res.json({ id: row.id, email });
   }),
+);
+
+// The phone number typed on "Already a PlayyPal?", kept in case the visitor does not finish
+shareRouter.post(
+  '/leads',
+  wrap(async (req, res) => {
+    if (!allowShare(req.ip)) throw new HttpError(429, 'Too many requests');
+    const phone = String(req.body?.phone ?? '').trim().slice(0, 15);
+    if (!isPhone(phone)) throw badRequest('Invalid phone number');
+    await addLead(phone);
+    res.json({ ok: true });
+  }),
+);
+
+shareRouter.get(
+  '/cc/leads',
+  requireAdmin,
+  wrap(async (_req, res) => res.json({ leads: await listAbandonedLeads(MAX_LISTED) })),
 );
 
 shareRouter.get(

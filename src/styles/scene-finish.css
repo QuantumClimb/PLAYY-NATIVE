@@ -1,7 +1,7 @@
 /* The finished page: logo and the name under the character */
 .scene-cq { container-type: inline-size; }
 
-.scene-logo { position: absolute; z-index: 3; left: 3%; top: 1.6%; width: 31%; aspect-ratio: 995.8 / 527.1; }
+.scene-logo { position: absolute; z-index: 3; left: 3%; top: 1.6%; width: 28%; aspect-ratio: 3013 / 1826; }
 
 .scene-name {
   position: absolute; left: 0; right: 0; bottom: 3.6%; z-index: 3; display: flex; justify-content: center; align-items: center;

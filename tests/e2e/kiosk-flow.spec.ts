@@ -54,3 +54,26 @@ test('the Advanced colour toggle works', async ({ page }) => {
   await expect(page.locator('.color-mode-toggle .is-active')).toHaveText('Advanced');
   expect(await page.locator('.color-panel').count()).toBeGreaterThan(2);
 });
+
+test('"Already a PlayyPal?" asks for a phone number, keeps it and carries on', async ({ page }) => {
+  const leads: unknown[] = [];
+  await page.route('**/api/leads', (route) => {
+    leads.push(route.request().postDataJSON());
+    return route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' });
+  });
+  await openKiosk(page, 'stay');
+  await page.getByText('Already a PlayyPal?').click();
+  await page.getByText('DONE').click();
+  await expect(page.locator('.details-error')).toContainText('phone number');
+  for (const digit of '9876543210')
+    await page.locator('.details-keyboard').getByRole('button', { name: digit, exact: true }).click();
+  await page.getByText('DONE').click();
+  await expect.poll(() => currentPage(page)).toBe('head');
+  expect(leads).toEqual([{ phone: '9876543210' }]);
+});
+
+test('the Home button on a page goes back to the intro screen', async ({ page }) => {
+  await openKiosk(page);
+  await page.getByRole('button', { name: 'Home' }).click();
+  await expect(page.getByText('Tap to Start')).toBeVisible();
+});

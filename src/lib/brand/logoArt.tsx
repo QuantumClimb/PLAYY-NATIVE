@@ -15,7 +15,7 @@ function renderLogoArt(svgText: string, opts: { mode: 'color' | 'line'; stroke: 
   const vb = parseSvgAsset(svgText).viewBox;
   const w = ((opts.stroke.enabled ? opts.stroke.width : 0) * vb.h) / 100;
   // line art always needs a stroke; fall back to a sensible one if the setting is off
-  const lineW = Math.max(w, (0.8 * vb.h) / 100);
+  const lineW = Math.max(w, (1.4 * vb.h) / 100);
 
   const base = renderSvgAsset(svgText, { main: '#ffffff', mode: opts.mode, parts: {} });
   const doc = new DOMParser().parseFromString(base, 'image/svg+xml');
