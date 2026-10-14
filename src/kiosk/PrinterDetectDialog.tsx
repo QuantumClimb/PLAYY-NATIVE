@@ -23,6 +23,10 @@ const STATUS_LABEL: Record<PrinterInfo['status'], { text: string; ok: boolean }>
   unknown: { text: 'Unknown', ok: false },
 };
 
+const HOSTED_MESSAGE =
+  'This kiosk is opened from the hosted website, which cannot see the printers on this computer, so none are listed. ' +
+  'Printing itself still works through Chrome. To skip the print preview, start Chrome with --kiosk-printing.';
+
 export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen, onClose, onTestPrint }) => {
   const [printers, setPrinters] = useState<PrinterInfo[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -36,11 +40,15 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen
     } catch (e) {
       setPrinters(null);
       const msg = (e as Error).message;
-      setError(
-        e instanceof SyntaxError || msg === 'Failed to fetch'
-          ? 'Printer helper not running. Start it with: npm run server'
-          : msg,
-      );
+      if ((e as { status?: number }).status === 404)
+        // The hosted website has no access to this PC's printers (only the server on the kiosk PC does)
+        setError(HOSTED_MESSAGE);
+      else
+        setError(
+          e instanceof SyntaxError || msg === 'Failed to fetch'
+            ? 'Printer helper not running. Start it with: npm run server'
+            : msg,
+        );
     } finally {
       setLoading(false);
     }
