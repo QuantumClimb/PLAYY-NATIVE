@@ -58,7 +58,9 @@ shareRouter.post(
   '/leads',
   wrap(async (req, res) => {
     if (!allowShare(req.ip)) throw new HttpError(429, 'Too many requests');
-    const phone = String(req.body?.phone ?? '').trim().slice(0, 15);
+    const phone = String(req.body?.phone ?? '')
+      .trim()
+      .slice(0, 15);
     if (!isPhone(phone)) throw badRequest('Invalid phone number');
     await addLead(phone);
     res.json({ ok: true });

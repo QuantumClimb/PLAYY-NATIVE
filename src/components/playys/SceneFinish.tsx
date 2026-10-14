@@ -17,7 +17,11 @@ const NameBanner: React.FC<{ name: string; mode: 'color' | 'line' }> = ({ name, 
           <span
             key={i}
             data-ch={ch}
-            style={mode === 'color' ? { color: LETTER_COLORS[i % LETTER_COLORS.length] } : undefined}
+            style={
+              mode === 'color'
+                ? ({ ['--letter' as string]: LETTER_COLORS[i % LETTER_COLORS.length] } as React.CSSProperties)
+                : undefined
+            }
           >
             {ch === ' ' ? ' ' : ch}
           </span>

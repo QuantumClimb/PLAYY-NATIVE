@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { X, Printer, RefreshCw, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { api } from '../data/api';
+import { HELPER_URL, setSilentPrint, silentPrintOn } from '../lib/print/silentPrint';
 
 interface PrinterInfo {
   name: string;
@@ -25,12 +26,16 @@ const STATUS_LABEL: Record<PrinterInfo['status'], { text: string; ok: boolean }>
 
 const HOSTED_MESSAGE =
   'This kiosk is opened from the hosted website, which cannot see the printers on this computer, so none are listed. ' +
-  'Printing itself still works through Chrome. To skip the print preview, start Chrome with --kiosk-printing.';
+  'Printing itself still works through Chrome. To skip the print preview, switch on silent printing below (it needs the print helper on this PC) or start Chrome with --kiosk-printing.';
 
 export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen, onClose, onTestPrint }) => {
   const [printers, setPrinters] = useState<PrinterInfo[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [silent, setSilent] = useState(silentPrintOn);
+  const [testing, setTesting] = useState(false);
+  // With silent printing on, the printers are the ones the helper sees on this PC
+  const base = silent ? HELPER_URL : '';
 
   const load = useCallback(async (request: () => Promise<{ printers: PrinterInfo[] }>) => {
     setLoading(true);
@@ -46,7 +51,7 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen
       else
         setError(
           e instanceof SyntaxError || msg === 'Failed to fetch'
-            ? 'Printer helper not running. Start it with: npm run server'
+            ? 'Print helper not running. Start it on this PC with: npm run print-helper'
             : msg,
         );
     } finally {
@@ -54,12 +59,30 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen
     }
   }, []);
 
-  const detect = useCallback(() => load(() => api.get('/api/printers')), [load]);
-  const setDefault = (name: string) => load(() => api.post('/api/printers/default', { name }));
+  const detect = useCallback(() => load(() => api.get(`${base}/api/printers`)), [load, base]);
+  const setDefault = (name: string) => load(() => api.post(`${base}/api/printers/default`, { name }));
 
   useEffect(() => {
     if (isOpen) detect();
   }, [isOpen, detect]);
+
+  const toggleSilent = () => {
+    setSilentPrint(!silent);
+    setSilent(!silent);
+  };
+
+  const testPrint = async () => {
+    if (!silent) return onTestPrint();
+    setTesting(true);
+    setError(null);
+    try {
+      await api.post(`${HELPER_URL}/api/print/test`);
+    } catch (e) {
+      setError(`The test page could not be printed: ${(e as Error).message}`);
+    } finally {
+      setTesting(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -83,6 +106,18 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen
           <button type="button" onClick={onClose} aria-label="Close" className="p-2 rounded-full hover:bg-slate-800">
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        <div className="rounded-xl border border-slate-700 bg-slate-800/60 p-3 space-y-1">
+          <label className="flex items-center justify-between gap-3 cursor-pointer">
+            <span>Silent printing (no print preview)</span>
+            <input type="checkbox" checked={silent} onChange={toggleSilent} className="h-6 w-6 accent-teal-400" />
+          </label>
+          <p className="text-xs text-slate-400">
+            {silent
+              ? 'Prints are sent to the print helper on this PC (npm run print-helper). If it is not running, the normal print dialog opens.'
+              : 'Prints open the browser print dialog. Switch on to print straight to the default printer.'}
+          </p>
         </div>
 
         {error && (
@@ -149,8 +184,8 @@ export const PrinterDetectDialog: React.FC<PrinterDetectDialogProps> = ({ isOpen
           </button>
           <button
             type="button"
-            onClick={onTestPrint}
-            disabled={!defaultOk}
+            onClick={testPrint}
+            disabled={!defaultOk || testing}
             className="btn-3d flex-1 py-3 px-4 disabled:opacity-50"
           >
             TEST PRINT

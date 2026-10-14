@@ -22,7 +22,7 @@ interface Options {
   library: AssetLibrary;
   selection: Selection;
   /** The visitor finished (after SHARE): open the print dialog and show the success screen */
-  onFinish: () => void;
+  onFinish: (printed: boolean) => void;
   /** Back to the intro screen (idle too long, or Back on the first page) */
   onExit: () => void;
 }

@@ -14,7 +14,7 @@ interface KioskFlowProps {
   card: GeneratedCard | null;
   onCardChange: (card: GeneratedCard | null) => void;
   /** The visitor shared: open the print dialog and show the success screen */
-  onFinish: () => void;
+  onFinish: (printed: boolean) => void;
   /** Back to the intro screen (idle too long, or Back on the first page) */
   onExit: () => void;
 }

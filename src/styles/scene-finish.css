@@ -14,17 +14,25 @@
   font-family: 'Sniglet', 'Fredoka', sans-serif; font-weight: 800; font-size: calc(var(--fs) * 1cqw);
 }
 
-.scene-name[data-mode='color'] .scene-name-text { filter: drop-shadow(0 0 .3cqw rgba(35, 25, 110, .95)) drop-shadow(0 .7cqw .5cqw rgba(0, 0, 0, .22)); }
+/* The lettering is built from stacked solid copies of each letter: a dark outline underneath, then (colour page) a white
+   edge, then the letter itself. No filters, transparency or isolation groups: some printers and drivers turn those
+   into a grey wash over the name. The span's own text is the bottom copy; the pseudo-elements are laid over it. */
+.scene-name-text > span { position: relative; }
 
-.scene-name[data-mode='color'] .scene-name-text > span { -webkit-text-stroke: calc(var(--fs) * .17cqw) #fff; paint-order: stroke fill; }
-
-/* Coloring page: pure white letters on a black outline. The outline is a second copy of the letter underneath,
-   so the fill stays white even where a renderer ignores paint-order. */
-.scene-name[data-mode='line'] .scene-name-text > span { position: relative; color: #fff; isolation: isolate; }
-.scene-name[data-mode='line'] .scene-name-text > span::before {
-  content: attr(data-ch); position: absolute; left: 0; top: 0; z-index: -1; color: #111;
-  -webkit-text-stroke: calc(var(--fs) * .26cqw) #111;
+.scene-name-text > span::before, .scene-name-text > span::after {
+  content: attr(data-ch); position: absolute; left: 0; top: 0;
 }
+
+/* Colour page: navy outline, white edge, rainbow letter */
+.scene-name[data-mode='color'] .scene-name-text > span {
+  color: #23196e; -webkit-text-stroke: calc(var(--fs) * .3cqw) #23196e;
+}
+.scene-name[data-mode='color'] .scene-name-text > span::before { color: #fff; -webkit-text-stroke: calc(var(--fs) * .17cqw) #fff; }
+.scene-name[data-mode='color'] .scene-name-text > span::after { color: var(--letter); -webkit-text-stroke: 0; }
+
+/* Coloring page: pure white letters on a black outline */
+.scene-name[data-mode='line'] .scene-name-text > span { color: #111; -webkit-text-stroke: calc(var(--fs) * .26cqw) #111; }
+.scene-name[data-mode='line'] .scene-name-text > span::after { color: #fff; -webkit-text-stroke: 0; }
 
 .scene-dash { position: absolute; z-index: 1; width: 4cqw; height: 1cqw; border-radius: 999px; background: #111; }
 

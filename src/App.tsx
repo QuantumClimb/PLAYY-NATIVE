@@ -15,6 +15,7 @@ import { KioskFlow } from './kiosk/KioskFlow';
 import { KioskWelcome } from './kiosk/KioskWelcome';
 import { KioskCelebrationScreen } from './kiosk/KioskCelebrationScreen';
 import { PrinterDetectDialog } from './kiosk/PrinterDetectDialog';
+import { printSilently } from './lib/print/silentPrint';
 import { saveLead } from './lib/share/leads';
 import { retryPendingShare } from './lib/share/send';
 
@@ -65,9 +66,14 @@ export default function App() {
     setPhase('create');
   };
 
-  const handleFinishAndPrint = () => {
-    handlePrint();
+  // Pages the print helper already printed need no print dialog
+  const handleFinishAndPrint = (printed: boolean) => {
+    if (!printed) handlePrint();
     setPhase('celebrate');
+  };
+
+  const handlePrintAgain = async () => {
+    if (!(await printSilently(null))) handlePrint();
   };
 
   const handleResetToIdle = () => {
@@ -130,7 +136,7 @@ export default function App() {
                   config={configuration}
                   card={liveCard}
                   onAllDone={handleResetToIdle}
-                  onPrintAnother={handlePrint}
+                  onPrintAnother={handlePrintAgain}
                 />
               )}
             </div>

@@ -16,6 +16,16 @@ npm run dev:all    # development with hot reload (site :3000, server :3001)
 
 Copy `.env.example` to `.env` and fill in `DATABASE_URL`, `COMMAND_CENTER_PASSWORD` and (for email) `SMTP_USER` / `SMTP_PASS`.
 
+## Silent printing (kiosk PC)
+
+When the kiosk opens the hosted website, the browser shows its print preview. To print straight to the default printer instead:
+
+1. On the kiosk PC run `npm run print-helper` (keep it running; it needs no database). Install [SumatraPDF](https://www.sumatrapdf.org/) for fully silent printing; without it the PDF app's own print command is used.
+2. Open the printer dialog (Alt + Shift + P) and switch on **Silent printing**. The setting is kept in that browser.
+3. SHARE and PRINT AGAIN now send the pages to the helper. If the helper is not running, the normal print dialog opens instead.
+
+The helper only accepts calls from localhost and `*.vercel.app`; add other sites with `PRINT_ALLOWED_ORIGINS` (comma separated). Starting Chrome with `--kiosk-printing` also skips the preview, without the helper.
+
 ## Check it
 
 ```

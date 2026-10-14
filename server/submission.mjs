@@ -27,6 +27,14 @@ const text = (value, max) =>
     .trim()
     .slice(0, max);
 
+/** The four pictures, checked: base64 text of a sensible size. Throws a 400 when one is missing or wrong. */
+export function parseImages(images) {
+  const badImage = (key) =>
+    typeof images?.[key] !== 'string' || !BASE64.test(images[key]) || images[key].length > MAX_IMAGE_LENGTH;
+  if (!images || IMAGE_KEYS.some(badImage)) throw badRequest('Invalid images');
+  return Object.fromEntries(IMAGE_KEYS.map((key) => [key, images[key]]));
+}
+
 /**
  * Checks what the kiosk sends when a visitor taps SHARE and returns only what we keep.
  * Throws a 400 with a plain message when something is missing or wrong.
@@ -40,9 +48,7 @@ export function parseSubmission(body) {
   if (typeof thumbnail !== 'string' || !THUMBNAIL.test(thumbnail) || thumbnail.length > MAX_THUMBNAIL_LENGTH)
     throw badRequest('Invalid thumbnail');
 
-  const badImage = (key) =>
-    typeof images?.[key] !== 'string' || !BASE64.test(images[key]) || images[key].length > MAX_IMAGE_LENGTH;
-  if (!images || IMAGE_KEYS.some(badImage)) throw badRequest('Invalid images');
+  const checkedImages = parseImages(images);
 
   const character = {};
   for (const field of CHARACTER_FIELDS) if (config?.[field] !== undefined) character[field] = config[field];
@@ -53,6 +59,6 @@ export function parseSubmission(body) {
     who,
     thumbnail,
     config: character,
-    images: Object.fromEntries(IMAGE_KEYS.map((key) => [key, images[key]])),
+    images: checkedImages,
   };
 }
