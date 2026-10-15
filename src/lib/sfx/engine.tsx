@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { synthById } from './synth';
 import { api } from '../../data/api';
-import { startMusic } from './music';
+import { audioMuted, startMusic } from './music';
 import { DEFAULT_SOUND_SETTINGS, SFX_EVENTS, SfxEvent, SoundSettings, cleanSettings } from './settings';
 
 // ---------- the audio context and the loaded settings ----------
@@ -45,7 +45,7 @@ function loadBuffer(mediaId: string): Promise<AudioBuffer | null> {
 
 /** Plays one sound reference (`synth:pop`, `custom:abc`, `none`) at a volume, using the given settings for custom lookups. */
 export function playRef(ref: string, volume = 1, cfg: SoundSettings = settings): void {
-  if (ref === 'none') return;
+  if (ref === 'none' || audioMuted()) return;
   const a = audio();
   if (!a) return;
   a.master.gain.value = cfg.volume;

@@ -46,8 +46,11 @@ shareRouter.post(
   '/submissions',
   wrap(async (req, res) => {
     if (!allowShare(req.ip)) throw new HttpError(429, 'Too many requests');
-    const { who, thumbnail, config, images } = parseSubmission(req.body);
-    const row = await addSubmission({ ...who, thumbnail, config });
+    const { who, serial, thumbnail, config, images } = parseSubmission(req.body);
+    const row = await addSubmission({ ...who, serial, thumbnail, config });
+    // The same Playy sent again after it was already emailed is not emailed twice
+    if (row.duplicate && ['sent', 'off'].includes(row.email_status))
+      return res.json({ id: row.id, email: row.email_status });
     const email = await emailSubmission(row.id, { ...who, created: row.created }, images);
     res.json({ id: row.id, email });
   }),

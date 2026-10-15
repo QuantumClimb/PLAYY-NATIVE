@@ -10,6 +10,8 @@
     visibility: hidden;
   }
 
+  #printable-test-sheet,
+  #printable-test-sheet *,
   #printable-coloring-sheet,
   #printable-coloring-sheet *,
   #printable-card-sheet,

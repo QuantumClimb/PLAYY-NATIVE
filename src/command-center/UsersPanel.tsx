@@ -50,7 +50,7 @@ export const UsersPanel: React.FC = () => {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search name, email or phone"
+          placeholder="Search name, email, phone or serial"
           className="bg-gray-50 border border-gray-300 rounded-lg px-3 py-1.5 text-sm w-72"
         />
         <span className="text-sm text-gray-500">

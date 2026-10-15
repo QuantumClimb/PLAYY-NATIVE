@@ -18,7 +18,7 @@ interface UsersTableProps {
   emptyText: string;
 }
 
-const HEADINGS = ['Card', 'Name', 'Email', 'Phone', 'Date and time', 'Character', 'Email'];
+const HEADINGS = ['Card', 'Name', 'Email', 'Phone', 'Serial', 'Date and time', 'Character', 'Email'];
 
 export const UsersTable: React.FC<UsersTableProps> = ({ rows, emptyText }) => (
   <div className="overflow-x-auto rounded-xl border border-gray-300">
@@ -52,6 +52,7 @@ export const UsersTable: React.FC<UsersTableProps> = ({ rows, emptyText }) => (
             <td className="px-3 py-2 font-medium">{r.name}</td>
             <td className="px-3 py-2">{r.email}</td>
             <td className="px-3 py-2">{r.phone}</td>
+            <td className="px-3 py-2 font-mono text-xs">{r.serial ?? '-'}</td>
             <td className="px-3 py-2 whitespace-nowrap">{formatWhen(r.created)}</td>
             <td className="px-3 py-2 text-xs text-gray-600">
               <div>

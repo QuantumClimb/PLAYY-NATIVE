@@ -10,10 +10,34 @@ let index = 0;
 let failures = 0;
 let unlockBound = false;
 
+const MUTE_KEY = 'playys-muted';
+
+/** Whether all sound (music and button sounds) is switched off on this PC. Kept in this browser. */
+let muted = (() => {
+  try {
+    return localStorage.getItem(MUTE_KEY) === '1';
+  } catch {
+    return false;
+  }
+})();
+
+export const audioMuted = () => muted;
+
+export function setAudioMuted(value: boolean): void {
+  muted = value;
+  try {
+    localStorage.setItem(MUTE_KEY, value ? '1' : '0');
+  } catch {
+    /* storage blocked: the setting just does not stick */
+  }
+  if (player) player.muted = value;
+}
+
 function ensurePlayer(): HTMLAudioElement {
   if (!player) {
     player = new Audio();
     player.preload = 'auto';
+    player.muted = muted;
     player.addEventListener('ended', () => playIndex(index + 1));
     player.addEventListener('error', () => {
       // Skip a song that cannot be played; give up if none of them can

@@ -18,13 +18,9 @@ Copy `.env.example` to `.env` and fill in `DATABASE_URL`, `COMMAND_CENTER_PASSWO
 
 ## Silent printing (kiosk PC)
 
-When the kiosk opens the hosted website, the browser shows its print preview. To print straight to the default printer instead:
+Run `scripts/install-kiosk-shortcut.bat` on the kiosk PC. It makes a "PLAYY Kiosk" shortcut (desktop and Startup) that opens the site full-screen in Chrome with `--kiosk-printing`, so prints go straight to the Windows default printer with no preview. Alt + Shift + P opens TEST PRINT to check it.
 
-1. On the kiosk PC run `npm run print-helper` (keep it running; it needs no database). Install [SumatraPDF](https://www.sumatrapdf.org/) for fully silent printing; without it the PDF app's own print command is used.
-2. Open the printer dialog (Alt + Shift + P) and switch on **Silent printing**. The setting is kept in that browser.
-3. SHARE and PRINT AGAIN now send the pages to the helper. If the helper is not running, the normal print dialog opens instead.
-
-The helper only accepts calls from localhost and `*.vercel.app`; add other sites with `PRINT_ALLOWED_ORIGINS` (comma separated). Starting Chrome with `--kiosk-printing` also skips the preview, without the helper.
+Optional print helper (not needed with the shortcut): `npm run print-helper` prints the finished pages through SumatraPDF or the PDF app. Switch it on in the browser console with `localStorage.setItem('playys-silent-print-helper', '1')`. It only accepts calls from localhost and `*.vercel.app`; add other sites with `PRINT_ALLOWED_ORIGINS`.
 
 ## Check it
 

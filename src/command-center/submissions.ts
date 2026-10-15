@@ -5,6 +5,8 @@ export interface Submission {
   name: string;
   email: string;
   phone: string;
+  /** The serial printed on the trump card (empty for Playys made before serials were kept) */
+  serial: string | null;
   thumbnail: string | null;
   config: {
     head?: string;
@@ -39,7 +41,7 @@ export const formatWhen = (iso: string): string =>
 
 export const matchesQuery = (row: Submission, query: string): boolean => {
   const q = query.trim().toLowerCase();
-  return !q || `${row.name} ${row.email} ${row.phone}`.toLowerCase().includes(q);
+  return !q || `${row.name} ${row.email} ${row.phone} ${row.serial ?? ''}`.toLowerCase().includes(q);
 };
 
 const csvCell = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`;
@@ -49,6 +51,7 @@ const CSV_HEADINGS = [
   'Name',
   'Email',
   'Phone',
+  'Serial',
   'Head',
   'Pose',
   'Power',
@@ -66,6 +69,7 @@ export function submissionsToCsv(rows: Submission[]): string {
       r.name,
       r.email,
       r.phone,
+      r.serial,
       r.config.head,
       r.config.pose,
       r.config.symbol,

@@ -105,6 +105,13 @@ describe('parseSubmission', () => {
     expect(parseSubmission({ ...body, config: { card: { stats: { power: 'x' } } } }).config.card).toBeUndefined();
   });
 
+  it('keeps a card serial, allows none, and refuses a malformed one', () => {
+    expect(parseSubmission({ ...body, serial: '7K3QX-9M2VD' }).serial).toBe('7K3QX-9M2VD');
+    expect(parseSubmission(body).serial).toBeNull();
+    expect(parseSubmission({ ...body, serial: '' }).serial).toBeNull();
+    expect(message(() => parseSubmission({ ...body, serial: "x'; drop table" }))).toBe('Invalid serial');
+  });
+
   it('refuses a missing name, a bad thumbnail and a bad picture', () => {
     expect(message(() => parseSubmission({ ...body, name: '  ' }))).toBe('A name is needed');
     expect(message(() => parseSubmission({ ...body, thumbnail: 'http://x' }))).toBe('Invalid thumbnail');

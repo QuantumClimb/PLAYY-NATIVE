@@ -13,6 +13,8 @@ interface Pending {
   name: string;
   email: string;
   phone: string;
+  /** The serial printed on the trump card */
+  serial: string;
   thumbnail: string;
   config: Partial<PlayyConfiguration> & { card?: { stats: GeneratedCard['stats']; type: string; rarity: string } };
   images: ShareCapture['images'];
@@ -35,6 +37,7 @@ export async function sendShare(
     name: config.kidName ?? '',
     email: config.email ?? '',
     phone: config.phone ?? '',
+    serial: card?.id ?? '',
     thumbnail: capture.thumbnail,
     config: {
       head: config.head,

@@ -4,7 +4,9 @@ import type { ShareCapture } from '../share/capture';
 /** The print helper that runs on the kiosk PC (npm run print-helper). */
 export const HELPER_URL = 'http://127.0.0.1:3002';
 
-const KEY = 'playys-silent-print';
+// The setting has no switch on screen any more; this key is new so an old value from the removed switch is ignored.
+// To use the print helper on a PC: localStorage.setItem('playys-silent-print-helper', '1') in the browser console.
+const KEY = 'playys-silent-print-helper';
 
 /** Whether prints go through the helper (no print preview). Kept in this browser, so each kiosk PC has its own setting. */
 export function silentPrintOn(): boolean {
@@ -12,14 +14,6 @@ export function silentPrintOn(): boolean {
     return localStorage.getItem(KEY) === '1';
   } catch {
     return false;
-  }
-}
-
-export function setSilentPrint(on: boolean): void {
-  try {
-    localStorage.setItem(KEY, on ? '1' : '0');
-  } catch {
-    /* storage blocked: the setting just does not stick */
   }
 }
 

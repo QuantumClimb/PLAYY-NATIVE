@@ -3,6 +3,7 @@ import { badRequest } from './http.mjs';
 /** The four pictures sent with every share: the black-and-white page, the colour page, the card front and back. */
 export const IMAGE_KEYS = ['bw', 'color', 'cardFront', 'cardBack'];
 
+const SERIAL = /^[0-9A-Z]{5}-[0-9A-Z]{5}$/;
 const BASE64 = /^[A-Za-z0-9+/=]+$/;
 const THUMBNAIL = /^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/;
 const MAX_THUMBNAIL_LENGTH = 120_000;
@@ -40,10 +41,12 @@ export function parseImages(images) {
  * Throws a 400 with a plain message when something is missing or wrong.
  */
 export function parseSubmission(body) {
-  const { name, email, phone, thumbnail, config, images } = body ?? {};
+  const { name, email, phone, serial, thumbnail, config, images } = body ?? {};
 
   const who = { name: text(name, 40), email: text(email, 120), phone: text(phone, 30) };
   if (!who.name) throw badRequest('A name is needed');
+  if (serial !== undefined && serial !== '' && !(typeof serial === 'string' && SERIAL.test(serial)))
+    throw badRequest('Invalid serial');
 
   if (typeof thumbnail !== 'string' || !THUMBNAIL.test(thumbnail) || thumbnail.length > MAX_THUMBNAIL_LENGTH)
     throw badRequest('Invalid thumbnail');
@@ -57,6 +60,7 @@ export function parseSubmission(body) {
 
   return {
     who,
+    serial: serial || null,
     thumbnail,
     config: character,
     images: checkedImages,

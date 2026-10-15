@@ -41,6 +41,7 @@ export default function App() {
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [isExporterOpen, setIsExporterOpen] = useState(false);
   const [isPrinterDetectOpen, setIsPrinterDetectOpen] = useState(false);
+  const [testPrinting, setTestPrinting] = useState(false);
 
   // A Playy that could not be sent last time (no connection) goes out when the kiosk starts again
   useEffect(() => {
@@ -51,6 +52,13 @@ export default function App() {
   const handlePrint = useCallback(() => {
     window.print();
   }, []);
+
+  // TEST PRINT: the test page replaces the Playy pages for one print
+  useEffect(() => {
+    if (!testPrinting) return;
+    window.print();
+    setTestPrinting(false);
+  }, [testPrinting]);
 
   // Flow handlers
   const handleStart = () => {
@@ -103,8 +111,17 @@ export default function App() {
   return (
     <div className="w-screen h-screen min-h-screen overflow-hidden bg-slate-950 text-white flex flex-col select-none print:bg-white print:p-0 print:h-auto print:overflow-visible">
       {/* 1. Dedicated Printable Sheet (Hidden on screen, activated during print) */}
-      <PrintableColoringSheet config={configuration} />
-      <PrintableCardSheet card={liveCard} />
+      {testPrinting ? (
+        <div id="printable-test-sheet" className="hidden print:block bg-white text-black p-10">
+          <h1 className="text-4xl font-bold">PLAYY test print</h1>
+          <p className="mt-4 text-xl">{new Date().toLocaleString('en-IN')}</p>
+        </div>
+      ) : (
+        <>
+          <PrintableColoringSheet config={configuration} />
+          <PrintableCardSheet card={liveCard} />
+        </>
+      )}
 
       {/* 2. Full-Screen Full-Bleed Magical Coloring Machine */}
       <main className="w-full h-full flex-1 flex flex-col overflow-hidden print:hidden">
@@ -155,7 +172,7 @@ export default function App() {
       <PrinterDetectDialog
         isOpen={isPrinterDetectOpen}
         onClose={() => setIsPrinterDetectOpen(false)}
-        onTestPrint={handlePrint}
+        onTestPrint={() => setTestPrinting(true)}
       />
 
       {/* 3. Hidden operator tools (opened by holding the logo for 4.5 seconds, or Ctrl+D) */}

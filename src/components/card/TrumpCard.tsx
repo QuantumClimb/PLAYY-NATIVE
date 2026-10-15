@@ -156,7 +156,7 @@ export const TrumpCardBack: React.FC<TrumpCardProps> = ({ card, scale = 1, setti
         <div className="text-center text-[11px] italic text-white/80">"{archetype.quote}"</div>
 
         <div className="flex justify-between border-t border-white/20 pt-1 text-[9px]">
-          <span className="whitespace-nowrap text-white/60">SERIAL #{id.toUpperCase()}</span>
+          <span className="whitespace-nowrap text-white/60">SERIAL #{id}</span>
           <span className="whitespace-nowrap" style={{ color: s.backAccent }}>
             AUTHENTIC COLLECTIBLE ★
           </span>

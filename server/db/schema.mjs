@@ -117,6 +117,11 @@ export async function runMigrations(sql) {
         created TIMESTAMPTZ NOT NULL DEFAULT now(),
         phone   TEXT NOT NULL
       )`);
+  // The serial printed on the trump card: no two submissions may share one
+  await sql.query(`ALTER TABLE submissions ADD COLUMN IF NOT EXISTS serial TEXT`);
+  await sql.query(
+    `CREATE UNIQUE INDEX IF NOT EXISTS submissions_serial_key ON submissions (serial) WHERE serial IS NOT NULL`,
+  );
   await sql.query(`
       CREATE TABLE IF NOT EXISTS brand (
         id       INTEGER PRIMARY KEY DEFAULT 1,
