@@ -19,6 +19,18 @@
     visibility: visible;
   }
 
+  /* Print colours exactly as drawn. Without this, a print that leaves "background graphics" off (as --kiosk-printing
+     does) turns white lettering and white logo fills grey. */
+  #printable-test-sheet,
+  #printable-test-sheet *,
+  #printable-coloring-sheet,
+  #printable-coloring-sheet *,
+  #printable-card-sheet,
+  #printable-card-sheet * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
   /* Page 1: coloring sheet. Page 2: trump card front + back (if a card exists). */
   #printable-coloring-sheet {
     display: block !important;
