@@ -16,7 +16,7 @@ import { KioskWelcome } from './kiosk/KioskWelcome';
 import { KioskCelebrationScreen } from './kiosk/KioskCelebrationScreen';
 import { PrinterDetectDialog } from './kiosk/PrinterDetectDialog';
 import { printSilently } from './lib/print/silentPrint';
-import { saveLead } from './lib/share/leads';
+import { countFirstVisit, saveLead } from './lib/share/leads';
 import { retryPendingShare } from './lib/share/send';
 
 // Operator tools: only loaded when an operator opens them, so the kiosk does not carry their code
@@ -70,6 +70,8 @@ export default function App() {
     if (phone) {
       saveLead(phone);
       setConfiguration((c) => ({ ...c, phone }));
+    } else {
+      countFirstVisit();
     }
     setPhase('create');
   };

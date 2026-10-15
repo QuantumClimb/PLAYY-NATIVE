@@ -1,7 +1,16 @@
 import express from 'express';
 import { isEmail, isPhone } from '../../shared/validation.mjs';
 import { requireAdmin } from '../auth.mjs';
-import { addLead, addSubmission, listAbandonedLeads, listSubmissions, settings } from '../db/index.mjs';
+import {
+  addLead,
+  addSubmission,
+  addVisit,
+  clearUsers,
+  countUsers,
+  listAbandonedLeads,
+  listSubmissions,
+  settings,
+} from '../db/index.mjs';
 import { HttpError, badRequest, rateLimiter, wrap } from '../http.mjs';
 import { smtpConfigured } from '../mailer.mjs';
 import { emailSubmission, shareSettings } from '../shareService.mjs';
@@ -66,6 +75,34 @@ shareRouter.post(
       .slice(0, 15);
     if (!isPhone(phone)) throw badRequest('Invalid phone number');
     await addLead(phone);
+    await addVisit('returning');
+    res.json({ ok: true });
+  }),
+);
+
+// Someone chose FIRST TIME? on the welcome screen
+shareRouter.post(
+  '/visits',
+  wrap(async (req, res) => {
+    if (!allowShare(req.ip)) throw new HttpError(429, 'Too many requests');
+    if (req.body?.kind !== 'first') throw badRequest('Invalid visit');
+    await addVisit('first');
+    res.json({ ok: true });
+  }),
+);
+
+shareRouter.get(
+  '/cc/user-counts',
+  requireAdmin,
+  wrap(async (_req, res) => res.json({ counts: await countUsers() })),
+);
+
+// Starts the users list and the counter again from zero
+shareRouter.delete(
+  '/cc/users',
+  requireAdmin,
+  wrap(async (_req, res) => {
+    await clearUsers();
     res.json({ ok: true });
   }),
 );

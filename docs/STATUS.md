@@ -1,10 +1,10 @@
 # PLAYYS Kiosk: Status Report
 
-Last updated: 2026-10-12 (refactor phases 0 to 6 done). Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
+Last updated: 2026-10-15 (client testing under way). Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
 
 ## 1. Summary
 
-The whole visitor journey works end to end: intro, build a character (face, pose, colours), power-up questions, power awarded, background, name, phone and email, preview, trump card, share (print dialog, email, log) and a success screen that returns to the intro. Everything the client edits lives in the command center. What is still open is outside the code: the **SMTP password** (so emails go out) and the **WhatsApp token**, both waiting on the client's system administrator.
+The whole visitor journey works end to end: intro, a welcome choice (FIRST TIME? or Already a PlayyPal?), build a character (face, pose, colours), power-up questions, power awarded, background, name, phone and email, preview, trump card, share (print, email to the team and to the visitor, log) and a success screen that returns to the intro. The kiosk goes back to the intro after 4 minutes without a touch, and every page has a Home button. Everything the client edits lives in the command center. What is still open is outside the code: the **SMTP password** (so emails go out) and the **WhatsApp token**, both waiting on the client's system administrator.
 
 ## 2. How to run
 
@@ -14,19 +14,21 @@ The whole visitor journey works end to end: intro, build a character (face, pose
 | Development (hot reload) | `npm run dev:all` (site on :3000, server on :3001) |
 | Server only / site only | `npm run server` / `npm run dev` |
 | Command center | `/command-center` (password in `.env`: `COMMAND_CENTER_PASSWORD`) |
-| Printer dialog | `Alt+Shift+P` on any screen (needs the local server) |
-| Operator dialog | hold the logo on the intro screen for 4.5 seconds |
-| Kiosk Chrome | `--kiosk --kiosk-printing --autoplay-policy=no-user-gesture-required` (silent printing, music from the start) |
+| Operator dialog | `Alt+Shift+P` on any screen: **TEST PRINT** (one test page, printed the way the kiosk prints) and a **sound mute** switch (saved per PC) |
+| Operator tools | hold the logo on the intro screen for 4.5 seconds |
+| Kiosk PC setup | run `scripts/install-kiosk-shortcut.bat` once on the PC: it makes a "PLAYY Kiosk" shortcut (desktop and Startup, with the PLAYY head icon) that opens the Vercel site in Chrome with `--kiosk --kiosk-printing --autoplay-policy=no-user-gesture-required` (full screen, no print preview, music from the start). Set the right printer as the Windows default. Alt+F4 leaves the kiosk. |
+| Print helper (optional) | `npm run print-helper` prints the finished pages through SumatraPDF or the PDF app; switch it on in the browser console (see README). Not needed with the shortcut. |
 
 `.env` needs `DATABASE_URL` (Neon Postgres, shared by local runs and Vercel), `COMMAND_CENTER_PASSWORD`, and, for email, `SMTP_USER` and `SMTP_PASS` (optional `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`). See `.env.example`. Pushing to `main` deploys to Vercel; its environment variables must match.
 
 ## 3. The visitor journey
 
-Every page after the intro shares one layout: logo, progress tabs, title and subtitle, "Pick for Me!" where it applies, and Back / Next in one bottom container. No page scrolls vertically; option lists swipe sideways.
+Every page after the welcome screen shares one layout: logo, progress tabs, title and subtitle, "Pick for Me!" where it applies, a round **Home** button (back to the intro) to its right, and Back / Next in one bottom container. Visitor-facing instructions say **PlayyPal** ("Pick a face for your PlayyPal!"); the character's own name is unchanged. No page scrolls vertically; option lists swipe sideways.
 
 | Step | What happens |
 |---|---|
 | Intro | Looping video, logo, sign, Tap to Start, four badges. |
+| Welcome | **FIRST TIME?** goes on to the normal flow. **Already a PlayyPal?** opens a phone keypad: the number is kept on the server (so it can be followed up if the visitor never finishes) and pre-filled on the phone screen, then the normal flow follows. No footer on this screen. |
 | 1 Face | Swipeable cards of heads. The head also sets the outfit and secondary colours. |
 | 2 Pose | Swipeable pose cards; the character preview recolours with the chosen head. |
 | 3 Colours | Simple (main + secondary colour) or Advanced (each part), 15 glossy hexagon swatches. Gloves stay white. |
@@ -39,9 +41,9 @@ Every page after the intro shares one layout: logo, progress tabs, title and sub
 | Share | The two pages and the card in a row. **SHARE** photographs them, logs the visitor, emails two PDFs, opens the print dialog and moves on. |
 | Success | Confetti and what happens next; returns to the intro after 20 seconds or on FINISH. |
 
-The finished page (preview, print, PDF) has the logo top-left, the name big under the character, and "Notes: email - phone" along the bottom. Colour choices go through one resolver, `src/lib/playys/colors.ts`. The black-and-white page ignores colour choices.
+The finished page (preview, print, PDF) has the logo top-left and the name big under the character. The email and phone are no longer printed. The trump card front has the logo and name too. The name lettering is built from plain stacked letter copies (no filters), because filters printed as a grey wash on some printers. Colour choices go through one resolver, `src/lib/playys/colors.ts`. The black-and-white page ignores colour choices.
 
-Printing sends the black-and-white page, the colour page and the card front and back. The browser's print dialog still appears for now; with `--kiosk-printing` it prints silently.
+Printing sends the black-and-white page, the colour page and the card front and back. With the kiosk shortcut (`--kiosk-printing`) it prints straight to the Windows default printer; in an ordinary browser tab the print preview appears. The website cannot list the PC's printers (the server runs on Vercel), so the old printer-detect list was removed.
 
 ## 4. Command center (`/command-center`)
 
@@ -54,25 +56,27 @@ Password protected. Tabs:
 | Intro badges | The badges under the start button: label, icon (built in, upload or emoji), colour, order. |
 | Progress tabs | Rename the eight top tabs, change their icons, or hide the labels. |
 | Trump card | Outline colour and thickness, corner roundness, back background and highlight colour, with live preview. Power symbols and stat icons are fixed. |
-| Users | Everyone who made a Playyy: name, email, phone, date and time, a card thumbnail, the character choices and the email status. Search, CSV download, Resend. |
+| Users | **Counters** (people who used it = everyone who chose FIRST TIME or Already a PlayyPal; first time; already a PlayyPal; finished a Playy), then everyone who finished: name, email, phone, **card serial**, date and time, a card thumbnail, the character choices and the email status. Search (name, email, phone, serial), CSV download, **Clear all users** (asks first; empties the list, the unfinished numbers and the counters). Below: **Started but did not finish**, the phone numbers typed on "Already a PlayyPal?" with no finished Playy under the same number, one per number. |
 | Share & email | Two recipient slots (currently qcquantumclimb@gmail.com and aum.janakiram@gmail.com), on/off, a greyed-out WhatsApp slot. |
 | Power quiz | The questions, answers and the symbol each answer leans toward. |
-| Logo | Replace the logo SVG; in-app drop shadow and an artwork stroke. |
+| Logo | Replace the logo SVG; in-app drop shadow and an artwork stroke. The built-in logo is now the Playy Kingdom (PK) logo; an uploaded logo overrides it. |
 | Sounds | A sound and volume for 14 kiosk actions, uploads, and the **background music playlist** (order, volume, preview, add songs). |
 
 The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps its playful look.
 
 ## 5. Sharing, email and the users log
 
-- `POST /api/submissions` receives the name, email, phone, a thumbnail, the character choices and four JPEGs (about 1.5 MB). It stores the row, builds two PDFs with `pdf-lib` (coloring pages; trump card) and emails them with `nodemailer` to the recipients in the command center.
-- If the email fails, the images are kept in `submission_files` so **Resend** works later. If the kiosk cannot reach the server, the Playyy is kept in the browser and sent on the next start.
+- `POST /api/submissions` receives the name, email, phone, the card serial, a thumbnail, the character choices and four JPEGs (about 1.5 MB). It stores the row, builds two PDFs with `pdf-lib` (coloring pages; trump card) and sends two emails with `nodemailer`: one to the recipients in the command center (the team copy) and one **to the address the visitor typed**, each tried twice. The PDFs exist only while the emails are sent; nothing large is stored, so there is no Resend. The email switch in Share & email turns all emailing off.
+- **Card serial:** `XXXXX-XXXXX` (10 characters, no look-alike letters, from the browser's secure random source), stored with the submission under a unique database rule. A resend of the same Playy (kiosk retrying after a lost answer) returns the existing row and is not emailed twice. Older rows have no serial. If the kiosk cannot reach the server, the Playy is kept in the browser and sent on the next start.
+- **Counting people:** `POST /api/visits` (FIRST TIME) and `POST /api/leads` (Already a PlayyPal, which also stores the phone number) each add one row to `visits`. These are open routes, rate limited per address.
 - Pictures are taken in the browser with `html-to-image` (the fonts are read once and embedded; this needed `crossorigin` on the Google Fonts link).
 - **Waiting on the client:** SMTP login (a Gmail app password or the company mail server's details) and the WhatsApp token. Until then every row shows "Not sent".
 
 ## 6. Data and architecture
 
-- **Neon Postgres** through the serverless driver, plain SQL in `server/db/`. Tables: `assets`, `media_files`, `scene_backgrounds`, `power_quiz_questions`, `intro_badges`, `progress_tabs`, `trump_card`, `brand`, `sound_settings`, `share_settings`, `submissions` (one small thumbnail per visitor, no pages or PDFs), `app_migrations`; an old `submission_files` table may still exist and can be dropped.
-- **One Express app** (`server/app.mjs`) with two launchers: `server/kiosk-server.mjs` (local, also serves the built site) and `api/index.mjs` (Vercel function, routed by `vercel.json`). Printer routes are off on Vercel.
+- **Neon Postgres** through the serverless driver, plain SQL in `server/db/`. Tables: `assets`, `media_files`, `scene_backgrounds`, `power_quiz_questions`, `intro_badges`, `progress_tabs`, `trump_card`, `brand`, `sound_settings`, `share_settings`, `submissions` (one small thumbnail and the card serial per visitor, no pages or PDFs), `leads` (phone numbers from Already a PlayyPal), `visits` (one row per start, for the counters), `app_migrations`; an old `submission_files` table (about 7 MB of earlier visitors' pictures) still exists and can be dropped.
+- **Database plan and cost:** the Neon project is on the **Launch** plan (billed through Vercel): storage $0.35 per GB-month, compute $0.106 per compute-hour. The database is about 48 MB. At 100 users a day expect roughly $5 to $10 a month for the database (compute dominates). The free plan's quota was exceeded once during testing, which made every `/api` call fail and the kiosk fall back to its few built-in characters (wrong poses and alignment). To keep transfer low, the read-only kiosk content (`/api/assets`, scene backgrounds, brand, sounds and the other settings) is cached at Vercel's edge for 5 minutes (`server/cache.mjs`); someone signed in to the command center always gets fresh data, so a command center edit reaches kiosks within about 5 minutes.
+- **One Express app** (`server/app.mjs`) with two launchers: `server/kiosk-server.mjs` (local, also serves the built site) and `api/index.mjs` (Vercel function, routed by `vercel.json`). Printer and print routes are off on Vercel; `server/print-helper.mjs` is a small separate server for the kiosk PC.
 - **Frontend:** React 19, Vite 6, Tailwind 4 for utilities, plain CSS in `src/styles/` (one file per feature) for the page layouts. Layouts use percentages of the screen so they scale from 1366x768 to 1920x1080.
 - **SVG engine** (`src/lib/assets/svgParts.ts`): named Illustrator layers become parts; one source SVG gives the colour and black-and-white versions. `scene.ts` lays out the A4 scene (5 mm margin, background stretched, character on the stand point).
 - **Sounds** are synthesized in the browser (no audio files, no licensing); background music files are in `public/assets/audio/music`.
@@ -90,8 +94,9 @@ The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps 
 
 **Needs the client**
 1. WhatsApp (pending, see the list below). Email is set up and tested (Google Workspace, noreply@vgpplayykingdom.in); add the same SMTP variables to Vercel.
-2. The kiosk PC's printer, and silent printing with `--kiosk-printing`.
+2. Test the kiosk shortcut on the real kiosk PC: no print preview, the right printer, no grey over the name on the printout, music from the start.
 3. Confirm the Vercel deploy with all environment variables once SMTP is set.
+4. When the client approves the final: move the Vercel project to a **Pro** (commercial) plan; the free Hobby plan is for non-commercial use. A paid Vercel plan covers every project in the team.
 
 **Pending: WhatsApp (waiting on the client's administrator)**
 The token received (32 characters) is rejected by Meta, so the sending code is not built yet. Needed:
@@ -107,7 +112,9 @@ To build then: sending code and command center switch, token only on the server,
 - The Users tab does not yet show each visitor's card stats (they are saved with every submission in its `config`).
 - Page class names still use the old `head-*` / `pick-*` prefixes, and some headers use `display: contents`; renaming them is cosmetic and was left out to keep the screenshots identical.
 - `ExpoProjectExporterModal` is not reachable from any screen.
-- Local fallback assets can hide a database error in the kiosk; decide whether the kiosk should show an error instead.
+- Local fallback assets can hide a database error in the kiosk (this is what happened when the database quota ran out); decide whether the kiosk should show an error instead.
+- The counters count people who chose a start option on the welcome screen; someone who walks away from the welcome screen without choosing is not counted. A returning PlayyPal who makes several Playys is counted once per visit.
+- `scripts/PlayyPal.zip` is an untracked local file.
 - The saved quiz in the database may still hold older wording; re-save it in the Power quiz tab.
 - The CI workflow is in `docs/ci.yml.example` because the push token lacks the `workflow` scope.
 - Colours page: region names are white on cream and hard to read.

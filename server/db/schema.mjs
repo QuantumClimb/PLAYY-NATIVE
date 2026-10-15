@@ -117,6 +117,14 @@ export async function runMigrations(sql) {
         created TIMESTAMPTZ NOT NULL DEFAULT now(),
         phone   TEXT NOT NULL
       )`);
+  // One row each time someone picks FIRST TIME or "Already a PlayyPal?": how many people used the kiosk
+  await sql.query(`
+      CREATE TABLE IF NOT EXISTS visits (
+        id      SERIAL PRIMARY KEY,
+        created TIMESTAMPTZ NOT NULL DEFAULT now(),
+        kind    TEXT NOT NULL                  -- first | returning
+      )`);
+
   // The serial printed on the trump card: no two submissions may share one
   await sql.query(`ALTER TABLE submissions ADD COLUMN IF NOT EXISTS serial TEXT`);
   await sql.query(

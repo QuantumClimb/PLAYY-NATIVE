@@ -28,6 +28,9 @@ vi.mock('../../server/db/index.mjs', () => ({
   upsertSceneBackground: vi.fn(),
   resetSceneBackground: vi.fn(),
   addLead: vi.fn(),
+  addVisit: vi.fn(),
+  countUsers: vi.fn(async () => ({ started: 0, first_time: 0, returning: 0, finished: 0 })),
+  clearUsers: vi.fn(),
   listAbandonedLeads: vi.fn(async () => []),
   addSubmission: vi.fn(),
   listSubmissions: vi.fn(async () => []),
@@ -109,6 +112,8 @@ describe('the command center', () => {
     expect((await call('/cc/progress-tabs', { method: 'PUT', json: {} })).status).toBe(401);
     expect((await call('/cc/submissions')).status).toBe(401);
     expect((await call('/cc/leads')).status).toBe(401);
+    expect((await call('/cc/user-counts')).status).toBe(401);
+    expect((await call('/cc/users', { method: 'DELETE' })).status).toBe(401);
     expect((await call('/cc/session').then((r) => r.json())).signedIn).toBe(false);
   });
 
@@ -156,6 +161,13 @@ describe('sharing', () => {
     const res = await call('/submissions', { method: 'POST', json: { name: '' } });
     expect(res.status).toBe(400);
     expect((await res.json()).error).toBe('A name is needed');
+  });
+
+  it('counts a FIRST TIME visit and refuses any other kind', async () => {
+    const db = await import('../../server/db/index.mjs');
+    expect((await call('/visits', { method: 'POST', json: { kind: 'x' } })).status).toBe(400);
+    expect((await call('/visits', { method: 'POST', json: { kind: 'first' } })).status).toBe(200);
+    expect(db.addVisit).toHaveBeenCalledWith('first');
   });
 
   it('keeps the phone number from "Already a PlayyPal?" and refuses a bad one', async () => {

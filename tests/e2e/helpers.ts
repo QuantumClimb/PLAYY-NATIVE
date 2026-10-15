@@ -41,6 +41,10 @@ export async function openKiosk(page: Page, welcome: 'first-time' | 'stay' = 'fi
   await page.route('**/api/submissions', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 0, email: 'sent' }) }),
   );
+  // Counting a visit would write to the real database
+  await page.route('**/api/visits', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '{"ok":true}' }),
+  );
   await page.goto('/');
   await page.getByText('Tap to Start').waitFor();
   await page.waitForTimeout(800);
