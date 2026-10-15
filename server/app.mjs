@@ -2,6 +2,7 @@
 // An Express app with no listener: server/kiosk-server.mjs runs it locally and api/index.mjs runs it on Vercel.
 import express from 'express';
 import { authRouter } from './auth.mjs';
+import { cacheKioskReads } from './cache.mjs';
 import { HOSTED } from './config.mjs';
 import { errorHandler } from './http.mjs';
 import { assetsRouter } from './routes/assets.mjs';
@@ -16,6 +17,7 @@ const app = express();
 if (HOSTED) app.set('trust proxy', true);
 app.use(express.json({ limit: '50mb' }));
 
+app.use('/api', cacheKioskReads);
 app.use('/api', authRouter);
 app.use('/api', printersRouter);
 app.use('/api', assetsRouter);

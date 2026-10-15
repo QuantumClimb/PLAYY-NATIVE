@@ -73,6 +73,20 @@ describe('public routes', () => {
     expect((await res.json()).assets).toHaveLength(1);
   });
 
+  it('let the edge keep the kiosk reads for a few minutes, but never for someone signed in or for a failure', async () => {
+    const visitor = await fetch(base + '/assets');
+    expect(visitor.headers.get('cache-control')).toContain('s-maxage=300');
+    const admin = await fetch(base + '/assets', { headers: { cookie: 'cc_session=abc' } });
+    expect(admin.headers.get('cache-control')).toBe('no-store');
+    const db = await import('../../server/db/index.mjs');
+    vi.mocked(db.listAssets).mockRejectedValueOnce(new Error('down'));
+    const quiet = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const failed = await fetch(base + '/assets');
+    expect(failed.status).toBe(500);
+    expect(failed.headers.get('cache-control') ?? '').not.toContain('s-maxage');
+    quiet.mockRestore();
+  });
+
   it('answer null for a setting nobody saved yet', async () => {
     expect(await (await call('/progress-tabs')).json()).toEqual({ tabs: null });
   });
