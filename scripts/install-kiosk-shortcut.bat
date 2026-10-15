@@ -1,7 +1,7 @@
 @echo off
 rem Creates the "PLAYY Kiosk" shortcut (full-screen Chrome, silent printing, music from the start)
 rem on the desktop and in the Startup folder, so it also opens when the PC starts.
-rem Double-click this file on the kiosk PC. To change the site, edit the URL below.
+rem Keep playy-kiosk.ico in the same folder as this file. Double-click this file on the kiosk PC. To change the site, edit the URL below.
 
 set "URL=https://playy-native.vercel.app/"
 
@@ -16,12 +16,18 @@ if not defined CHROME (
   exit /b 1
 )
 
+rem The icon is copied to a fixed place so the shortcuts keep working if this folder is moved or deleted
+set "ICON=%LocalAppData%\PLAYY\playy-kiosk.ico"
+if not exist "%LocalAppData%\PLAYY" mkdir "%LocalAppData%\PLAYY"
+if exist "%~dp0playy-kiosk.ico" copy /y "%~dp0playy-kiosk.ico" "%ICON%" >nul
+
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$shell = New-Object -ComObject WScript.Shell;" ^
   "foreach ($dir in @([Environment]::GetFolderPath('Desktop'), [Environment]::GetFolderPath('Startup'))) {" ^
   "  $link = $shell.CreateShortcut((Join-Path $dir 'PLAYY Kiosk.lnk'));" ^
   "  $link.TargetPath = $env:CHROME;" ^
   "  $link.Arguments = '--kiosk --kiosk-printing --autoplay-policy=no-user-gesture-required ' + $env:URL;" ^
+  "  if (Test-Path $env:ICON) { $link.IconLocation = $env:ICON };" ^
   "  $link.Save()" ^
   "}"
 
