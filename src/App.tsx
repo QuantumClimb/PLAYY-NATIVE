@@ -111,7 +111,7 @@ export default function App() {
         {/* PHASE 1: IDLE MOVIE (Continuous loop with TAP TO CREATE) */}
         {phase === 'idle' && <KioskIdleMovie onStart={handleStart} onAdminTrigger={() => setIsAdminModalOpen(true)} />}
 
-        {/* Inner pages share the footer; the start page has none */}
+        {/* Inner pages share the footer; the start page and the welcome screen have none */}
         {phase !== 'idle' && (
           <div className="kiosk-create-shell flex-1 min-h-0 flex flex-col overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
@@ -140,12 +140,14 @@ export default function App() {
                 />
               )}
             </div>
-            <img
-              src="/assets/footer.png"
-              alt=""
-              draggable={false}
-              className="kiosk-footer w-full h-auto max-h-20 object-contain shrink-0 bg-slate-950"
-            />
+            {phase !== 'welcome' && (
+              <img
+                src="/assets/footer.png"
+                alt=""
+                draggable={false}
+                className="kiosk-footer w-full h-auto max-h-20 object-contain shrink-0 bg-slate-950"
+              />
+            )}
           </div>
         )}
       </main>
