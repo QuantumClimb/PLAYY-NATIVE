@@ -77,3 +77,29 @@ test('the Home button on a page goes back to the intro screen', async ({ page })
   await page.getByRole('button', { name: 'Home' }).click();
   await expect(page.getByText('Tap to Start')).toBeVisible();
 });
+
+test('freeform colouring: a finger stroke paints the character and is not sent to the server', async ({ page }) => {
+  const bodies: string[] = [];
+  await openKiosk(page);
+  await page.route('**/api/submissions', (route) => {
+    bodies.push(route.request().postData() ?? '');
+    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 0, email: 'sent' }) });
+  });
+  await walkTo(page, 'colors');
+  await page.getByRole('button', { name: 'Freeform' }).click();
+
+  const canvas = page.locator('canvas.paint-canvas');
+  await expect(canvas).toBeVisible();
+  const box = (await canvas.boundingBox())!;
+  await page.mouse.move(box.x + box.width * 0.3, box.y + box.height * 0.4);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.6, { steps: 8 });
+  await page.mouse.up();
+  await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled();
+
+  await walkTo(page, 'share');
+  await page.getByText('SHARE', { exact: true }).first().click();
+  await expect.poll(() => bodies.length).toBe(1);
+  expect(bodies[0]).not.toContain('"paint"');
+  expect(bodies[0]).toContain('freeform');
+});

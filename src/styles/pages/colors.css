@@ -43,7 +43,43 @@
   font-size: min(1.2vw, 2.1vh); font-weight: 900; box-shadow: 0 .4vh 1vh rgba(10, 70, 60, .4);
 }
 
-/* Simple / Advanced switch, centered between Back and Next */
+/* Freeform painting: the canvas fills the character's frame; the tools sit in the options area */
+.paint-canvas { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+
+.paint-tools { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2.4vh; height: 100%; }
+
+.paint-palette { display: flex; flex-wrap: wrap; justify-content: center; gap: 1.6vh 1.2vw; max-width: 90%; }
+
+.paint-dot {
+  width: min(5.6vw, 9.6vh); aspect-ratio: 1; padding: 0; border: .6vh solid #fff; border-radius: 50%; cursor: pointer;
+  box-shadow: 0 .5vh .8vh rgba(20, 18, 90, .35); transition: transform .12s ease;
+}
+
+.paint-dot.is-selected { transform: scale(1.18); border-color: #ffc928; box-shadow: 0 0 0 .5vh #fff, 0 .8vh 1.4vh rgba(20, 18, 90, .45); }
+
+.paint-row { display: flex; align-items: center; justify-content: center; gap: 1.2vw; }
+
+.paint-size, .paint-action {
+  display: flex; align-items: center; justify-content: center; gap: .8vw; border: .5vh solid #fff; border-radius: 999px; cursor: pointer;
+  background: linear-gradient(#fff, #ece8ff); color: #4a4a8a; box-shadow: 0 .6vh 0 rgba(60, 50, 150, .4);
+  font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(1.6vw, 2.9vh); text-transform: uppercase;
+}
+
+.paint-size { width: min(7vw, 12vh); aspect-ratio: 1; padding: 0; }
+
+.paint-size i { display: block; max-width: 70%; border-radius: 50%; background: currentColor; }
+
+.paint-action { padding: 1.2vh 1.8vw; }
+
+.paint-action svg { width: 1.3em; height: 1.3em; }
+
+.paint-size.is-active, .paint-action.is-active {
+  background: linear-gradient(#ffe86a, #ffb81c); color: #1b1464; box-shadow: 0 .4vh 0 #d88a00, inset 0 .3vh 0 rgba(255, 255, 255, .6);
+}
+
+.paint-action:disabled { opacity: .45; cursor: default; }
+
+/* Simple / Advanced / Freeform switch, centered between Back and Next */
 .pick-page .color-mode-toggle {
   position: absolute; z-index: 6; left: 50%; bottom: 4.6%; transform: translateX(-50%); display: flex; gap: .4vw; padding: .6vh;
   border: .5vh solid #fff; border-radius: 999px; background: linear-gradient(#fff, #ece8ff);
@@ -51,7 +87,7 @@
 }
 
 .color-mode-toggle button {
-  min-width: 10vw; padding: 1.1vh 1.6vw; border: 0; border-radius: 999px; background: transparent; color: #4a4a8a; cursor: pointer;
+  min-width: 8.4vw; padding: 1.1vh 1.4vw; border: 0; border-radius: 999px; background: transparent; color: #4a4a8a; cursor: pointer;
   font-family: 'Fredoka', sans-serif; font-weight: 700; font-size: min(1.55vw, 2.8vh); letter-spacing: .04em; text-transform: uppercase;
 }
 

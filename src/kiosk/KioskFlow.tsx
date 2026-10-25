@@ -4,6 +4,7 @@ import { useAssetLibrary, useSelection } from '../lib/assets/library';
 import type { GeneratedCard } from '../lib/playys/cardTypes';
 import type { PlayyConfiguration } from '../lib/playys/types';
 import { PageChrome } from './PageChrome';
+import { PaintCanvas } from './components/PaintCanvas';
 import { PreviewCard } from './components/PreviewCard';
 import { useKioskFlow } from './flow/useKioskFlow';
 import { STEP_CONTENT } from './steps';
@@ -39,7 +40,18 @@ export const KioskFlow: React.FC<KioskFlowProps> = ({
       className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${flow.def.pageClass}`}
     >
       <SceneBackground sceneId={flow.def.scene} />
-      {flow.def.preview !== 'none' && <PreviewCard kind={flow.def.preview} selection={selection} config={config} />}
+      {flow.def.preview !== 'none' && (
+        <PreviewCard
+          kind={flow.def.preview}
+          selection={selection}
+          config={config}
+          editor={
+            flow.step === 'colors' && flow.colorMode === 'freeform' ? (
+              <PaintCanvas paint={flow.paint} onInteract={flow.touch} />
+            ) : undefined
+          }
+        />
+      )}
       <PageChrome flow={flow}>
         <Content flow={flow} config={config} selection={selection} library={library} card={card} />
       </PageChrome>

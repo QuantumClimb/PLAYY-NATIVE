@@ -1,6 +1,6 @@
 import type { Asset } from '../../lib/assets/types';
 import { effectiveRegionColor, regionGroup } from '../../lib/playys/colors';
-import type { CharacterColorConfiguration } from '../../lib/playys/types';
+import type { CharacterColorConfiguration, ColorMode } from '../../lib/playys/types';
 import { copy } from '../copy';
 
 /** One panel of swatches on the colours page. */
@@ -41,7 +41,7 @@ const regionRank = (key: string) => {
  * and the outlines.
  */
 export function colorPanels(
-  mode: 'simple' | 'advanced',
+  mode: Exclude<ColorMode, 'freeform'>,
   body: Pick<Asset, 'parts'>,
   colors?: CharacterColorConfiguration,
 ): ColorPanelSpec[] {

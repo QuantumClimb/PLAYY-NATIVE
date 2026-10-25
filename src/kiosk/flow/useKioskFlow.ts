@@ -5,11 +5,12 @@ import type { GeneratedCard } from '../../lib/playys/cardTypes';
 import { COLOR_SWATCHES } from '../../lib/playys/colors';
 import { nativeFeedback } from '../../lib/playys/nativeFeedback';
 import { calculatePowerSymbol, usePowerQuizQuestions } from '../../lib/playys/powerQuiz';
-import type { PlayyConfiguration } from '../../lib/playys/types';
+import type { ColorMode, PlayyConfiguration } from '../../lib/playys/types';
 import { playSfx } from '../../lib/sfx/engine';
 import { IDLE_SECONDS, useIdleReset } from './useIdleReset';
 import { useDetailsForm } from './useDetailsForm';
 import { usePowerQuiz } from './usePowerQuiz';
+import { usePaint } from './usePaint';
 import { useShare } from './useShare';
 import { STEPS, StepContext, StepId, stepAfter, stepBefore } from './steps';
 
@@ -86,7 +87,9 @@ export function useKioskFlow({ config, onChangeConfig, onCardChange, library, se
   const choose = (patch: Partial<PlayyConfiguration>) => {
     touch();
     nativeFeedback.selection();
-    change(patch);
+    // Paint is fitted to one head and pose, so a different one starts with a clean canvas
+    const reshaped = (patch.head && patch.head !== config.head) || (patch.pose && patch.pose !== config.pose);
+    change(reshaped ? { ...patch, paint: undefined } : patch);
   };
 
   const setColor = (region: string, color: string) => {
@@ -98,7 +101,9 @@ export function useKioskFlow({ config, onChangeConfig, onCardChange, library, se
     else change({ colors: { ...colors, parts: { ...colors.parts, [region]: color } } });
   };
 
-  const setColorMode = (mode: 'simple' | 'advanced') => {
+  const paint = usePaint(config.paint, (value) => change({ paint: value }), (config.colors?.palette?.[0] ?? COLOR_SWATCHES[0]));
+
+  const setColorMode = (mode: ColorMode) => {
     touch();
     change({ colors: { ...config.colors, mode } });
   };
@@ -126,8 +131,8 @@ export function useKioskFlow({ config, onChangeConfig, onCardChange, library, se
   const surprise = () => {
     touch();
     nativeFeedback.impactMedium();
-    if (step === 'head') change({ head: anyOf(library.heads).slug });
-    else if (step === 'pose') change({ pose: anyOf(library.bodies).slug });
+    if (step === 'head') change({ head: anyOf(library.heads).slug, paint: undefined });
+    else if (step === 'pose') change({ pose: anyOf(library.bodies).slug, paint: undefined });
     else if (step === 'world') change({ background: anyOf(library.backgrounds).slug });
     else if (step === 'colors')
       change({ colors: { ...config.colors, main: anyOf(COLOR_SWATCHES), highlight: anyOf(COLOR_SWATCHES) } });
@@ -149,6 +154,7 @@ export function useKioskFlow({ config, onChangeConfig, onCardChange, library, se
     setColor,
     setColorMode,
     colorMode,
+    paint,
     answerQuiz,
     quiz,
     details,

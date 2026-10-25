@@ -1,8 +1,10 @@
+/** simple: a main and a secondary color. advanced: every part on its own. freeform: painted by hand over the line art. */
+export type ColorMode = 'simple' | 'advanced' | 'freeform';
+
 export interface CharacterColorConfiguration {
   /** CMS-compatible palette values used by the coloring stage. */
   palette?: string[];
-  /** simple: a main and a secondary color. advanced: every part can be set on its own. */
-  mode?: 'simple' | 'advanced';
+  mode?: ColorMode;
   /** Main color: the head, hoodie, trousers and shoes. */
   main?: string;
   /** Secondary color: the cuffs, trim and soles only. */
@@ -21,4 +23,9 @@ export interface PlayyConfiguration {
   phone?: string;
   email?: string;
   colors?: CharacterColorConfiguration;
+  /**
+   * Freeform mode: the hand-painted layer as a transparent PNG data URL, covering the body and head bounds.
+   * Kept out of what is sent to the server (see sendShare).
+   */
+  paint?: string;
 }

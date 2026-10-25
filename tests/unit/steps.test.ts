@@ -61,6 +61,9 @@ describe('page wording', () => {
 
   it('follows the colour mode and the question showing', () => {
     expect(STEPS.colors.subtitle({ ...context, colorMode: 'advanced' })).not.toBe(STEPS.colors.subtitle(context));
+    expect(STEPS.colors.subtitle({ ...context, colorMode: 'freeform' })).toMatch(/paint/i);
+    expect(STEPS.colors.pickForMe(context)).toBe(true);
+    expect(STEPS.colors.pickForMe({ ...context, colorMode: 'freeform' })).toBe(false);
     expect(STEPS.quiz.title({ ...context, question: { question: 'What do you love?' } })).toBe('WHAT DO YOU LOVE?');
     expect(STEPS.details.title({ ...context, detailsStep: 2 })).not.toBe(STEPS.details.title(context));
   });

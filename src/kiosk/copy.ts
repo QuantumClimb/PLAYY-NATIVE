@@ -7,6 +7,7 @@ export const copy = {
     title: 'CHOOSE YOUR COLOURS!',
     simple: 'Pick a main colour and a secondary colour for your PlayyPal!',
     advanced: 'Pick a colour for each part of your PlayyPal!',
+    freeform: 'Paint your PlayyPal any way you like! Use your finger!',
     main: 'Main colour',
     secondary: 'Secondary colour',
     head: 'Head',

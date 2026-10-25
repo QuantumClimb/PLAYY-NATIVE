@@ -12,9 +12,11 @@ interface PreviewCardProps {
   kind: Exclude<PreviewKind, 'none'>;
   selection: Selection;
   config: PlayyConfiguration;
+  /** The freeform paint canvas, laid over the character (the character then shows without the saved paint) */
+  editor?: React.ReactNode;
 }
 
-function Preview({ kind, selection, config }: PreviewCardProps) {
+function Preview({ kind, selection, config, editor }: PreviewCardProps) {
   switch (kind) {
     case 'head':
       return <HeadArt selection={selection} config={config} />;
@@ -22,7 +24,13 @@ function Preview({ kind, selection, config }: PreviewCardProps) {
     case 'character-with-power':
       return (
         <div className="flex h-full w-full items-center justify-center p-[3vh]">
-          <CroppedCharacter selection={selection} config={config} showSymbol={kind === 'character-with-power'} />
+          <CroppedCharacter
+            selection={selection}
+            config={editor ? { ...config, paint: undefined } : config}
+            showSymbol={kind === 'character-with-power'}
+          >
+            {editor}
+          </CroppedCharacter>
         </div>
       );
     case 'scene':

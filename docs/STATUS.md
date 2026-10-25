@@ -1,10 +1,10 @@
 # PLAYYS Kiosk: Status Report
 
-Last updated: 2026-10-15 (client testing under way). Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
+Last updated: 2026-10-25 (client testing under way; Freeform colouring added). Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
 
 ## 1. Summary
 
-The whole visitor journey works end to end: intro, a welcome choice (FIRST TIME? or Already a PlayyPal?), build a character (face, pose, colours), power-up questions, power awarded, background, name, phone and email, preview, trump card, share (print, email to the team and to the visitor, log) and a success screen that returns to the intro. The kiosk goes back to the intro after 4 minutes without a touch, and every page has a Home button. Everything the client edits lives in the command center. What is still open is outside the code: the **SMTP password** (so emails go out) and the **WhatsApp token**, both waiting on the client's system administrator.
+The whole visitor journey works end to end: intro, a welcome choice (FIRST TIME? or Already a PlayyPal?), build a character (face, pose, colours: simple, advanced or freehand painting), power-up questions, power awarded, background, name, phone and email, preview, trump card, share (print, email to the team and to the visitor, log) and a success screen that returns to the intro. The kiosk goes back to the intro after 4 minutes without a touch, and every page has a Home button. Everything the client edits lives in the command center. What is still open is outside the code: the **SMTP password** (so emails go out) and the **WhatsApp token**, both waiting on the client's system administrator.
 
 ## 2. How to run
 
@@ -16,7 +16,7 @@ The whole visitor journey works end to end: intro, a welcome choice (FIRST TIME?
 | Command center | `/command-center` (password in `.env`: `COMMAND_CENTER_PASSWORD`) |
 | Operator dialog | `Alt+Shift+P` on any screen: **TEST PRINT** (one test page, printed the way the kiosk prints) and a **sound mute** switch (saved per PC) |
 | Operator tools | hold the logo on the intro screen for 4.5 seconds |
-| Kiosk PC setup | run `scripts/install-kiosk-shortcut.bat` once on the PC: it makes a "PLAYY Kiosk" shortcut (desktop and Startup, with the PLAYY head icon) that opens the Vercel site in Chrome with `--kiosk --kiosk-printing --autoplay-policy=no-user-gesture-required` (full screen, no print preview, music from the start). Set the right printer as the Windows default. Alt+F4 leaves the kiosk. |
+| Kiosk PC setup | run `scripts/install-kiosk-shortcut.bat` once on the PC: it makes a "PLAYY Kiosk" shortcut (on the desktop, with the PLAYY head icon; it asks whether to also start with Windows, so answer N on your own PC) that opens the Vercel site in Chrome with `--kiosk --kiosk-printing --autoplay-policy=no-user-gesture-required` (full screen, no print preview, music from the start). Set the right printer as the Windows default. Alt+F4 leaves the kiosk. |
 | Print helper (optional) | `npm run print-helper` prints the finished pages through SumatraPDF or the PDF app; switch it on in the browser console (see README). Not needed with the shortcut. |
 
 `.env` needs `DATABASE_URL` (Neon Postgres, shared by local runs and Vercel), `COMMAND_CENTER_PASSWORD`, and, for email, `SMTP_USER` and `SMTP_PASS` (optional `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`). See `.env.example`. Pushing to `main` deploys to Vercel; its environment variables must match.
@@ -31,7 +31,7 @@ Every page after the welcome screen shares one layout: logo, progress tabs, titl
 | Welcome | **FIRST TIME?** goes on to the normal flow. **Already a PlayyPal?** opens a phone keypad: the number is kept on the server (so it can be followed up if the visitor never finishes) and pre-filled on the phone screen, then the normal flow follows. No footer on this screen. |
 | 1 Face | Swipeable cards of heads. The head also sets the outfit and secondary colours. |
 | 2 Pose | Swipeable pose cards; the character preview recolours with the chosen head. |
-| 3 Colours | Simple (main + secondary colour) or Advanced (each part), 15 glossy hexagon swatches. Gloves stay white. |
+| 3 Colours | Simple (main + secondary colour), Advanced (each part) or Freeform (finger painting over the white line art, outlines are not barriers, multiplied so the black lines stay on top; clear/undo/eraser, 3 brush sizes; the painting is kept out of the data sent to the server), 15 glossy hexagon swatches. Gloves stay white outside Freeform. |
 | 4 You | Power-up questions: a centred row of pastel cards, no preview. An answer moves straight on. |
 | 5 Power | Power awarded: the character holds the symbol, award panel on the right. |
 | 6 Background | Portrait preview card; world cards with the artwork edge to edge. |
@@ -42,6 +42,8 @@ Every page after the welcome screen shares one layout: logo, progress tabs, titl
 | Success | Confetti and what happens next; returns to the intro after 20 seconds or on FINISH. |
 
 The finished page (preview, print, PDF) has the logo top-left and the name big under the character. The email and phone are no longer printed. The trump card front has the logo and name too. The name lettering is built from plain stacked letter copies (no filters), because filters printed as a grey wash on some printers. Colour choices go through one resolver, `src/lib/playys/colors.ts`. The black-and-white page ignores colour choices.
+
+**Freeform colouring** (the third option on the colours page): the left card becomes a painting canvas over the white line art of the body and head, and the right side shows the palette (the same colours as the other modes), three brush sizes, Eraser, Undo (10 steps) and Clear. The outlines are not barriers; the paint layer is multiplied over the art, so black lines stay black. The painting is one transparent PNG (`config.paint`) that covers the body and head bounds, so it lines up on the pose preview, the A4 page, the trump card, the celebration screen and the printed colour page (`SceneLayers.tsx`). It is cleared when the head or pose changes (it is fitted to one drawing) and when the kiosk returns to the intro. It is not part of what `sendShare` sends, so it is not stored in the database or the Users tab; only the colour mode (`freeform`) is. "Pick for Me!" is hidden in this mode. Covered by a unit test and a browser test (a stroke is painted and the submission has no `paint`); the printed capture was checked by eye.
 
 Printing sends the black-and-white page, the colour page and the card front and back. With the kiosk shortcut (`--kiosk-printing`) it prints straight to the Windows default printer; in an ordinary browser tab the print preview appears. The website cannot list the PC's printers (the server runs on Vercel), so the old printer-detect list was removed.
 
@@ -118,6 +120,7 @@ To build then: sending code and command center switch, token only on the server,
 - The saved quiz in the database may still hold older wording; re-save it in the Power quiz tab.
 - The CI workflow is in `docs/ci.yml.example` because the push token lacks the `workflow` scope.
 - Colours page: region names are white on cream and hard to read.
+- Freeform painting was tested with a mouse in desktop Chrome only; try it with a finger on the kiosk touchscreen (stroke smoothness, the three-button mode switch width). The unfinished painting is not kept if the visitor goes back to change the head or pose.
 - The pages are laid out for a landscape screen (about 16:9).
 - The kiosk needs a connection to load its assets (no offline cache).
 - On Vercel the login rate limit is per function instance. Use a long password.

@@ -13,6 +13,8 @@ interface CharacterArtProps {
   /** Draw this pose instead of the selected one (the pose cards each show their own) */
   body?: Asset;
   showSymbol?: boolean;
+  /** Drawn on top, filling the character's frame (the freeform paint editor) */
+  children?: React.ReactNode;
 }
 
 /** The body and head (and the power symbol) cropped to their own bounds, so the character fills whatever box it is put in. */
@@ -21,6 +23,7 @@ export const CroppedCharacter: React.FC<CharacterArtProps> = ({
   config,
   body = selection.body,
   showSymbol = false,
+  children,
 }) => {
   const layout = layoutScene({
     background: selection.background,
@@ -35,12 +38,14 @@ export const CroppedCharacter: React.FC<CharacterArtProps> = ({
       <SceneLayers
         selection={selection}
         colors={config.colors}
+        paint={config.paint}
         mode="color"
         layout={layout}
         frame={frame}
         showSymbol={showSymbol}
         body={body}
       />
+      {children}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useId } from 'react';
 import { deriveColor, normalizeColor } from '../../lib/assets/svgParts';
+import type { ColorMode } from '../../lib/playys/types';
 
 // A flat-topped hexagon with softly rounded corners (the stroke is drawn in the swatch's own color)
 const HEX = 'M26 8H74L96 50L74 92H26L4 50Z';
@@ -83,13 +84,15 @@ export const ColorPanel: React.FC<ColorPanelProps> = ({ label, accent, value, sw
   );
 };
 
-/** Simple / Advanced switch. */
+const MODE_LABELS: Record<ColorMode, string> = { simple: 'Simple', advanced: 'Advanced', freeform: 'Freeform' };
+
+/** Simple / Advanced / Freeform switch. */
 export const ColorModeToggle: React.FC<{
-  mode: 'simple' | 'advanced';
-  onChange: (m: 'simple' | 'advanced') => void;
+  mode: ColorMode;
+  onChange: (m: ColorMode) => void;
 }> = ({ mode, onChange }) => (
   <div className="color-mode-toggle" role="group" aria-label="Colour mode">
-    {(['simple', 'advanced'] as const).map((m) => (
+    {(['simple', 'advanced', 'freeform'] as const).map((m) => (
       <button
         key={m}
         type="button"
@@ -98,7 +101,7 @@ export const ColorModeToggle: React.FC<{
         className={mode === m ? 'is-active' : ''}
         onClick={() => onChange(m)}
       >
-        {m === 'simple' ? 'Simple' : 'Advanced'}
+        {MODE_LABELS[m]}
       </button>
     ))}
   </div>

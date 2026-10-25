@@ -1,4 +1,5 @@
 import type { SceneId } from '../../lib/backgrounds/types';
+import type { ColorMode } from '../../lib/playys/types';
 import { copy } from '../copy';
 
 export type StepId =
@@ -23,7 +24,7 @@ export type PreviewKind = 'none' | 'head' | 'character' | 'character-with-power'
 
 /** What a page's wording can depend on. */
 export interface StepContext {
-  colorMode: 'simple' | 'advanced';
+  colorMode: ColorMode;
   /** 0 name, 1 phone, 2 email */
   detailsStep: number;
   /** The power-up question showing, if any */
@@ -82,7 +83,8 @@ export const STEPS: Record<StepId, StepDef> = {
     title: () => copy.colors.title,
     subtitle: ({ colorMode }) => copy.colors[colorMode],
     preview: 'character',
-    pickForMe: always,
+    // A random paint job means nothing in freeform
+    pickForMe: ({ colorMode }) => colorMode !== 'freeform',
     nextLabel: copy.nav.next,
   },
   quiz: {

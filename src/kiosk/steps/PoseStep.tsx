@@ -17,7 +17,7 @@ export const PoseStep: React.FC<StepProps> = ({ flow, config, selection, library
         onClick={() => flow.choose({ pose: body.slug })}
         label={body.name}
       >
-        <CroppedCharacter selection={selection} config={config} body={body} />
+        <CroppedCharacter selection={selection} config={{ ...config, paint: undefined }} body={body} />
       </ChoiceCard>
     )}
   />

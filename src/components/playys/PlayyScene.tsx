@@ -42,6 +42,7 @@ export const PlayyScene: React.FC<PlayySceneProps> = ({ config, mode, finish = f
       <SceneLayers
         selection={sel}
         colors={config.colors}
+        paint={config.paint}
         mode={mode}
         layout={layout}
         frame={SCENE_FRAME}
