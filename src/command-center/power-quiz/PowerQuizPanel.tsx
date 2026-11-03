@@ -40,7 +40,8 @@ export const PowerQuizPanel: React.FC = () => {
             total={questions.length}
             onText={(patch) => edit((qs) => updateQuestion(qs, index, patch))}
             onLabel={(option, label) => edit((qs) => updateOption(qs, index, option, { label }))}
-            onIcon={(option, icon) => edit((qs) => updateOption(qs, index, option, { icon }))}
+            run={cms.run}
+            onIcon={(option, patch) => edit((qs) => updateOption(qs, index, option, patch))}
             onWeight={(option, slug, weight) => edit((qs) => setSymbolWeight(qs, index, option, slug, weight))}
           />
         ))}

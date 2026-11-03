@@ -2,12 +2,17 @@ import express from 'express';
 import { requireAdmin } from '../auth.mjs';
 import { createMediaFile, getMediaFile } from '../db/index.mjs';
 import { badRequest, notFound, wrap } from '../http.mjs';
+import { svgProblem } from '../svgCheck.mjs';
 
 const MEGABYTE = 1024 * 1024;
 
 /** What can be uploaded, by kind, with the biggest size allowed. */
 const KINDS = {
-  image: { types: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'], maxMegabytes: 10, label: 'image' },
+  image: {
+    types: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'],
+    maxMegabytes: 10,
+    label: 'image',
+  },
   video: { types: ['video/mp4', 'video/webm'], maxMegabytes: 30, label: 'video' },
   audio: {
     types: [
@@ -35,6 +40,11 @@ const SEEDED_MEDIA = { 'cheerful-castle-initial': '/assets/Cheerful-Mascot-Castl
 function sendFile(req, res, media) {
   const buffer = Buffer.from(media.data_base64, 'base64');
   res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  // An SVG opened on its own must not run anything, whatever it holds
+  if (media.mime_type === 'image/svg+xml') {
+    res.setHeader('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; sandbox");
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+  }
 
   const range = req.headers.range;
   if (!range) {
@@ -77,13 +87,18 @@ mediaRouter.post(
 
     const kind = kindOf(mimeType);
     if (!kind)
-      throw badRequest('Unsupported file type. Allowed: PNG, JPG, WebP, MP4, WebM, and MP3, WAV, OGG, M4A audio.');
+      throw badRequest('Unsupported file type. Allowed: PNG, JPG, WebP, SVG, MP4, WebM, and MP3, WAV, OGG, M4A audio.');
 
     const buffer = Buffer.from(base64, 'base64');
     if (buffer.length > kind.maxMegabytes * MEGABYTE) {
       throw badRequest(
         `File size (${(buffer.length / MEGABYTE).toFixed(1)}MB) exceeds limit of ${kind.maxMegabytes}MB for ${kind.label}.`,
       );
+    }
+
+    if (mimeType === 'image/svg+xml') {
+      const problem = svgProblem(buffer.toString('utf8'));
+      if (problem) throw badRequest(problem);
     }
 
     const id = `med_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;

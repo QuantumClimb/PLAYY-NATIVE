@@ -1,4 +1,5 @@
 import React from 'react';
+import { mediaUrl } from '../../data/media';
 import type { StepProps } from './types';
 
 /** A power-up question: a row of answer cards. Tapping one moves straight on. */
@@ -13,7 +14,13 @@ export const QuizStep: React.FC<StepProps> = ({ flow }) => (
           onClick={() => flow.answerQuiz(i)}
           className="quiz-card"
         >
-          <div className="quiz-card-art">{option.icon && <span>{option.icon}</span>}</div>
+          <div className="quiz-card-art">
+            {option.iconKind === 'image' && option.iconImage ? (
+              <img src={mediaUrl(option.iconImage)} alt="" draggable={false} />
+            ) : (
+              option.icon && <span>{option.icon}</span>
+            )}
+          </div>
           <div className="quiz-card-label">{option.label}</div>
         </button>
       ))}

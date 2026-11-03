@@ -14,7 +14,7 @@ export function updateOption(
   questions: PowerQuizQuestion[],
   questionIndex: number,
   optionIndex: number,
-  patch: Partial<Pick<PowerQuizOption, 'label' | 'icon'>>,
+  patch: Partial<Pick<PowerQuizOption, 'label' | 'icon' | 'iconKind' | 'iconImage'>>,
 ): PowerQuizQuestion[] {
   return questions.map((q, i) =>
     i === questionIndex ? { ...q, options: q.options.map((o, j) => (j === optionIndex ? { ...o, ...patch } : o)) } : q,

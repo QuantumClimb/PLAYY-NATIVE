@@ -1,6 +1,12 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { parseIntroBadges, parseProgressTabs, parseSounds, parseTrumpCard } from '../../server/settingsSchemas.mjs';
+import {
+  parseIntroBadges,
+  parsePowerQuiz,
+  parseProgressTabs,
+  parseSounds,
+  parseTrumpCard,
+} from '../../server/settingsSchemas.mjs';
 import { IMAGE_KEYS, parseSubmission } from '../../server/submission.mjs';
 import { svgProblem } from '../../server/svgCheck.mjs';
 import { DEFAULT_SOUND_SETTINGS } from '../../src/lib/sfx/settings';
@@ -26,6 +32,20 @@ describe('svgProblem', () => {
     expect(svgProblem('<svg><image href="https://evil.example/x.png"/></svg>')).toContain('disallowed');
     expect(svgProblem('<svg><use href="https://evil.example/x.svg#a"/></svg>')).toContain('disallowed');
     expect(svgProblem('not an svg')).toBe('Not an SVG file');
+  });
+});
+
+describe('power quiz answer icons', () => {
+  const quiz = (option: object) => [
+    { id: 1, question: 'Q', options: [{ id: 'a', label: 'A', symbolWeights: {}, ...option }] },
+  ];
+  it('accepts an emoji or an uploaded image', () => {
+    expect(message(() => parsePowerQuiz(quiz({ icon: '🤝' })))).toBeNull();
+    expect(message(() => parsePowerQuiz(quiz({ iconKind: 'image', iconImage: 'med_1_abc' })))).toBeNull();
+  });
+  it('rejects an unknown icon type or an image id that is not a media id', () => {
+    expect(message(() => parsePowerQuiz(quiz({ iconKind: 'url' })))).toContain('icon type');
+    expect(message(() => parsePowerQuiz(quiz({ iconImage: '../x' })))).toContain('icon image');
   });
 });
 

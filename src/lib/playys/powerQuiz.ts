@@ -3,7 +3,12 @@ import { useServerSetting } from '../../data/useServerSetting';
 export interface PowerQuizOption {
   id: string;
   label: string;
+  /** The emoji shown on the answer card */
   icon?: string;
+  /** What the card shows: the emoji (the default) or the uploaded picture. Both are kept so the toggle loses nothing. */
+  iconKind?: 'emoji' | 'image';
+  /** The uploaded SVG or PNG: an id in the media store */
+  iconImage?: string;
   symbolWeights: Record<string, number>;
 }
 

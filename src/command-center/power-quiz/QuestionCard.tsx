@@ -1,6 +1,6 @@
 import React from 'react';
 import { PowerQuizQuestion } from '../../lib/playys/powerQuiz';
-import { OptionEditor } from './OptionEditor';
+import { IconPatch, OptionEditor } from './OptionEditor';
 
 interface QuestionCardProps {
   question: PowerQuizQuestion;
@@ -8,7 +8,9 @@ interface QuestionCardProps {
   total: number;
   onText: (patch: Partial<Pick<PowerQuizQuestion, 'question' | 'subtitle'>>) => void;
   onLabel: (optionIndex: number, label: string) => void;
-  onIcon: (optionIndex: number, icon: string) => void;
+  onIcon: (optionIndex: number, patch: IconPatch) => void;
+  /** Runs an upload with the panel's busy and error handling */
+  run: (action: () => Promise<void>) => Promise<void>;
   onWeight: (optionIndex: number, slug: string, weight: number) => void;
 }
 
@@ -22,6 +24,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   onText,
   onLabel,
   onIcon,
+  run,
   onWeight,
 }) => (
   <div className="bg-white border border-gray-200 p-5 rounded-2xl space-y-4">
@@ -64,7 +67,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             option={option}
             letter={String.fromCharCode(65 + optionIndex)}
             onLabel={(label) => onLabel(optionIndex, label)}
-            onIcon={(icon) => onIcon(optionIndex, icon)}
+            onIcon={(patch) => onIcon(optionIndex, patch)}
+            run={run}
             onWeight={(slug, weight) => onWeight(optionIndex, slug, weight)}
           />
         ))}

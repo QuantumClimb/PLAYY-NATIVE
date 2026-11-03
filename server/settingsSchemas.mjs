@@ -11,6 +11,13 @@ const unit = (value) => value >= 0 && value <= 1;
 /** @param {unknown} questions */
 export function parsePowerQuiz(questions) {
   if (!Array.isArray(questions)) throw badRequest('Questions must be an array');
+  for (const question of questions)
+    for (const option of question?.options ?? []) {
+      if (option.iconKind !== undefined && option.iconKind !== 'emoji' && option.iconKind !== 'image')
+        throw badRequest('Invalid answer icon type');
+      if (option.iconImage !== undefined && !(typeof option.iconImage === 'string' && ID.test(option.iconImage)))
+        throw badRequest('Invalid answer icon image');
+    }
   return questions;
 }
 

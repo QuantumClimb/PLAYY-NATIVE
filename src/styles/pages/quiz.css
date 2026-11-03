@@ -43,6 +43,8 @@
   box-shadow: inset 0 .4vh 0 rgba(0, 0, 0, .04), 0 .3vh 0 rgba(255, 255, 255, .8);
 }
 
+.quiz-card-art img { width: min(7.6vw, 13vh); height: min(7.6vw, 13vh); object-fit: contain; filter: drop-shadow(0 .6vh .5vh rgba(0, 0, 0, .18)); }
+
 .quiz-card-art span { font-size: min(7.6vw, 13vh); line-height: 1; filter: drop-shadow(0 .6vh .5vh rgba(0, 0, 0, .18)); }
 
 .quiz-card-label {
@@ -58,3 +60,5 @@
 .pick-page.pick-quiz .pick-options-area { top: 32%; height: 52%; }
 
 .quiz-card-art span { font-size: min(9.5vw, 17vh); }
+
+.quiz-card-art img { width: min(9.5vw, 17vh); height: min(9.5vw, 17vh); }

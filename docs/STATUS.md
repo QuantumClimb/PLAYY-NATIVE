@@ -1,6 +1,6 @@
 # PLAYYS Kiosk: Status Report
 
-Last updated: 2026-10-25 (client testing under way; Freeform colouring added). Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
+Last updated: 2026-11-03 (client testing under way; Freeform colouring and quiz answer icons added). Active app: the **Vite web kiosk** with its command center and API. The Expo app (`expo-app/`) is paused until the mobile work starts. The clean-up plan is in [REFACTOR_PLAN.md](REFACTOR_PLAN.md).
 
 ## 1. Summary
 
@@ -60,7 +60,7 @@ Password protected. Tabs:
 | Trump card | Outline colour and thickness, corner roundness, back background and highlight colour, with live preview. Power symbols and stat icons are fixed. |
 | Users | **Counters** (people who used it = everyone who chose FIRST TIME or Already a PlayyPal; first time; already a PlayyPal; finished a Playy), then everyone who finished: name, email, phone, **card serial**, date and time, a card thumbnail, the character choices and the email status. Search (name, email, phone, serial), CSV download, **Clear all users** (asks first; empties the list, the unfinished numbers and the counters). Below: **Started but did not finish**, the phone numbers typed on "Already a PlayyPal?" with no finished Playy under the same number, one per number. |
 | Share & email | Two recipient slots (currently qcquantumclimb@gmail.com and aum.janakiram@gmail.com), on/off, a greyed-out WhatsApp slot. |
-| Power quiz | The questions, answers and the symbol each answer leans toward. |
+| Power quiz | The questions, answers and the symbol each answer leans toward. Each answer's icon has an **Emoji / SVG-PNG toggle**: type an emoji, or upload an SVG or PNG (SVGs get the same safety check as character SVGs; both choices are kept, so switching back loses nothing). |
 | Logo | Replace the logo SVG; in-app drop shadow and an artwork stroke. The built-in logo is now the Playy Kingdom (PK) logo; an uploaded logo overrides it. |
 | Sounds | A sound and volume for 14 kiosk actions, uploads, and the **background music playlist** (order, volume, preview, add songs). |
 
@@ -125,6 +125,7 @@ To build then: sending code and command center switch, token only on the server,
 - The kiosk needs a connection to load its assets (no offline cache).
 - On Vercel the login rate limit is per function instance. Use a long password.
 - With `npm run dev` the `/api` routes are reachable from the LAN (printer routes are not password protected).
+- Quiz answer icons (SVG or PNG uploads) have only been checked on the kiosk with mocked data; do one real upload in the command center. The media store now accepts SVG for every image upload (served with a no-script security header), but the intro badge and progress tab pickers still only offer PNG, JPG and WebP.
 - Uploads through Vercel are limited to about 4.5 MB per request, so large songs go in `public/assets/audio/music`.
 - `docs/PKD_Create_Your_Play_Functional_Document_v7.docx` is a local file, not committed.
 - Expo app: wants slightly different `react-native-svg` and `safe-area-context` versions and its `app.json` points at missing icon and splash images.
