@@ -17,6 +17,8 @@ export interface Submission {
   };
   email_status: EmailStatus;
   email_error: string | null;
+  whatsapp_status: EmailStatus;
+  whatsapp_error: string | null;
 }
 
 export type EmailStatus = 'pending' | 'sent' | 'failed' | 'off';
@@ -26,6 +28,13 @@ export const STATUS_LABEL: Record<EmailStatus, string> = {
   sent: 'Emailed',
   failed: 'Not sent',
   off: 'Email off',
+};
+
+export const WHATSAPP_LABEL: Record<EmailStatus, string> = {
+  pending: 'Pending',
+  sent: 'Sent',
+  failed: 'Not sent',
+  off: 'Off',
 };
 
 /** "12 Oct 2026, 02:30 pm", the way the marketing team reads dates. */
@@ -59,6 +68,7 @@ const CSV_HEADINGS = [
   'Main colour',
   'Highlight colour',
   'Email status',
+  'WhatsApp status',
 ];
 
 /** The rows as a CSV file's text (with a byte-order mark so Excel reads it as UTF-8). */
@@ -77,6 +87,7 @@ export function submissionsToCsv(rows: Submission[]): string {
       r.config.colors?.main,
       r.config.colors?.highlight,
       STATUS_LABEL[r.email_status],
+      WHATSAPP_LABEL[r.whatsapp_status ?? 'off'],
     ]
       .map(csvCell)
       .join(','),

@@ -5,6 +5,7 @@ import {
   addLead,
   addSubmission,
   addVisit,
+  getShareFile,
   clearUsers,
   countUsers,
   listAbandonedLeads,
@@ -13,6 +14,7 @@ import {
 } from '../db/index.mjs';
 import { HttpError, badRequest, rateLimiter, wrap } from '../http.mjs';
 import { smtpConfigured } from '../mailer.mjs';
+import { whatsappConfigured } from '../whatsapp.mjs';
 import { emailSubmission, shareSettings } from '../shareService.mjs';
 import { parseSubmission } from '../submission.mjs';
 
@@ -27,7 +29,7 @@ shareRouter.get(
   '/cc/share-settings',
   requireAdmin,
   wrap(async (_req, res) => {
-    res.json({ settings: await shareSettings(), smtp: smtpConfigured(), whatsapp: false });
+    res.json({ settings: await shareSettings(), smtp: smtpConfigured(), whatsapp: whatsappConfigured() });
   }),
 );
 
@@ -43,8 +45,18 @@ shareRouter.put(
     res.json({
       settings: await settings.shareSettings.save({ enabled, recipients: addresses.filter(Boolean) }),
       smtp: smtpConfigured(),
-      whatsapp: false,
+      whatsapp: whatsappConfigured(),
     });
+  }),
+);
+
+// The PDFs WhatsApp downloads: the long random token is the secret, and a file is kept for a day
+shareRouter.get(
+  '/share-files/:token/:name',
+  wrap(async (req, res) => {
+    const pdf = /^[0-9a-f]{48}$/.test(req.params.token) ? await getShareFile(req.params.token) : null;
+    if (!pdf) throw new HttpError(404, 'Not found');
+    res.set({ 'Content-Type': 'application/pdf', 'Cache-Control': 'private, no-store' }).send(pdf);
   }),
 );
 

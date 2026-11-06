@@ -24,9 +24,13 @@ export async function setSubmissionEmail(id, status, error = null) {
   );
 }
 
+export async function setSubmissionWhatsapp(id, status, error = null) {
+  await query(`UPDATE submissions SET whatsapp_status = $2, whatsapp_error = $3 WHERE id = $1`, [id, status, error]);
+}
+
 export async function listSubmissions(limit = 500) {
   return query(
-    `SELECT id, created, name, email, phone, serial, thumbnail, config, email_status, email_error, emailed_at
+    `SELECT id, created, name, email, phone, serial, thumbnail, config, email_status, email_error, emailed_at, whatsapp_status, whatsapp_error
      FROM submissions ORDER BY created DESC LIMIT $1`,
     [limit],
   );

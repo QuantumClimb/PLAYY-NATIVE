@@ -1,5 +1,5 @@
 import React from 'react';
-import { EmailStatus, STATUS_LABEL, Submission, formatWhen } from './submissions';
+import { EmailStatus, STATUS_LABEL, Submission, WHATSAPP_LABEL, formatWhen } from './submissions';
 
 const STATUS_STYLE: Record<EmailStatus, string> = {
   pending: 'bg-gray-100 text-gray-600 border-gray-200',
@@ -18,7 +18,7 @@ interface UsersTableProps {
   emptyText: string;
 }
 
-const HEADINGS = ['Card', 'Name', 'Email', 'Phone', 'Serial', 'Date and time', 'Character', 'Email'];
+const HEADINGS = ['Card', 'Name', 'Email', 'Phone', 'Serial', 'Date and time', 'Character', 'Email', 'WhatsApp'];
 
 export const UsersTable: React.FC<UsersTableProps> = ({ rows, emptyText }) => (
   <div className="overflow-x-auto rounded-xl border border-gray-300">
@@ -72,6 +72,14 @@ export const UsersTable: React.FC<UsersTableProps> = ({ rows, emptyText }) => (
                 className={`text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_STYLE[r.email_status]}`}
               >
                 {STATUS_LABEL[r.email_status]}
+              </span>
+            </td>
+            <td className="px-3 py-2">
+              <span
+                title={r.whatsapp_error ?? ''}
+                className={`text-xs font-medium px-2.5 py-1 rounded-full border ${STATUS_STYLE[r.whatsapp_status ?? 'off']}`}
+              >
+                {WHATSAPP_LABEL[r.whatsapp_status ?? 'off']}
               </span>
             </td>
           </tr>

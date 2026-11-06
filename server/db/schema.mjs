@@ -110,6 +110,15 @@ export async function runMigrations(sql) {
         email_error  TEXT,
         emailed_at   TIMESTAMPTZ
       )`);
+  // PDFs kept for a day so WhatsApp can download them from a link
+  await sql.query(`
+      CREATE TABLE IF NOT EXISTS share_files (
+        token   TEXT PRIMARY KEY,
+        data    BYTEA NOT NULL,
+        expires TIMESTAMPTZ NOT NULL
+      )`);
+  await sql.query(`ALTER TABLE submissions ADD COLUMN IF NOT EXISTS whatsapp_status TEXT NOT NULL DEFAULT 'pending'`);
+  await sql.query(`ALTER TABLE submissions ADD COLUMN IF NOT EXISTS whatsapp_error TEXT`);
   // Phone numbers typed on the "Already a PlayyPal?" screen, so a visitor who walks away before SHARE can still be reached
   await sql.query(`
       CREATE TABLE IF NOT EXISTS leads (

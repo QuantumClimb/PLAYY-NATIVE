@@ -15,6 +15,8 @@ interface ShareResponse {
   settings: ShareForm;
   /** Whether the server has the email login it needs to send */
   smtp: boolean;
+  /** Whether WhatsApp (Qikberry) is fully set up on the server */
+  whatsapp: boolean;
 }
 
 const emptyForm: ShareForm = { enabled: true, recipients: Array(SLOTS).fill('') };
@@ -85,15 +87,19 @@ export const ShareSettingsPanel: React.FC = () => {
         <SaveBar busy={cms.busy} onSave={cms.save} saveDisabled={bad} />
       </section>
 
-      <section className="rounded-xl border border-gray-300 p-4 space-y-2 opacity-70">
+      <section className="rounded-xl border border-gray-300 p-4 space-y-2">
         <div className="font-medium text-sm">WhatsApp</div>
-        <p className="text-sm text-gray-500">
-          Not active yet. When the client provides the WhatsApp token it can be switched on here, and the same PDFs will
-          be sent to the visitor's phone number.
-        </p>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" disabled /> Send on WhatsApp
-        </label>
+        {cms.response?.whatsapp ? (
+          <p className="text-sm text-emerald-700">
+            On. The visitor's coloring pages are sent to the phone number they typed, through Qikberry.
+          </p>
+        ) : (
+          <p className="text-sm text-gray-500">
+            Off until it is set up in the environment: <code>WHATSAPP_TOKEN</code>, <code>WHATSAPP_SENDER_NUMBER</code>,{' '}
+            <code>WHATSAPP_TEMPLATE_NAME</code> (a template approved for WhatsApp with a PDF header) and{' '}
+            <code>SITE_URL</code>. The Users table shows how each send went.
+          </p>
+        )}
       </section>
 
       <p className="text-xs text-gray-500">

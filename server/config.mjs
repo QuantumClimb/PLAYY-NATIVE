@@ -30,3 +30,28 @@ export const SMTP = {
   pass: process.env.SMTP_PASS || '',
   from: process.env.SMTP_FROM || process.env.SMTP_USER || '',
 };
+
+/**
+ * WhatsApp through Qikberry (https://apidocs.qikberry.ai). Sending needs the token, the business's own WhatsApp number
+ * and the name of a template Meta has approved (one with a PDF header). Without them WhatsApp shows as off.
+ * TEMPLATE_BODY lists what fills the template's {{1}}, {{2}}...: name, card (link to the trump card PDF).
+ */
+export const WHATSAPP = {
+  token: process.env.WHATSAPP_TOKEN || '',
+  sender: String(process.env.WHATSAPP_SENDER_NUMBER || '').replace(/\D/g, ''),
+  template: process.env.WHATSAPP_TEMPLATE_NAME || '',
+  language: process.env.WHATSAPP_TEMPLATE_LANGUAGE || 'en',
+  /** 'document' when the template has a PDF header, 'none' when it is text only */
+  header: process.env.WHATSAPP_TEMPLATE_HEADER === 'none' ? 'none' : 'document',
+  body: (process.env.WHATSAPP_TEMPLATE_BODY ?? 'name')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
+  apiUrl: process.env.WHATSAPP_API_URL || 'https://rest.qikberry.ai/v1/whatsapp/messages',
+};
+
+/** The public address of the site, used for the links to the PDFs that WhatsApp downloads */
+export const SITE_URL = (
+  process.env.SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '')
+).replace(/\/+$/, '');
