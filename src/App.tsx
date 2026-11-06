@@ -15,7 +15,7 @@ import { KioskFlow } from './kiosk/KioskFlow';
 import { KioskWelcome } from './kiosk/KioskWelcome';
 import { KioskCelebrationScreen } from './kiosk/KioskCelebrationScreen';
 import { PrinterDetectDialog } from './kiosk/PrinterDetectDialog';
-import { printSilently } from './lib/print/silentPrint';
+import { PRINT_DIALOG } from './lib/print/printDialog';
 import { countFirstVisit, saveLead } from './lib/share/leads';
 import { retryPendingShare } from './lib/share/send';
 
@@ -50,7 +50,7 @@ export default function App() {
 
   // Trigger browser / local print service
   const handlePrint = useCallback(() => {
-    window.print();
+    if (PRINT_DIALOG) window.print();
   }, []);
 
   // TEST PRINT: the test page replaces the Playy pages for one print
@@ -80,10 +80,6 @@ export default function App() {
   const handleFinishAndPrint = (printed: boolean) => {
     if (!printed) handlePrint();
     setPhase('celebrate');
-  };
-
-  const handlePrintAgain = async () => {
-    if (!(await printSilently(null))) handlePrint();
   };
 
   const handleResetToIdle = () => {
@@ -151,12 +147,7 @@ export default function App() {
 
               {/* PHASE 3: CELEBRATION (YOUR PLAYY IS READY! -> AUTO RETURN TO IDLE) */}
               {phase === 'celebrate' && (
-                <KioskCelebrationScreen
-                  config={configuration}
-                  card={liveCard}
-                  onAllDone={handleResetToIdle}
-                  onPrintAnother={handlePrintAgain}
-                />
+                <KioskCelebrationScreen config={configuration} card={liveCard} onAllDone={handleResetToIdle} />
               )}
             </div>
             {phase !== 'welcome' && (

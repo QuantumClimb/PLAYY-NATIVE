@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Mail, Printer } from 'lucide-react';
+import { Mail, Share2 } from 'lucide-react';
 import { SceneBackground } from '../components/backgrounds/SceneBackground';
 import { CARD_H, TrumpCardFront } from '../components/card/TrumpCard';
 import { PlayyScene } from '../components/playys/PlayyScene';
@@ -19,19 +19,13 @@ interface KioskCelebrationScreenProps {
   card: GeneratedCard | null;
   /** FINISH, or the countdown reaching zero: back to the intro screen */
   onAllDone: () => void;
-  onPrintAnother: () => void;
 }
 
 const AUTO_RETURN_SECONDS = 20;
 const CONFETTI_COLORS = ['#F59E0B', '#EC4899', '#38BDF8', '#10B981', '#A855F7'];
 
 /** The last screen: confetti, what happens next, and an automatic return to the intro screen. */
-export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
-  config,
-  card,
-  onAllDone,
-  onPrintAnother,
-}) => {
+export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({ config, card, onAllDone }) => {
   const secondsLeft = useCountdown(AUTO_RETURN_SECONDS, onAllDone);
   const cardScale = useFitScale(CARD_H, 0.5);
 
@@ -65,7 +59,7 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
         <div className="success-steps">
           <div className="success-step">
             <span className="success-step-icon">
-              <Printer strokeWidth={2.6} />
+              <Share2 strokeWidth={2.6} />
             </span>
             <div>
               <b>{copy.success.collect.title}</b>
@@ -85,10 +79,6 @@ export const KioskCelebrationScreen: React.FC<KioskCelebrationScreenProps> = ({
       </div>
 
       <div className="machine-navigation">
-        <button type="button" data-sfx="tap" onClick={onPrintAnother} className="btn-3d btn-3d-blue head-nav-button">
-          <Printer strokeWidth={3.2} aria-hidden="true" />
-          <span>{copy.success.printAgain}</span>
-        </button>
         <div className="success-countdown">{copy.success.countdown(secondsLeft)}</div>
         <button type="button" data-sfx="done" onClick={onAllDone} className="btn-3d head-nav-button head-nav-next">
           <span>{copy.success.finish}</span>

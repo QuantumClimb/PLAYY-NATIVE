@@ -54,12 +54,14 @@ export const copy = {
   success: {
     title: 'YOUR PLAYYPAL IS READY!',
     thanks: (name?: string) => `Thank you for playing${name ? `, ${name}` : ''}!`,
-    collect: { title: 'Collect your pages', text: 'Your coloring pages and trump card are printing now.' },
+    collect: {
+      title: 'Sharing now',
+      text: 'Your coloring pages and trump card are on their way by email and WhatsApp.',
+    },
     sent: {
       title: 'Sent to our team',
       text: 'Your PlayyPal and trump card are on their way to the Playy Kingdom team.',
     },
-    printAgain: 'PRINT AGAIN',
     finish: 'FINISH',
     countdown: (seconds: number) => `Back to the start in ${seconds}s`,
   },

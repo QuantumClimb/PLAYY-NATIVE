@@ -38,7 +38,10 @@ export const SMTP = {
  */
 export const WHATSAPP = {
   token: process.env.WHATSAPP_TOKEN || '',
-  sender: String(process.env.WHATSAPP_SENDER_NUMBER || '').replace(/\D/g, ''),
+  // Digits with the country code; a 10-digit number is taken as Indian (91 is added)
+  sender: String(process.env.WHATSAPP_SENDER_NUMBER || '')
+    .replace(/\D/g, '')
+    .replace(/^(\d{10})$/, '91$1'),
   template: process.env.WHATSAPP_TEMPLATE_NAME || '',
   language: process.env.WHATSAPP_TEMPLATE_LANGUAGE || 'en',
   /** 'document' when the template has a PDF header, 'none' when it is text only */

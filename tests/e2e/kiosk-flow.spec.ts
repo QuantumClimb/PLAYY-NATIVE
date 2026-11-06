@@ -25,10 +25,10 @@ test('a visitor can go from the intro screen to the success screen and back to t
     'share',
   ]);
 
-  // SHARE prints and moves on to the success screen
+  // SHARE moves on to the success screen without opening the print dialog (no printer yet; see PRINT_DIALOG)
   await page.getByText('SHARE', { exact: true }).first().click();
-  await expect.poll(() => page.evaluate(() => (window as unknown as { __printed: number }).__printed)).toBe(1);
   await expect.poll(() => currentPage(page)).toBe('success');
+  expect(await page.evaluate(() => (window as unknown as { __printed: number }).__printed)).toBe(0);
 
   // FINISH returns to the intro screen
   await page.getByText('FINISH', { exact: true }).click();
@@ -83,7 +83,11 @@ test('freeform colouring: a finger stroke paints the character and is not sent t
   await openKiosk(page);
   await page.route('**/api/submissions', (route) => {
     bodies.push(route.request().postData() ?? '');
-    return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 0, email: 'sent' }) });
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ id: 0, email: 'sent' }),
+    });
   });
   await walkTo(page, 'colors');
   await page.getByRole('button', { name: 'Freeform' }).click();

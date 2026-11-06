@@ -17,7 +17,7 @@ export function silentPrintOn(): boolean {
   }
 }
 
-// The pages of the last Playy, so PRINT AGAIN can send them again
+// The pages of the last Playy, kept for a reprint
 let lastImages: ShareCapture['images'] | null = null;
 
 /** Sends the finished pages to the helper. Returns false when silent printing is off or the helper cannot be reached. */

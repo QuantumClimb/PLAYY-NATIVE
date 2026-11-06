@@ -5,6 +5,7 @@ vi.stubEnv('WHATSAPP_TOKEN', 'tok');
 vi.stubEnv('WHATSAPP_SENDER_NUMBER', '+91 98765 43210');
 vi.stubEnv('WHATSAPP_TEMPLATE_NAME', 'playy_ready');
 vi.stubEnv('WHATSAPP_TEMPLATE_BODY', 'name,card');
+vi.stubEnv('WHATSAPP_TEMPLATE_HEADER', 'document');
 vi.stubEnv('SITE_URL', 'https://playy.example/');
 
 const { sendWhatsapp, templateMessage, whatsappConfigured, whatsappNumber } = await import('../../server/whatsapp.mjs');
@@ -57,5 +58,16 @@ describe('whatsapp text-only template', () => {
     const { templateMessage: build } = await import('../../server/whatsapp.mjs');
     const message = build({ to: '+919876543210', name: 'Asha', coloringUrl: '', cardUrl: '', filename: 'f.pdf' });
     expect(message.template.components).toEqual([]);
+  });
+});
+
+describe('whatsapp sender number', () => {
+  it('adds 91 to a ten-digit sender and keeps one that has a country code', async () => {
+    vi.resetModules();
+    vi.stubEnv('WHATSAPP_SENDER_NUMBER', '7200637887');
+    expect((await import('../../server/config.mjs')).WHATSAPP.sender).toBe('917200637887');
+    vi.resetModules();
+    vi.stubEnv('WHATSAPP_SENDER_NUMBER', '+91 72006 37887');
+    expect((await import('../../server/config.mjs')).WHATSAPP.sender).toBe('917200637887');
   });
 });

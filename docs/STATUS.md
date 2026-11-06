@@ -4,7 +4,7 @@ Last updated: 2026-11-03 (client testing under way; Freeform colouring and quiz 
 
 ## 1. Summary
 
-The whole visitor journey works end to end: intro, a welcome choice (FIRST TIME? or Already a PlayyPal?), build a character (face, pose, colours: simple, advanced or freehand painting), power-up questions, power awarded, background, name, phone and email, preview, trump card, share (print, email to the team and to the visitor, log) and a success screen that returns to the intro. The kiosk goes back to the intro after 4 minutes without a touch, and every page has a Home button. Everything the client edits lives in the command center. What is still open is outside the code: the **SMTP password** (so emails go out) and the **WhatsApp token**, both waiting on the client's system administrator.
+The whole visitor journey works end to end: intro, a welcome choice (FIRST TIME? or Already a PlayyPal?), build a character (face, pose, colours: simple, advanced or freehand painting), power-up questions, power awarded, background, name, phone and email, preview, trump card, share (print, email to the team and to the visitor, WhatsApp, log) and a success screen that returns to the intro. The kiosk goes back to the intro after 4 minutes without a touch, and every page has a Home button. Everything the client edits lives in the command center. WhatsApp sending is built and a real test message through Qikberry arrived. What is still open is on the client's side: the DNS record for the PDF links and the approved PDF template (see section 8).
 
 ## 2. How to run
 
@@ -58,8 +58,8 @@ Password protected. Tabs:
 | Intro badges | The badges under the start button: label, icon (built in, upload or emoji), colour, order. |
 | Progress tabs | Rename the eight top tabs, change their icons, or hide the labels. |
 | Trump card | Outline colour and thickness, corner roundness, back background and highlight colour, with live preview. Power symbols and stat icons are fixed. |
-| Users | **Counters** (people who used it = everyone who chose FIRST TIME or Already a PlayyPal; first time; already a PlayyPal; finished a Playy), then everyone who finished: name, email, phone, **card serial**, date and time, a card thumbnail, the character choices and the email status. Search (name, email, phone, serial), CSV download, **Clear all users** (asks first; empties the list, the unfinished numbers and the counters). Below: **Started but did not finish**, the phone numbers typed on "Already a PlayyPal?" with no finished Playy under the same number, one per number. |
-| Share & email | Two recipient slots (currently qcquantumclimb@gmail.com and aum.janakiram@gmail.com), on/off, a greyed-out WhatsApp slot. |
+| Users | **Counters** (people who used it = everyone who chose FIRST TIME or Already a PlayyPal; first time; already a PlayyPal; finished a Playy), then everyone who finished: name, email, phone, **card serial**, date and time, a card thumbnail, the character choices, the email status and the **WhatsApp status** (Sent, Not sent with the reason on hover, Off). Search (name, email, phone, serial), CSV download, **Clear all users** (asks first; empties the list, the unfinished numbers and the counters). Below: **Started but did not finish**, the phone numbers typed on "Already a PlayyPal?" with no finished Playy under the same number, one per number. |
+| Share & email | Two recipient slots (currently qcquantumclimb@gmail.com and aum.janakiram@gmail.com), on/off, and a WhatsApp box that says whether WhatsApp is on (it is set up in the environment, not here). |
 | Power quiz | The questions, answers and the symbol each answer leans toward. Each answer's icon has an **Emoji / SVG-PNG toggle**: type an emoji, or upload an SVG or PNG (SVGs get the same safety check as character SVGs; both choices are kept, so switching back loses nothing). |
 | Logo | Replace the logo SVG; in-app drop shadow and an artwork stroke. The built-in logo is now the Playy Kingdom (PK) logo; an uploaded logo overrides it. |
 | Sounds | A sound and volume for 14 kiosk actions, uploads, and the **background music playlist** (order, volume, preview, add songs). |
@@ -72,11 +72,13 @@ The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps 
 - **Card serial:** `XXXXX-XXXXX` (10 characters, no look-alike letters, from the browser's secure random source), stored with the submission under a unique database rule. A resend of the same Playy (kiosk retrying after a lost answer) returns the existing row and is not emailed twice. Older rows have no serial. If the kiosk cannot reach the server, the Playy is kept in the browser and sent on the next start.
 - **Counting people:** `POST /api/visits` (FIRST TIME) and `POST /api/leads` (Already a PlayyPal, which also stores the phone number) each add one row to `visits`. These are open routes, rate limited per address.
 - Pictures are taken in the browser with `html-to-image` (the fonts are read once and embedded; this needed `crossorigin` on the Google Fonts link).
-- **Waiting on the client:** SMTP login (a Gmail app password or the company mail server's details) and the WhatsApp token. Until then every row shows "Not sent".
+- **WhatsApp (Qikberry):** WhatsApp goes through Qikberry's REST API (`POST https://rest.qikberry.ai/v1/whatsapp/messages`, bearer token, the business number in the `x-phone-number` header), not Meta's Graph API; the 32-character token is a Qikberry key. After the emails, `server/shareService.mjs` sends the visitor an approved template message (`server/whatsapp.mjs`), tried twice, independent of the email result. A 10-digit number is taken as Indian (+91). Two template modes: `WHATSAPP_TEMPLATE_HEADER=none` (text only, no PDF, no variables) and `document` (a PDF header with the coloring pages, and the name as `{{1}}`; the card link can be `{{2}}` with `WHATSAPP_TEMPLATE_BODY=name,card`). Qikberry downloads PDFs from a public link, so in `document` mode the two PDFs are kept for 24 hours in the `share_files` table behind a long random token (`GET /api/share-files/:token/:name`, expired files deleted on the next save). The result is stored on the submission (`whatsapp_status`, `whatsapp_error`). Each send costs about 0.9 (Qikberry's `charges` field).
+- **Setup (environment):** `WHATSAPP_TOKEN`, `WHATSAPP_SENDER_NUMBER` (digits with country code, 917200637887), `WHATSAPP_TEMPLATE_NAME`, `WHATSAPP_TEMPLATE_LANGUAGE` (en), `WHATSAPP_TEMPLATE_HEADER`, `WHATSAPP_TEMPLATE_BODY`, and `SITE_URL` (needed only in `document` mode). WhatsApp is off until the token, number and template name are set.
+- **Tested:** on 6 Nov 2026 the approved `playypals` template (text only) was sent to two real numbers through Qikberry and arrived. The full flow from the kiosk (SHARE, then the Users table) has not been run on Vercel yet.
 
 ## 6. Data and architecture
 
-- **Neon Postgres** through the serverless driver, plain SQL in `server/db/`. Tables: `assets`, `media_files`, `scene_backgrounds`, `power_quiz_questions`, `intro_badges`, `progress_tabs`, `trump_card`, `brand`, `sound_settings`, `share_settings`, `submissions` (one small thumbnail and the card serial per visitor, no pages or PDFs), `leads` (phone numbers from Already a PlayyPal), `visits` (one row per start, for the counters), `app_migrations`; an old `submission_files` table (about 7 MB of earlier visitors' pictures) still exists and can be dropped.
+- **Neon Postgres** through the serverless driver, plain SQL in `server/db/`. Tables: `assets`, `media_files`, `scene_backgrounds`, `power_quiz_questions`, `intro_badges`, `progress_tabs`, `trump_card`, `brand`, `sound_settings`, `share_settings`, `submissions` (one small thumbnail and the card serial per visitor, no pages or PDFs; plus the email and WhatsApp results), `share_files` (WhatsApp PDFs, kept 24 hours), `leads` (phone numbers from Already a PlayyPal), `visits` (one row per start, for the counters), `app_migrations`; an old `submission_files` table (about 7 MB of earlier visitors' pictures) still exists and can be dropped.
 - **Database plan and cost:** the Neon project is on the **Launch** plan (billed through Vercel): storage $0.35 per GB-month, compute $0.106 per compute-hour. The database is about 48 MB. At 100 users a day expect roughly $5 to $10 a month for the database (compute dominates). The free plan's quota was exceeded once during testing, which made every `/api` call fail and the kiosk fall back to its few built-in characters (wrong poses and alignment). To keep transfer low, the read-only kiosk content (`/api/assets`, scene backgrounds, brand, sounds and the other settings) is cached at Vercel's edge for 5 minutes (`server/cache.mjs`); someone signed in to the command center always gets fresh data, so a command center edit reaches kiosks within about 5 minutes.
 - **One Express app** (`server/app.mjs`) with two launchers: `server/kiosk-server.mjs` (local, also serves the built site) and `api/index.mjs` (Vercel function, routed by `vercel.json`). Printer and print routes are off on Vercel; `server/print-helper.mjs` is a small separate server for the kiosk PC.
 - **Frontend:** React 19, Vite 6, Tailwind 4 for utilities, plain CSS in `src/styles/` (one file per feature) for the page layouts. Layouts use percentages of the screen so they scale from 1366x768 to 1920x1080.
@@ -90,25 +92,23 @@ The command center uses a white, Inter theme (`.cc-*` classes); the kiosk keeps 
 - Characters: a head colour, an outfit colour (defaults to the head colour) and an optional fixed secondary colour. The face is a shared asset.
 - PDFs and thumbnails are made in the browser, not on the server (the server stays small enough for Vercel).
 - Google's cartoon sound library was not used (its terms limit it to Actions on Google); sounds are synthesized instead.
-- Email first; WhatsApp behind the same share step when the token arrives. Eventually SHARE sends straight to the printer, the email and WhatsApp with no print dialog.
+- Email first, WhatsApp behind the same share step through Qikberry (Meta's Graph API is not used). Eventually SHARE sends straight to the printer, the email and WhatsApp with no print dialog.
 
 ## 8. Open items
 
 **Needs the client**
-1. WhatsApp (pending, see the list below). Email is set up and tested (Google Workspace, noreply@vgpplayykingdom.in); add the same SMTP variables to Vercel.
+1. WhatsApp (see the list below). Email is set up and tested (Google Workspace, noreply@vgpplayykingdom.in); add the same SMTP variables to Vercel.
 2. Test the kiosk shortcut on the real kiosk PC: no print preview, the right printer, no grey over the name on the printout, music from the start.
 3. Confirm the Vercel deploy with all environment variables once SMTP is set.
 4. When the client approves the final: move the Vercel project to a **Pro** (commercial) plan; the free Hobby plan is for non-commercial use. A paid Vercel plan covers every project in the team.
 
-**Pending: WhatsApp (waiting on the client's administrator)**
-The token received (32 characters) is rejected by Meta, so the sending code is not built yet. Needed:
-1. A permanent access token (`EAA...`) from a System User with `whatsapp_business_messaging` and `whatsapp_business_management`. Why: the server sends with it; temporary tokens expire in about 24 hours.
-2. The Phone Number ID of +91 72006 37887 (WhatsApp Manager, API Setup). Why: every send is addressed to it.
-3. The WhatsApp Business Account ID (optional). Why: lists and checks templates.
-4. An approved utility template with a PDF header and a name variable. Why: WhatsApp allows free text only within 24 hours of the visitor messaging us; a kiosk visitor has not.
-5. The number registered on the Cloud API (it then stops working in the phone app) and business verification with a payment method. Why: a server cannot drive an app-only number; unverified accounts have a very low daily limit and messages are billed.
-6. Consent line on the details screen. Why: messaging rules and DPDP.
-To build then: sending code and command center switch, token only on the server, PDF upload and template send, result logged like email. Open decisions: default country code +91 when no "+" is typed (with a hint "Outside India? Start with +"), which countries to send to (cost differs), and showing the number back on the preview to catch typos. Today the phone keypad already accepts international numbers (digits and a leading "+", 7 to 15 characters).
+**WhatsApp: what is left**
+1. Vercel: set `WHATSAPP_SENDER_NUMBER`, `WHATSAPP_TEMPLATE_NAME=playypals`, `WHATSAPP_TEMPLATE_LANGUAGE=en`, `WHATSAPP_TEMPLATE_HEADER=none` and an empty `WHATSAPP_TEMPLATE_BODY` (the token is already there), redeploy, then make one test Playy on the kiosk and check the WhatsApp badge in Users. If the platform refuses an empty body value, change the default so no variable is sent.
+2. Client: the existing `playypals` template shows `{{ }}` braces around its title in the preview; ask them to remove the braces.
+3. Client: create a second utility template, `playypals_pdf` (underscore; Meta refuses hyphens), with a Document (PDF) header and `{{1}}` for the name in the body (sample value "Asha"). When approved, set `WHATSAPP_TEMPLATE_NAME=playypals_pdf`, `WHATSAPP_TEMPLATE_HEADER=document`, `WHATSAPP_TEMPLATE_BODY=name`.
+4. Client: a DNS CNAME, host `playypals`, value `41c44ad8e6797696.vercel-dns-017.com`, for `playypals.vgpplayykingdom.com` (added in Vercel already, still "Invalid Configuration"). Then set `SITE_URL=https://playypals.vgpplayykingdom.com`. Until then `https://playy-native.vercel.app` works. Check that the PDF links open without a Vercel login (Deployment Protection off for Production).
+5. Only one PDF fits in a template header, so the card PDF reaches the visitor by email, or by WhatsApp only if the template has a second variable for a link (`WHATSAPP_TEMPLATE_BODY=name,card`).
+6. Still open from before: a consent line on the details screen (messaging rules and DPDP), and which countries to send to (cost differs). The phone keypad accepts international numbers; a number typed without "+" is taken as Indian.
 
 **Known issues**
 - The Users tab does not yet show each visitor's card stats (they are saved with every submission in its `config`).
@@ -137,7 +137,7 @@ To build then: sending code and command center switch, token only on the server,
 
 ## 9. Next
 
-1. Get SMTP and WhatsApp details; test a real email end to end.
+1. Finish the WhatsApp setup above and test a real Playy end to end (email and WhatsApp).
 2. Check a Vercel deploy of the restructured server.
 3. Add a balance table (how often each power and character type comes up) to the Power quiz tab.
 4. Show the card stats in the Users tab.
