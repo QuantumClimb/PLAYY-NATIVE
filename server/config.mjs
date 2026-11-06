@@ -44,8 +44,10 @@ export const WHATSAPP = {
     .replace(/^(\d{10})$/, '91$1'),
   template: process.env.WHATSAPP_TEMPLATE_NAME || '',
   language: process.env.WHATSAPP_TEMPLATE_LANGUAGE || 'en',
-  /** 'document' when the template has a PDF header, 'none' when it is text only */
-  header: process.env.WHATSAPP_TEMPLATE_HEADER === 'none' ? 'none' : 'document',
+  /** What the template's header holds: 'document' (the coloring PDF), 'text' (the visitor's name) or 'none' */
+  header: ['none', 'text'].includes(process.env.WHATSAPP_TEMPLATE_HEADER ?? '')
+    ? process.env.WHATSAPP_TEMPLATE_HEADER
+    : 'document',
   body: (process.env.WHATSAPP_TEMPLATE_BODY ?? 'name')
     .split(',')
     .map((s) => s.trim())

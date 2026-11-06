@@ -71,3 +71,14 @@ describe('whatsapp sender number', () => {
     expect((await import('../../server/config.mjs')).WHATSAPP.sender).toBe('917200637887');
   });
 });
+
+describe('whatsapp template with the name in the header', () => {
+  it('sends the name as the header text and nothing else', async () => {
+    vi.resetModules();
+    vi.stubEnv('WHATSAPP_TEMPLATE_HEADER', 'text');
+    vi.stubEnv('WHATSAPP_TEMPLATE_BODY', '');
+    const { templateMessage: build } = await import('../../server/whatsapp.mjs');
+    const message = build({ to: '+919876543210', name: 'Asha', coloringUrl: '', cardUrl: '', filename: 'f.pdf' });
+    expect(message.template.components).toEqual([{ type: 'header', parameters: [{ type: 'text', text: 'Asha' }] }]);
+  });
+});

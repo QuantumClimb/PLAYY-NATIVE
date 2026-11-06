@@ -1,7 +1,7 @@
 import { SITE_URL, WHATSAPP } from './config.mjs';
 
 export const whatsappConfigured = () =>
-  !!(WHATSAPP.token && WHATSAPP.sender && WHATSAPP.template && (SITE_URL || WHATSAPP.header === 'none'));
+  !!(WHATSAPP.token && WHATSAPP.sender && WHATSAPP.template && (SITE_URL || WHATSAPP.header !== 'document'));
 
 /** "98765 43210" becomes "+919876543210" (a number of ten digits is taken to be Indian); null when it is too short. */
 export function whatsappNumber(phone) {
@@ -12,7 +12,7 @@ export function whatsappNumber(phone) {
   return digits.length >= 11 ? `+${digits}` : null;
 }
 
-/** The template message: the coloring PDF in its header and the name (and optionally the card link) in its body. */
+/** The template message: the coloring PDF (or the name) in its header and the name (and optionally the card link) in its body. */
 export function templateMessage({ to, name, coloringUrl, cardUrl, filename }) {
   const values = { name: name || 'there', card: cardUrl, coloring: coloringUrl };
   return {
@@ -25,6 +25,7 @@ export function templateMessage({ to, name, coloringUrl, cardUrl, filename }) {
         ...(WHATSAPP.header === 'document'
           ? [{ type: 'header', parameters: [{ type: 'document', document: { link: coloringUrl, filename } }] }]
           : []),
+        ...(WHATSAPP.header === 'text' ? [{ type: 'header', parameters: [{ type: 'text', text: values.name }] }] : []),
         ...(WHATSAPP.body.length
           ? [
               {
