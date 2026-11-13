@@ -45,3 +45,13 @@ async function cardPdf({ cardFront, cardBack }) {
 export async function buildPdfs(images) {
   return { coloring: await coloringPdf(images), card: await cardPdf(images) };
 }
+
+/** The coloring pages then the card as one file, for WhatsApp (a template header holds only one document). */
+export async function combinePdfs(...files) {
+  const combined = await PDFDocument.create();
+  for (const file of files) {
+    const source = await PDFDocument.load(file);
+    for (const page of await combined.copyPages(source, source.getPageIndices())) combined.addPage(page);
+  }
+  return Buffer.from(await combined.save());
+}

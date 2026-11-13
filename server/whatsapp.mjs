@@ -12,9 +12,9 @@ export function whatsappNumber(phone) {
   return digits.length >= 11 ? `+${digits}` : null;
 }
 
-/** The template message: the coloring PDF (or the name) in its header and the name (and optionally the card link) in its body. */
-export function templateMessage({ to, name, coloringUrl, cardUrl, filename }) {
-  const values = { name: name || 'there', card: cardUrl, coloring: coloringUrl };
+/** The template message: the PDF (or the name) in its header, and the name in its body. */
+export function templateMessage({ to, name, documentUrl, filename }) {
+  const values = { name: name || 'there' };
   return {
     to,
     type: 'template',
@@ -23,7 +23,7 @@ export function templateMessage({ to, name, coloringUrl, cardUrl, filename }) {
       language: WHATSAPP.language,
       components: [
         ...(WHATSAPP.header === 'document'
-          ? [{ type: 'header', parameters: [{ type: 'document', document: { link: coloringUrl, filename } }] }]
+          ? [{ type: 'header', parameters: [{ type: 'document', document: { link: documentUrl, filename } }] }]
           : []),
         ...(WHATSAPP.header === 'text' ? [{ type: 'header', parameters: [{ type: 'text', text: values.name }] }] : []),
         ...(WHATSAPP.body.length
@@ -40,7 +40,7 @@ export function templateMessage({ to, name, coloringUrl, cardUrl, filename }) {
 }
 
 /** Sends the visitor their PDFs on WhatsApp. Throws with Qikberry's reason when it is refused. */
-export async function sendWhatsapp({ phone, name, coloringUrl, cardUrl, filename }) {
+export async function sendWhatsapp({ phone, name, documentUrl, filename }) {
   if (!whatsappConfigured()) throw new Error('WhatsApp is not set up');
   const to = whatsappNumber(phone);
   if (!to) throw new Error('The phone number is too short for WhatsApp');
@@ -51,7 +51,7 @@ export async function sendWhatsapp({ phone, name, coloringUrl, cardUrl, filename
       'x-phone-number': WHATSAPP.sender,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(templateMessage({ to, name, coloringUrl, cardUrl, filename })),
+    body: JSON.stringify(templateMessage({ to, name, documentUrl, filename })),
     signal: AbortSignal.timeout(15_000),
   });
   if (!res.ok) {

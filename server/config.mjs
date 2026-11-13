@@ -34,7 +34,7 @@ export const SMTP = {
 /**
  * WhatsApp through Qikberry (https://apidocs.qikberry.ai). Sending needs the token, the business's own WhatsApp number
  * and the name of a template Meta has approved (one with a PDF header). Without them WhatsApp shows as off.
- * TEMPLATE_BODY lists what fills the template's {{1}}, {{2}}...: name, card (link to the trump card PDF).
+ * TEMPLATE_BODY lists what fills the template's body {{1}}, {{2}}...: only `name` is available (empty for none).
  */
 export const WHATSAPP = {
   token: process.env.WHATSAPP_TOKEN || '',
@@ -44,7 +44,7 @@ export const WHATSAPP = {
     .replace(/^(\d{10})$/, '91$1'),
   template: process.env.WHATSAPP_TEMPLATE_NAME || '',
   language: process.env.WHATSAPP_TEMPLATE_LANGUAGE || 'en',
-  /** What the template's header holds: 'document' (the coloring PDF), 'text' (the visitor's name) or 'none' */
+  /** What the template's header holds: 'document' (the coloring pages and the card as one PDF), 'text' (the visitor's name) or 'none' */
   header: ['none', 'text'].includes(process.env.WHATSAPP_TEMPLATE_HEADER ?? '')
     ? process.env.WHATSAPP_TEMPLATE_HEADER
     : 'document',

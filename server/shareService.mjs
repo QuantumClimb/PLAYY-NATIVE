@@ -1,7 +1,7 @@
 import { saveShareFile, setSubmissionEmail, setSubmissionWhatsapp, settings } from './db/index.mjs';
 import { SITE_URL, WHATSAPP } from './config.mjs';
 import { sendShareEmail, sendVisitorEmail } from './mailer.mjs';
-import { buildPdfs } from './pdf.mjs';
+import { buildPdfs, combinePdfs } from './pdf.mjs';
 import { sendWhatsapp, whatsappConfigured } from './whatsapp.mjs';
 
 const SEND_ATTEMPTS = 2;
@@ -63,11 +63,13 @@ async function sendOnWhatsapp({ id, who, files }) {
   const link = async (data, name) => `${SITE_URL}/api/share-files/${await saveShareFile(data)}/${name}`;
   try {
     // A text-only template carries no PDF, so none is stored
-    const withPdfs = WHATSAPP.header === 'document';
-    const coloringUrl = withPdfs ? await link(files.coloring, 'playy-coloring.pdf') : '';
-    const cardUrl = withPdfs ? await link(files.card, 'playy-trump-card.pdf') : '';
+    // A template header holds one file, so the coloring pages and the card go as one PDF
+    const documentUrl =
+      WHATSAPP.header === 'document'
+        ? await link(await combinePdfs(files.coloring, files.card), 'playy-playypal.pdf')
+        : '';
     const failure = await sendWithRetry(() =>
-      sendWhatsapp({ phone: who.phone, name: who.name, coloringUrl, cardUrl, filename: 'playy-coloring.pdf' }),
+      sendWhatsapp({ phone: who.phone, name: who.name, documentUrl, filename: 'playy-playypal.pdf' }),
     );
     if (failure) throw failure;
     await setSubmissionWhatsapp(id, 'sent');
