@@ -12,6 +12,13 @@ export function whatsappNumber(phone) {
   return digits.length >= 11 ? `+${digits}` : null;
 }
 
+/** A text value for the template; a named variable ({{name}}) also needs its name. */
+const textParameter = (value) => ({
+  type: 'text',
+  ...(WHATSAPP.paramName ? { parameter_name: WHATSAPP.paramName } : {}),
+  text: value,
+});
+
 /** The template message: the PDF (or the name) in its header, and the name in its body. */
 export function templateMessage({ to, name, documentUrl, filename }) {
   const values = { name: name || 'there' };
@@ -25,12 +32,12 @@ export function templateMessage({ to, name, documentUrl, filename }) {
         ...(WHATSAPP.header === 'document'
           ? [{ type: 'header', parameters: [{ type: 'document', document: { link: documentUrl, filename } }] }]
           : []),
-        ...(WHATSAPP.header === 'text' ? [{ type: 'header', parameters: [{ type: 'text', text: values.name }] }] : []),
+        ...(WHATSAPP.header === 'text' ? [{ type: 'header', parameters: [textParameter(values.name)] }] : []),
         ...(WHATSAPP.body.length
           ? [
               {
                 type: 'body',
-                parameters: WHATSAPP.body.map((key) => ({ type: 'text', text: String(values[key] ?? '') })),
+                parameters: WHATSAPP.body.map((key) => textParameter(String(values[key] ?? ''))),
               },
             ]
           : []),

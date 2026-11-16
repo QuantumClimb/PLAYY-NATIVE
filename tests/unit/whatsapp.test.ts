@@ -78,3 +78,15 @@ describe('whatsapp template with the name in the header', () => {
     expect(message.template.components).toEqual([{ type: 'header', parameters: [{ type: 'text', text: 'Asha' }] }]);
   });
 });
+
+describe('whatsapp template with a named variable', () => {
+  it('sends the variable with its name', async () => {
+    vi.resetModules();
+    vi.stubEnv('WHATSAPP_TEMPLATE_HEADER', 'document');
+    vi.stubEnv('WHATSAPP_TEMPLATE_BODY', 'name');
+    vi.stubEnv('WHATSAPP_TEMPLATE_PARAM_NAME', 'name');
+    const { templateMessage: build } = await import('../../server/whatsapp.mjs');
+    const message = build({ to: '+919876543210', name: 'Asha', documentUrl: 'u', filename: 'f.pdf' });
+    expect(message.template.components[1].parameters).toEqual([{ type: 'text', parameter_name: 'name', text: 'Asha' }]);
+  });
+});

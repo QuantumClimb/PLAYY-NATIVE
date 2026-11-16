@@ -48,6 +48,8 @@ export const WHATSAPP = {
   header: ['none', 'text'].includes(process.env.WHATSAPP_TEMPLATE_HEADER ?? '')
     ? process.env.WHATSAPP_TEMPLATE_HEADER
     : 'document',
+  /** The variable's name when the template uses a named variable like {{name}} (empty for {{1}}) */
+  paramName: (process.env.WHATSAPP_TEMPLATE_PARAM_NAME || '').trim(),
   body: (process.env.WHATSAPP_TEMPLATE_BODY ?? 'name')
     .split(',')
     .map((s) => s.trim())
