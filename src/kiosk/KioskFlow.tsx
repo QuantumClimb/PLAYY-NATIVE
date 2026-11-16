@@ -40,6 +40,8 @@ export const KioskFlow: React.FC<KioskFlowProps> = ({
       className={`kiosk-machine w-full h-full min-h-0 text-white flex flex-col lg:flex-row gap-3 lg:gap-8 px-3 sm:px-5 py-2 select-none relative overflow-hidden ${flow.def.pageClass}`}
     >
       <SceneBackground sceneId={flow.def.scene} />
+      {/* Freeform painting: a white veil over the scene, so it feels like a canvas and the colours stand out */}
+      {flow.step === 'colors' && flow.colorMode === 'freeform' && <div className="paint-veil" aria-hidden="true" />}
       {flow.def.preview !== 'none' && (
         <PreviewCard
           kind={flow.def.preview}

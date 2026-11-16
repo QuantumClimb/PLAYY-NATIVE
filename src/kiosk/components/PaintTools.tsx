@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eraser, Trash2, Undo2 } from 'lucide-react';
+import { Eraser, Paintbrush, Trash2, Undo2 } from 'lucide-react';
 import { normalizeColor } from '../../lib/assets/svgParts';
 import { BRUSH_SIZES, type PaintState } from '../flow/usePaint';
 
@@ -29,6 +29,7 @@ export const PaintTools: React.FC<PaintToolsProps> = ({ paint, palette }) => {
         ))}
       </div>
       <div className="paint-row" role="group" aria-label="Brush size">
+        <Paintbrush className="paint-brush-icon" aria-hidden="true" />
         {BRUSH_SIZES.map((size) => (
           <button
             key={size}
