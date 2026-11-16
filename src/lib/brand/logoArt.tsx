@@ -25,6 +25,8 @@ function renderLogoArt(svgText: string, opts: { mode: 'color' | 'line'; stroke: 
   let pad: number;
   if (opts.mode === 'line') {
     shapes.forEach((s) => {
+      // The small VGP blocks keep their own shape: a stroke would swell them and swallow their letters
+      if (s.hasAttribute('data-line-stroke')) return;
       s.setAttribute('stroke', '#111111');
       s.setAttribute('stroke-width', String(lineW));
       s.setAttribute('stroke-linejoin', 'round');
